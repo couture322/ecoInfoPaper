@@ -1,0 +1,2 @@
+# ecoInfoPaper
+This repository houses analysis and communications from the Exxon Valdez Oil Spill Trustee Council data collection efforts started in 2012 and conducted by the National Center for Ecological Analysis and Synthesis at the University of California, Santa Barbara. This project is led by Matt Jones and includes Jessica Couture, Rachael Blake, Colette Ward, Sarah Clark, Emma Freeman and Gavin McDonald.
