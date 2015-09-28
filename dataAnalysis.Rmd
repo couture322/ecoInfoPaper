@@ -1,0 +1,106 @@
+---
+title: "EVOSTC data collection paper - Analysis"
+author: "Jessica Couture"
+date: "9/27/2015"
+output: html_document
+---
+
+#Background
+
+We are writing up a publication to report results of a two year data archiving effort by a small group of researchers and students at the National Center for Ecological Analysis and Synthesis at UC Santa Barbara. The [Exxon Valdez Oil Spill Trustee Council](http://www.evostc.state.ak.us) (EVOSTC) was formed following the Exon Valdez oil spill in Alaska in 1989. Since then, then EVOSTC has funded hundreds of projects and in 2012 we began a project to recover and archive the data collected in these EVOSTC funded projects.
+
+For this paper we ask 4 main questions about the data collected from the Exxon Valdez Oil Spill Trustee Council funded projects:
+
+1. Twenty-five years after the EVOS, how many projects funded by EVOSTC can we collect data for?
+2. Are there certain **research fields** that are more likely to make data available than others?
+3. Are there certain **sectors** that are more likely to make data available than others?
+4. Is the availability of data correlated to how old the data are? (temporal relationships?)
+
+
+#Data setup
+*Pull in data and add agency affiliation and minor formatting
+*Load required libraries:
+  - library(dplyr)
+  - library(readr)
+  - library(ggpot2)
+  - library(reshape)
+*Set colors
+
+```{r data prep,echo=FALSE,message=FALSE}
+
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(reshape2)
+
+rslt=read.csv('data/archiveResults2.csv',header=T,stringsAsFactors=F)
+
+rslt$succ=ifelse(rslt$Status %in% c('Published','SentData','Revised'),1,0)
+
+agDes=read.csv('data/ecoInfoAgencyDesig.csv',header=F,stringsAsFactors=T,col.names=c('agency','agGrp'))
+agDes$agGrp=gsub('nonProf','private',agDes$agGrp)
+
+rslt2=merge(rslt,agDes,all.x=T)
+```
+Data table="rslt2"
+
+```{r}
+statusCols=c('Unrecoverable'='orangered',
+             'Emailed'='orange',
+             'Replied'='gold',
+             'SentData'='darkolivegreen2',
+             'Revised'='darkolivegreen3',
+             'Published'='forestgreen')
+
+```
+
+# 1. Project Status Reporting
+### Twenty-five years after the EVOS, how many projects funded by EVOSTC can we collect data for?
+
+---
+<h4> Plot status of datasets at the end of the initial archiving effort:
+```{r status plot,echo=FALSE}
+
+overall=table(rslt2$Status)
+overallLong=melt(overall)
+colnames(overallLong)=c('Status','nDatasets')
+overall2=overallLong %>%
+  mutate(prop=nDatasets/sum(nDatasets))
+
+possible=overallLong %>%
+  filter(!Status=='Unrecoverable') %>%
+  mutate(prop=nDatasets/sum(nDatasets))
+
+statusOrd=c('Unrecoverable','Emailed','Replied','SentData','Revised','Published')
+#rslt2$Status=as.factor(rslt2$Status,levels=statusOrd,ordered=T)
+
+statPlot=ggplot()+
+  geom_histogram(data=rslt2,aes(x=factor(Status,levels=statusOrd,ordered=T),fill=Status),binwidth=1,order=statusOrd)+
+  scale_fill_manual(labels=statusOrd,values=statusCols,breaks=statusOrd)+
+  theme(legend.title=element_blank())+
+  theme(axis.line=element_line('black'),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())+
+  #theme(axis.text.x = element_text(angle=90))+
+  xlab('Status')+
+  ylab('Number of datasets\n')+
+  ggtitle('Dataset status distribution')+
+  theme(axis.text=element_text(size=14),
+        title=element_text(size=16,face="bold"),
+        legend.text = element_text(size = 14, face = "bold"))
+
+statPlot
+```
+
+
+# 2.Field/research categories
+### Are there certain **research fields** that are more likely to make data available than others?
+
+# 3. Research center type
+### Are there certain **sectors** that are more likely to make data available than others?
+(based on PI's affiliation)
+
+# 4. Temporal relationships
+### Is the availability of data correlated to how old the data are?
