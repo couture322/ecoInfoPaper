@@ -35,7 +35,8 @@ library(reshape2)
 
 rslt=read.csv('data/archiveResults2.csv',header=T,stringsAsFactors=F)
 
-rslt$succ=ifelse(rslt$Status %in% c('Published','SentData','Revised'),1,0)
+rslt$succ=ifelse(rslt$Status %in% c('Published','SentData','Revised'),'aff','neg')
+rslt$statSucc=ifelse(rslt$Status %in% c('Published','SentData','Revised'),1,0)
 
 agDes=read.csv('data/ecoInfoAgencyDesig.csv',header=F,stringsAsFactors=T,col.names=c('agency','agGrp'))
 agDes$agGrp=gsub('nonProf','private',agDes$agGrp)
@@ -52,13 +53,17 @@ statusCols=c('Unrecoverable'='orangered',
              'Revised'='darkolivegreen3',
              'Published'='forestgreen')
 
+succCols=c('aff'='grey17',
+           'neg'='grey89')
+
 ```
 
 # 1. Project Status Reporting
-### Twenty-five years after the EVOS, how many projects funded by EVOSTC can we collect data for?
+<h4>Twenty-five years after the EVOS, for how many projects funded by EVOSTC can we collect data?</h4>
+ 
 
 ---
-<h4> Plot status of datasets at the end of the initial archiving effort:
+### Plot status of datasets at the end of the initial archiving effort:
 ```{r status plot,echo=FALSE}
 
 overall=table(rslt2$Status)
@@ -94,13 +99,119 @@ statPlot=ggplot()+
 statPlot
 ```
 
+### Test for equal proportions between status categories:
+```{r chi squared - test for eq prop,echo=FALSE}
+statusProps=table(rslt2$Status)
+eqProp=chisq.test(statusProps) #not equal proportions
+
+eqProp
+eqProp$stdres
+```
+
+### Binomial logistic regression: All data
+Which elements contribute most in determining if the data will be successfully collected?
+* research field
+* research sector of project PI
+* year project was last funded
+```{r BLR,echo=FALSE}
+succBlr<-glm(formula = statSucc~agGrp+end+category,family='binomial',data=rslt2)
+
+summary(succBlr)
+```
+
+The field of oceanography is the strongest indicator of whether data will be reported:
+
+---
 
 # 2.Field/research categories
 ### Are there certain **research fields** that are more likely to make data available than others?
 
+### Test for equal proportions between categories:
+
+Chi-squared test for equakl proportions between research fields funded
+
+```{r chi squared - field of study,echo=FALSE}
+catProps=table(rslt2$succ,rslt2$category)
+catChi=chisq.test(catProps)
+
+catChi
+
+```
+
+### Binomial logistic regression: Research field
+Which elements contribute most in determining if the data will be successfully collected?
+Since the chi-square test p-vaule << 0.05, run a binomial logistic regression to pull out where the differences occur
+```{r category BLR,echo=FALSE}
+catBlr<-glm(formula = statSucc~category,family='binomial',data=rslt2)
+
+summary(catBlr)
+```
+
+### PLOT: Successes by field of study
+```{r research field success plot,echo=FALSE}
+
+rfSums=as.data.frame(table(rslt2$category,rslt2$succ))
+colnames(rfSums)=c('category','succ','count')
+
+fieldSucc<-ggplot(rfSums,aes(x=category,y=count,fill=succ))+
+  geom_bar(stat = "identity")+
+  scale_fill_manual(values=succCols,name='Data received?',labels=c('Yes','No'),breaks=c('aff','neg'))+
+  #scale_alpha(guide=F) +
+  theme(axis.line=element_line('black'),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())+
+  theme(axis.text.x = element_text(angle=90))+
+  xlab('\nProject research field')+
+  ylab('Number of datasets\n')+
+  ggtitle('Data reporting by field')+
+  theme(axis.text=element_text(size=14),
+        title=element_text(size=16,face="bold"))#
+fieldSucc
+
+```
+
+---
+
 # 3. Research center type
 ### Are there certain **sectors** that are more likely to make data available than others?
 (based on PI's affiliation)
+### Test for equal propportions between PI's home institution type/sector:
+```{r chi squared - sector,echo=FALSE}
+secProps=table(rslt2$succ,rslt2$agGrp)
+sectChi=chisq.test(secProps)
+
+sectChi
+```
+
+### PLOT: Success by sector
+
+``` {r sector success plot,echo=FALSE}
+
+secSums=as.data.frame(table(rslt2$agGrp,rslt2$succ))
+colnames(secSums)=c('agGrp','succ','count')
+
+secSucc<-ggplot(secSums,aes(x=agGrp,y=count,fill=succ))+
+  geom_bar(stat = "identity")+
+  scale_fill_manual(values=succCols,name='Data received?',labels=c('Yes','No'),breaks=c('aff','neg'))+
+  #scale_alpha(guide=F) +
+  theme(axis.line=element_line('black'),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())+
+  theme(axis.text.x = element_text(angle=90))+
+  xlab('\nProject Sector')+
+  ylab('Number of datasets\n')+
+  ggtitle('Data reporting by field')+
+  theme(axis.text=element_text(size=14),
+        title=element_text(size=16,face="bold"))
+secSucc
+
+```
+
+---
 
 # 4. Temporal relationships
 ### Is the availability of data correlated to how old the data are?
