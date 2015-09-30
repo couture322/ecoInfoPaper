@@ -11,7 +11,7 @@ We are writing up a publication to report results of a two year data archiving e
 
 For this paper we ask 4 main questions about the data collected from the Exxon Valdez Oil Spill Trustee Council funded projects:
 
-1. Twenty-five years after the EVOS, how many projects funded by EVOSTC can we collect data for?
+1. Twenty-five years after the EVOS, for how many projects funded by EVOSTC can we collect data?
 2. Are there certain **research fields** that are more likely to make data available than others?
 3. Are there certain **sectors** that are more likely to make data available than others?
 4. Is the availability of data correlated to how old the data are? (temporal relationships?)
@@ -28,6 +28,7 @@ For this paper we ask 4 main questions about the data collected from the Exxon V
 
 ```{r data prep,echo=FALSE,message=FALSE}
 
+library(knitr)
 library(dplyr)
 library(readr)
 library(ggplot2)
@@ -61,8 +62,6 @@ succCols=c('aff'='grey17',
 # 1. Project Status Reporting
 <h4>Twenty-five years after the EVOS, for how many projects funded by EVOSTC can we collect data?</h4>
  
-
----
 ### Plot status of datasets at the end of the initial archiving effort:
 ```{r status plot,echo=FALSE}
 
@@ -105,7 +104,6 @@ statusProps=table(rslt2$Status)
 eqProp=chisq.test(statusProps) #not equal proportions
 
 eqProp
-eqProp$stdres
 ```
 
 ### Binomial logistic regression: All data
@@ -113,10 +111,17 @@ Which elements contribute most in determining if the data will be successfully c
 * research field
 * research sector of project PI
 * year project was last funded
-```{r BLR,echo=FALSE}
+```{r BLM - all}
+
 succBlr<-glm(formula = statSucc~agGrp+end+category,family='binomial',data=rslt2)
 
+## statSucc = Binomial: did we recover the data?
+## agGrp = sector of home institution
+## end = last year project was funded by EVOSTC
+## category = field of study
+
 summary(succBlr)
+
 ```
 
 The field of oceanography is the strongest indicator of whether data will be reported:
@@ -128,9 +133,10 @@ The field of oceanography is the strongest indicator of whether data will be rep
 
 ### Test for equal proportions between categories:
 
-Chi-squared test for equakl proportions between research fields funded
+Chi-squared test for equal proportions between research fields funded
 
 ```{r chi squared - field of study,echo=FALSE}
+
 catProps=table(rslt2$succ,rslt2$category)
 catChi=chisq.test(catProps)
 
@@ -150,24 +156,30 @@ summary(catBlr)
 ### PLOT: Successes by field of study
 ```{r research field success plot,echo=FALSE}
 
-rfSums=as.data.frame(table(rslt2$category,rslt2$succ))
-colnames(rfSums)=c('category','succ','count')
+rfSums=as.data.frame(table(rslt2$category,rslt2$succ)) ### CALCULATE THESE DIFFERENTLY using mean to get SD too, not manually
 
-fieldSucc<-ggplot(rfSums,aes(x=category,y=count,fill=succ))+
+rfProp=rfSums %>%
+  mutate(neg=rep(rfSums[rfSums$Var2=='neg',3],2)) %>%
+  rename(aff=Freq) %>%
+  rename(fos=Var1) %>%
+  filter(!Var2=='neg') %>%
+  mutate(prop=aff/(aff+neg)) %>%
+  select(fos,prop)
+  
+fieldSucc<-ggplot(rfProp,aes(x=fos,y=prop))+
   geom_bar(stat = "identity")+
-  scale_fill_manual(values=succCols,name='Data received?',labels=c('Yes','No'),breaks=c('aff','neg'))+
-  #scale_alpha(guide=F) +
   theme(axis.line=element_line('black'),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.border = element_blank(),
         panel.background = element_blank())+
   theme(axis.text.x = element_text(angle=90))+
-  xlab('\nProject research field')+
-  ylab('Number of datasets\n')+
-  ggtitle('Data reporting by field')+
+  xlab('\nProject field of study')+
+  ylim(0,1)+
+  ylab('Proportion\n')+
+  ggtitle('Percent successful data recoveries by field of study')+
   theme(axis.text=element_text(size=14),
-        title=element_text(size=16,face="bold"))#
+        title=element_text(size=16,face="bold"))
 fieldSucc
 
 ```
@@ -190,21 +202,27 @@ sectChi
 ``` {r sector success plot,echo=FALSE}
 
 secSums=as.data.frame(table(rslt2$agGrp,rslt2$succ))
-colnames(secSums)=c('agGrp','succ','count')
 
-secSucc<-ggplot(secSums,aes(x=agGrp,y=count,fill=succ))+
+secProp=secSums %>%
+  mutate(neg=rep(secSums[secSums$Var2=='neg',3],2)) %>%
+  rename(aff=Freq) %>%
+  rename(sector=Var1) %>%
+  filter(!Var2=='neg') %>%
+  mutate(prop=aff/(aff+neg)) %>%
+  select(sector,prop)
+
+secSucc<-ggplot(secProp,aes(x=sector,y=prop))+
   geom_bar(stat = "identity")+
-  scale_fill_manual(values=succCols,name='Data received?',labels=c('Yes','No'),breaks=c('aff','neg'))+
-  #scale_alpha(guide=F) +
   theme(axis.line=element_line('black'),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.border = element_blank(),
         panel.background = element_blank())+
   theme(axis.text.x = element_text(angle=90))+
-  xlab('\nProject Sector')+
-  ylab('Number of datasets\n')+
-  ggtitle('Data reporting by field')+
+  xlab('\nSector of PIs home institution')+
+  ylim(0,1)+
+  ylab('Proportion\n')+
+  ggtitle('Percent successful data recoveries by sector')+
   theme(axis.text=element_text(size=14),
         title=element_text(size=16,face="bold"))
 secSucc
