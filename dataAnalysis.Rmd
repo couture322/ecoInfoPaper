@@ -33,6 +33,8 @@ library(dplyr)
 library(readr)
 library(ggplot2)
 library(reshape2)
+library(grid)
+library(gridExtra)
 
 rslt=read.csv('data/archiveResults2.csv',header=T,stringsAsFactors=F)
 
@@ -222,14 +224,71 @@ secSucc<-ggplot(secProp,aes(x=sector,y=prop))+
   xlab('\nSector of PIs home institution')+
   ylim(0,1)+
   ylab('Proportion\n')+
-  ggtitle('Percent successful data recoveries by sector')+
+  ggtitle('broad sectors')+
   theme(axis.text=element_text(size=14),
         title=element_text(size=16,face="bold"))
-secSucc
 
+
+subSums=as.data.frame(table(rslt2$agSubGrp,rslt2$succ))
+
+subProp=subSums %>%
+  mutate(neg=rep(subSums[subSums$Var2=='neg',3],2)) %>%
+  rename(aff=Freq) %>%
+  rename(subAg=Var1) %>%
+  filter(!Var2=='neg') %>%
+  mutate(prop=aff/(aff+neg)) %>%
+  select(subAg,prop)
+
+subSecc<-ggplot(subProp,aes(x=subAg,y=prop),fill='blue')+
+  geom_bar(stat = "identity")+
+  theme(axis.line=element_line('black'),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())+
+  theme(axis.text.x = element_text(angle=90))+
+  xlab('\nProject field of study')+
+  ylim(0,1)+
+  #ylab('Proportion\n')+
+  ggtitle('separate state/fed gov')+
+  theme(axis.text=element_text(size=14),
+        title=element_text(size=16,face="bold"))#
+
+grid.arrange(secSucc,subSecc,ncol = 2, main = "Percent success by sector")
 ```
 
 ---
 
 # 4. Temporal relationships
 ### Is the availability of data correlated to how old the data are?
+
+
+
+
+# Comparison with other studies:
+
+This is one of four studies I found that look at the ability to recover data that is supposed to be publicly available
+
+```{r comparison data, echo=FALSE}
+
+comp=data.frame(study=c('SavageVickers2009','WichertsEtAl2006','Wolins1962','evostcProject'),
+                n=c(10,249,37,406),
+                successRate=c(0.10,0.26,0.24,0.32))
+comp
+
+stComparison<-ggplot(comp,aes(x=study,y=successRate))+
+  geom_bar(stat = "identity")+
+  theme(axis.line=element_line('black'),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())+
+  theme(axis.text.x = element_text(angle=90))+
+  xlab('\nSector of PIs home institution')+
+  ylim(0,0.5)+
+  ylab('Proportion\n')+
+  ggtitle('Percent successful data recoveries for four studies')+
+  theme(axis.text=element_text(size=14),
+        title=element_text(size=16,face="bold")) ## *** add each n as text above bar
+
+```
