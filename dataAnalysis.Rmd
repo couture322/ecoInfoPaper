@@ -41,7 +41,7 @@ rslt=read.csv('data/archiveResults2.csv',header=T,stringsAsFactors=F)
 rslt$succ=ifelse(rslt$Status %in% c('Published','SentData','Revised'),'aff','neg')
 rslt$statSucc=ifelse(rslt$Status %in% c('Published','SentData','Revised'),1,0)
 
-agDes=read.csv('data/ecoInfoAgencyDesig.csv',header=F,stringsAsFactors=T,col.names=c('agency','agGrp'))
+agDes=read.csv('data/ecoInfoAgencyDesig.csv',header=T,stringsAsFactors=T,col.names=c('agency','agGrp'))
 agDes$agGrp=gsub('nonProf','private',agDes$agGrp)
 
 rslt2=merge(rslt,agDes,all.x=T)
