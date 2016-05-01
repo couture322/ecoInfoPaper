@@ -36,7 +36,8 @@ library(reshape2)
 library(grid)
 library(gridExtra)
 
-rslt=read.csv('data/archiveResults2.csv',header=T,stringsAsFactors=F)
+rslt=read.csv('data/archResRevised.csv',header=T,stringsAsFactors=F)
+rslt[rslt$Status=='published','Status']<-'Published'
 
 rslt$succ=ifelse(rslt$Status %in% c('Published','SentData','Revised'),'aff','neg')
 rslt$statSucc=ifelse(rslt$Status %in% c('Published','SentData','Revised'),1,0)
@@ -81,7 +82,8 @@ statusOrd=c('Unrecoverable','Emailed','Replied','SentData','Revised','Published'
 #rslt2$Status=as.factor(rslt2$Status,levels=statusOrd,ordered=T)
 
 statPlot=ggplot()+
-  geom_histogram(data=rslt2,aes(x=factor(Status,levels=statusOrd,ordered=T),fill=Status),binwidth=1,order=statusOrd)+
+  geom_bar(data=rslt2,
+                 aes(x=factor(Status,levels=statusOrd,ordered=T),fill=Status))+
   scale_fill_manual(labels=statusOrd,values=statusCols,breaks=statusOrd)+
   theme(legend.title=element_blank())+
   theme(axis.line=element_line('black'),
