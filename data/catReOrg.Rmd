@@ -36,7 +36,7 @@ library(dplyr)
 * unk
 
 ```{r, echo=FALSE,fig.height=5}
-dat=read.csv('archResNewCateg.csv',header=T,stringsAsFactors = F,na.strings=c('',' '))
+dat=read.csv('archResNewCateg.csv',header=T,stringsAsFactors =F,na.strings=c('',' '))
 
 datFill<-dat[is.na(dat$category.1),1:13]
 

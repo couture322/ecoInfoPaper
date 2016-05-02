@@ -42,7 +42,7 @@ rslt[rslt$Status=='published','Status']<-'Published'
 rslt$succ=ifelse(rslt$Status %in% c('Published','SentData','Revised'),'aff','neg')
 rslt$statSucc=ifelse(rslt$Status %in% c('Published','SentData','Revised'),1,0)
 
-agDes=read.csv('data/ecoInfoAgencyDesig.csv',header=T,stringsAsFactors=T,col.names=c('agency','agGrp'))
+agDes=read.csv('data/ecoInfoAgencyDesig.csv',header=T,stringsAsFactors=T,col.names=c('agency','agGrp','agSubGrp'))
 agDes$agGrp=gsub('nonProf','private',agDes$agGrp)
 
 rslt2=merge(rslt,agDes,all.x=T)
@@ -117,22 +117,23 @@ Which elements contribute most in determining if the data will be successfully c
 * year project was last funded
 ```{r BLM - all}
 
-succBlr<-glm(formula = statSucc~agGrp+end+category,family='binomial',data=rslt2)
+succBlr<-glm(formula = statSucc~agGrp+end+dataType,family='binomial',data=rslt2)
 
 ## statSucc = Binomial: did we recover the data?
 ## agGrp = sector of home institution
 ## end = last year project was funded by EVOSTC
-## category = field of study
+## dataType = field of study
 
 summary(succBlr)
 
 ```
 
-The field of oceanography is the strongest indicator of whether data will be reported:
+The date the project ended is the strongest indicator of whether data will be reported:
+*** WHY IS THIS SO DIFFERENT THAN BEFORE (only oceanography was significant) ??? ***
 
 ---
 
-# 2.Field/research categories
+# 2.Data type category
 ### Are there certain **research fields** that are more likely to make data available than others?
 
 ### Test for equal proportions between categories:
@@ -141,26 +142,26 @@ Chi-squared test for equal proportions between research fields funded
 
 ```{r chi squared - field of study,echo=FALSE}
 
-catProps=table(rslt2$succ,rslt2$category)
-catChi=chisq.test(catProps)
+dtProps=table(rslt2$succ,rslt2$dataType)
+dtChi=chisq.test(dtProps)
 
-catChi
+dtChi
 
 ```
 
 ### Binomial logistic regression: Research field
 Which elements contribute most in determining if the data will be successfully collected?
 Since the chi-square test p-vaule << 0.05, run a binomial logistic regression to pull out where the differences occur
-```{r category BLR,echo=FALSE}
-catBlr<-glm(formula = statSucc~category,family='binomial',data=rslt2)
+```{r dataType BLR,echo=FALSE}
+dtBlr<-glm(formula = statSucc~dataType,family='binomial',data=rslt2)
 
-summary(catBlr)
+summary(dtBlr)
 ```
 
-### PLOT: Successes by field of study
+### PLOT: Successes by data type
 ```{r research field success plot,echo=FALSE}
 
-rfSums=as.data.frame(table(rslt2$category,rslt2$succ)) ### CALCULATE THESE DIFFERENTLY using mean to get SD too, not manually
+rfSums=as.data.frame(table(rslt2$dataType,rslt2$succ)) ### CALCULATE THESE DIFFERENTLY using mean to get SD too, not manually
 
 rfProp=rfSums %>%
   mutate(neg=rep(rfSums[rfSums$Var2=='neg',3],2)) %>%
@@ -256,7 +257,7 @@ subSecc<-ggplot(subProp,aes(x=subAg,y=prop),fill='blue')+
   theme(axis.text=element_text(size=14),
         title=element_text(size=16,face="bold"))#
 
-grid.arrange(secSucc,subSecc,ncol = 2, main = "Percent success by sector")
+grid.arrange(secSucc,subSecc,ncol = 2)
 ```
 
 ---
@@ -292,5 +293,5 @@ stComparison<-ggplot(comp,aes(x=study,y=successRate))+
   ggtitle('Percent successful data recoveries for four studies')+
   theme(axis.text=element_text(size=14),
         title=element_text(size=16,face="bold")) ## *** add each n as text above bar
-
+stComparison
 ```
