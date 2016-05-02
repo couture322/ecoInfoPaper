@@ -8,4 +8,5 @@ div_Figure_1_Dataset_Status__.html
 div_Figure_2_Recovery_by__.html
 div_Figure_3_Recovery_by__.html
 div_Figure_4_Recovery_by__.html
+div_Table_1_Comparison_to__.html
 Author_ContributionsJC_EF_Others_recovered__.html
