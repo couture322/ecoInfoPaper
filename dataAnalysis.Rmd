@@ -265,6 +265,82 @@ grid.arrange(secSucc,subSecc,ncol = 2)
 # 4. Temporal relationships
 ### Is the availability of data correlated to how old the data are?
 
+### Plot of data reporting based on the last year the data project was funded to represent length of time since data were produced
+```{r temporal-endYr}
+
+rslt2$succ<-ifelse(rslt2$Status %in% c('Unrecoverable','Emailed','Replied'),1,0)
+
+endYr=rslt2 %>%
+  filter(!end<1989) %>%
+  filter(!end>2010) %>%
+  select(succ,end)
+
+endYrs=as.data.frame(table(endYr$end,endYr$succ))
+colnames(endYrs)=c('year','succ','freq')
+
+yrsCols=c("1"='orangered',
+           "0"='forestgreen')
+
+ggplot(endYrs,aes(x=year,y=freq,fill=succ,order=rev(succ)))+
+  geom_bar(stat = "identity")+
+  scale_fill_manual(values=yrsCols,name='Success?',breaks=c('1','0'),labels=c('no','yes'))+
+  theme(axis.line=element_line('black'),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())+
+  theme(axis.text.x = element_text(angle=90))+
+  xlab('Year')+
+  ylab('Number of datasets\n')+
+  ggtitle('Temporal distrtibution of EVOS datasets collected\nbased on the LAST year projects were funded')+
+  theme(axis.text=element_text(size=14),
+        title=element_text(size=16,face="bold"))
+```
+
+### plot of data reporting based on the year the data were funded
+```{r temporal}
+yrsList=list()
+placer=1
+for(i in 1:nrow(rslt2)) {
+  yrsList[[i]]=as.numeric(rslt2$start[i]):as.numeric(rslt2$end[i])
+  placer=placer+1
+}
+
+yrsDf=ldply(yrsList,rbind)
+yrsDf$status=rslt2$Status
+yrsDf$category=rslt2$category
+colnames(yrsDf)=c(paste('yrs',colnames(yrsDf)[1:89],sep='.'),'status','category')
+
+yrsLng=reshape(yrsDf,varying=c(1:89),direction='long')
+yrs3=yrsLng %>%
+  filter(!is.na(yrs)) %>% 
+  filter(!yrs<1989) %>%
+  filter(!yrs>2010) %>%
+  select(status,category,yrs)
+
+totYrs=as.data.frame(table(yrs3$yrs,yrs3$succ))
+colnames(totYrs)=c('year','succ','freq')
+
+yrsCols=c("1"='orangered',
+           "0"='forestgreen')
+
+ggplot(totYrs,aes(x=year,y=freq,fill=succ,order=rev(succ)))+
+  geom_bar(stat = "identity")+
+  scale_fill_manual(values=yrsCols,name='Success?',breaks=c('1','0'),labels=c('no','yes'))+
+  theme(axis.line=element_line('black'),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())+
+  theme(axis.text.x = element_text(angle=90))+
+  xlab('Year')+
+  ylab('Number of datasets\n')+
+  ggtitle('Temporal distrtibution of EVOS datasets collected\nbased on year data were collected')+
+  theme(axis.text=element_text(size=14),
+        title=element_text(size=16,face="bold"))
+```
+
+#Why don't people share data?
 
 
 
