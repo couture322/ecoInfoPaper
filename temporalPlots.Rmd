@@ -1,0 +1,181 @@
+---
+title: "How do we want to display CATEGORY data?"
+author: "Jessica Couture"
+date: "5/15/2016"
+output: html_document
+---
+```{r setup, include=FALSE}
+library(knitr)
+library(plyr)
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(reshape2)
+library(grid)
+library(gridExtra)
+
+rslt=read.csv('data/archResRevised.csv',header=T,stringsAsFactors=F)
+rslt[rslt$Status=='published','Status']<-'Published'
+
+rslt$succ=ifelse(rslt$Status %in% c('Published','SentData','Revised'),'aff','neg')
+rslt$plotSucc=ifelse(rslt$Status %in% c('Published','SentData','Revised'),1,2)# 1 = success, 2 = not successful
+
+rslt$statSucc=ifelse(rslt$Status %in% c('Published','SentData','Revised'),1,0)# 1 = success, 0 = not successful
+
+
+agDes=read.csv('data/ecoInfoAgencyDesig.csv',header=T,stringsAsFactors=T,col.names=c('agency','agGrp','agSubGrp'))
+agDes$agGrp=gsub('nonProf','private',agDes$agGrp)
+
+rslt2=merge(rslt,agDes,all.x=T)
+```
+
+## Emphasize percents? number of datasets? differences between years?...
+We have talked about a number of different ways to display these results. Here I show 2 of the variables discussed:
+
+* Look at all years projects were funded or just the last year?
+* Use percent successful or number of datasets?
+
+Below I have plotted first the data looking at only the last year of funding (so these would represent the amount of time since a project was finished) as raw number of datasets and percents, then look at the data collected for each year a dataset was funded. I can think of pros and cons for each so this needs to be discussed
+
+I didn't start with stats because I haven't run any, something else we need to discuss....
+
+> Q4. Is the availability of data correlated to how old the data are? (temporal relationships?)
+
+#### __Plots of data reporting based on the year project funding _ended,_ to represent length of time since data were created:__
+```{r temporal-endYr, echo=FALSE}
+
+rslt2$succ<-ifelse(rslt2$Status %in% c('Unrecoverable','Emailed','Replied'),1,0)
+
+endYr=rslt2 %>%
+  filter(!end<1989) %>%
+  filter(!end>2010) %>%
+  select(succ,end)
+
+endYrs=as.data.frame(table(endYr$end,endYr$succ))
+colnames(endYrs)=c('year','succ','freq')
+endYrs<- mutate(endYrs,since=(2012-as.numeric(paste(endYrs$year))))
+
+yrsCols=c("1"='orangered',
+           "0"='forestgreen')
+
+ggplot(endYrs,aes(x=since,y=freq,fill=succ,order=rev(succ)))+
+  geom_bar(stat = "identity")+
+  scale_fill_manual(values=yrsCols,name='Success?',breaks=c('1','0'),labels=c('no','yes'))+
+  theme(axis.line=element_line('black'),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())+
+  xlim(max(endYrs$since),min(endYrs$since))+
+  xlab('Years since project ended')+
+  ylab('Number of datasets\n')+
+  ggtitle('Number of EVOS datasets collected\nbased on the number of years since a project ended')+
+  theme(axis.text=element_text(size=14),
+        title=element_text(size=16,face="bold"))+
+  theme(axis.line.x = element_line(color="black"),
+        axis.line.y = element_line(color="black"))
+```
+
+***
+
+``` {r temporal percents - end, echo=F}
+
+yrsPropEnd<-endYrs %>%
+  group_by(as.character(year)) %>%
+  mutate(yrSum=sum(freq)) %>%
+  mutate(prop=freq/yrSum)
+
+yrsPercEnd=ggplot(yrsPropEnd[yrsPropEnd$succ==0,],aes(x=since,y=prop,))+
+  geom_bar(stat = "identity")+
+  theme(axis.line=element_line('black'),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())+
+  ylim(0,1)+
+  xlab('Year')+
+  ylab('Percent successful')+
+  ggtitle('Percent success based on the \nlast year a project was funded')+
+  theme(axis.text=element_text(size=14),
+        title=element_text(size=16,face="bold"))+
+  theme(axis.line.x = element_line(color="black"),
+        axis.line.y = element_line(color="black"))
+yrsPercEnd
+```
+
+***
+
+#### __These plots show results based on each year a project received funding__
+Ex: a project funded from 1994-1997 would be counted 4 times: 1994, 1995, 1996, 1997
+```{r temporal, echo=F}
+library(plyr)
+yrsList=list()
+placer=1
+for(i in 1:nrow(rslt2)) {
+  yrsList[[i]]=as.numeric(rslt2$start[i]):as.numeric(rslt2$end[i])
+  placer=placer+1
+}
+
+yrsDf=ldply(yrsList,rbind)
+yrsDf$status=rslt2$Status
+yrsDf$category=rslt2$category
+colnames(yrsDf)=c(paste('yrs',colnames(yrsDf)[1:89],sep='.'),'status','category')
+
+yrsLng=reshape(yrsDf,varying=c(1:89),direction='long')
+yrs3=yrsLng %>%
+  filter(!is.na(yrs)) %>% 
+  filter(!yrs<1989) %>%
+  filter(!yrs>2010) %>%
+  mutate(succ=ifelse(status %in% c('Published','SentData','Revised'),'aff','neg')) %>%
+  select(succ,category,yrs)
+
+totYrs=as.data.frame(table(yrs3$yrs,yrs3$succ))
+colnames(totYrs)=c('year','succ','freq')
+
+yrsCols=c("neg"='orangered',
+          "aff"='forestgreen')
+
+ggplot(totYrs,aes(x=year,y=freq,fill=succ,order=rev(succ)))+
+  geom_bar(stat = "identity")+
+  scale_fill_manual(values=yrsCols,name='Success?',breaks=c('neg','aff'),labels=c('no','yes'))+
+  theme(axis.line=element_line('black'),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())+
+  theme(axis.text.x = element_text(angle=90))+
+  xlab('Year')+
+  ylab('Number of datasets\n')+
+  ggtitle('Temporal distrtibution of EVOS datasets collected\nbased on year data were funded')+
+  theme(axis.text=element_text(size=14),
+        title=element_text(size=16,face="bold"))+
+  theme(axis.line.x = element_line(color="black"),
+        axis.line.y = element_line(color="black")) ### GOOD!
+```
+
+***
+
+``` {r temporal percents - each year, echo=F}
+yrsProp<-totYrs %>%
+  group_by(as.character(year)) %>%
+  mutate(yrSum=sum(freq)) %>%
+  mutate(prop=freq/yrSum)
+
+yrsPercEach=ggplot(yrsProp[yrsProp$succ=='aff',],aes(x=year,y=prop,))+
+  geom_bar(stat = "identity")+
+  theme(axis.line=element_line('black'),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())+
+  theme(axis.text.x = element_text(angle=90))+
+  ylim(0,1)+
+  xlab('Year')+
+  ylab('Percent successful')+
+  ggtitle('Percent success by year')+
+  theme(axis.text=element_text(size=14),
+        title=element_text(size=16,face="bold"))+
+  theme(axis.line.x = element_line(color="black"),
+        axis.line.y = element_line(color="black"))
+yrsPercEach
+```
