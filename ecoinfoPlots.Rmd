@@ -20,6 +20,8 @@ Additionally we are exploring the following supplemental questions:
 
 s1. Why did people refuse to share their data?
 s2. how do our results compare to other similar studies
+  - person hours
+s3. Total elapsed time from inital contact to data publication
 
 
 #Data setup
@@ -92,8 +94,7 @@ statPlot=ggplot()+
                  aes(x=factor(Status,levels=statusOrd,ordered=T),fill=Status))+
   scale_fill_manual(labels=statusOrd,values=statusCols,breaks=statusOrd)+
   theme(legend.title=element_blank())+
-  theme(axis.line=element_line('black'),
-        panel.grid.major = element_blank(),
+  theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.border = element_blank(),
         panel.background = element_blank())+
@@ -103,7 +104,9 @@ statPlot=ggplot()+
   ggtitle('Dataset status distribution')+
   theme(axis.text=element_text(size=14),
         title=element_text(size=16,face="bold"),
-        legend.text = element_text(size = 14, face = "bold"))
+        legend.text = element_text(size = 14, face = "bold"))+
+  theme(axis.line.x = element_line(color="black"),
+        axis.line.y = element_line(color="black"))
 
 statPerc=ggplot(overall2,aes(x=factor(Status,levels=statusOrd,ordered=T),y=prop,fill=Status))+
   geom_bar(stat = "identity")+
@@ -119,7 +122,9 @@ statPerc=ggplot(overall2,aes(x=factor(Status,levels=statusOrd,ordered=T),y=prop,
   ylab('Percent\n')+
   ggtitle('Percent of datasets in each stage')+
   theme(axis.text=element_text(size=14),
-        title=element_text(size=16,face="bold"))
+        title=element_text(size=16,face="bold"))+
+  theme(axis.line.x = element_line(color="black"),
+        axis.line.y = element_line(color="black"))
 
 grid.arrange(statPlot,statPerc, ncol = 1)
 
@@ -182,7 +187,9 @@ broadSucc=ggplot(broadDf,aes(x=category,y=nDatasets,fill=succ,order=rev(succ)))+
   ylab('Number of datasets\n')+
   ggtitle('Successes by project type')+
   theme(axis.text=element_text(size=14),
-        title=element_text(size=16,face="bold"))
+        title=element_text(size=16,face="bold"))+
+  theme(axis.line.x = element_line(color="black"),
+        axis.line.y = element_line(color="black"))
 
 broadPerc=ggplot(broadDf[broadDf$succ=='aff',],aes(x=category,y=prop,order=rev(succ)))+
   geom_bar(stat = "identity")+
@@ -195,7 +202,7 @@ broadPerc=ggplot(broadDf[broadDf$succ=='aff',],aes(x=category,y=prop,order=rev(s
   theme(axis.text.x = element_text(angle=90))+
   #ylim=c(0,300)+
   xlab('Field')+
-  ylab('Number of datasets\n')+
+  ylab('Percent successful')+
   ggtitle('Percent success by biology field')+
   theme(axis.text=element_text(size=14),
         title=element_text(size=16,face="bold"))
@@ -233,10 +240,12 @@ bioPerc=ggplot(bioYN[bioYN$succ=='aff',],aes(x=subCat,y=prop,order=rev(succ)))+
   theme(axis.text.x = element_text(angle=90))+
   #ylim=c(0,300)+
   xlab('Field')+
-  ylab('Number of datasets\n')+
+  ylab('Percent successful')+
   ggtitle('Percent success by biology field')+
   theme(axis.text=element_text(size=14),
-        title=element_text(size=16,face="bold"))
+        title=element_text(size=16,face="bold"))+
+  theme(axis.line.x = element_line(color="black"),
+        axis.line.y = element_line(color="black"))
 
 grid.arrange(bioSucc, bioPerc, ncol = 1)
 ```
@@ -275,7 +284,9 @@ secSucc=ggplot(secYN2,aes(x=sector,y=nDatasets,fill=succ,order=rev(succ)))+
   ylab('Number of datasets\n')+
   ggtitle('Successes based on reaserch sector')+
   theme(axis.text=element_text(size=14),
-        title=element_text(size=16,face="bold"))
+        title=element_text(size=16,face="bold"))+
+  theme(axis.line.x = element_line(color="black"),
+        axis.line.y = element_line(color="black"))
 
 secPerc=ggplot(secYN2[secYN2$succ=='aff',],aes(x=sector,y=prop,order=rev(succ)))+
   geom_bar(stat = "identity")+
@@ -288,7 +299,7 @@ secPerc=ggplot(secYN2[secYN2$succ=='aff',],aes(x=sector,y=prop,order=rev(succ)))
   theme(axis.text.x = element_text(angle=90))+
   #ylim=c(0,300)+
   xlab('Sector')+
-  ylab('Percent\n')+
+  ylab('Percent successful\n')+
   ggtitle('Percent success by biology field')+
   theme(axis.text=element_text(size=14),
         title=element_text(size=16,face="bold"))
@@ -305,7 +316,7 @@ colnames(secSubYN)=c('subSector','succ','nDatasets')
 secSubYN2=secSubYN %>%
   group_by(subSector) %>%
   mutate(prop=nDatasets/sum(nDatasets))
-secSubYN$sector=factor(secSubYN$sector,levels=c('academia','government','private','tribe'))
+secSubYN$sector=factor(secSubYN$subSector,levels=c('academia','government','private','tribe'))
 
 
 subSecSucc=ggplot(secSubYN2,aes(x=subSector,y=nDatasets,fill=succ,order=rev(succ)))+
@@ -335,7 +346,7 @@ subSecPerc=ggplot(secSubYN2[secSubYN2$succ=='aff',],aes(x=subSector,y=prop,order
   theme(axis.text.x = element_text(angle=90))+
   #ylim=c(0,300)+
   xlab('Sector')+
-  ylab('Percent\n')+
+  ylab('Percent successful\n')+
   ggtitle('Percent success by research sector type')+
   theme(axis.text=element_text(size=14),
         title=element_text(size=16,face="bold"))
@@ -348,7 +359,7 @@ grid.arrange(subSecSucc, subSecPerc, ncol = 1)
 ### Is the availability of data correlated to how old the data are?
 
 ### Plot of data reporting based on the year a project was funded to represent length of time since data were produced
-```{r temporal-endYr}
+```{r temporal-endYr, echo=FALSE}
 
 rslt2$succ<-ifelse(rslt2$Status %in% c('Unrecoverable','Emailed','Replied'),1,0)
 
@@ -380,7 +391,8 @@ ggplot(endYrs,aes(x=year,y=freq,fill=succ,order=rev(succ)))+
 ```
 
 ### plot of data reporting based on the year the data were funded
-```{r temporal}
+```{r temporal, echo=F}
+library(plyr)
 yrsList=list()
 placer=1
 for(i in 1:nrow(rslt2)) {
@@ -398,17 +410,18 @@ yrs3=yrsLng %>%
   filter(!is.na(yrs)) %>% 
   filter(!yrs<1989) %>%
   filter(!yrs>2010) %>%
-  select(status,category,yrs)
+  mutate(succ=ifelse(status %in% c('Published','SentData','Revised'),'aff','neg')) %>%
+  select(succ,category,yrs)
 
 totYrs=as.data.frame(table(yrs3$yrs,yrs3$succ))
 colnames(totYrs)=c('year','succ','freq')
 
-yrsCols=c("1"='orangered',
-           "0"='forestgreen')
+yrsCols=c("neg"='orangered',
+          "aff"='forestgreen')
 
 ggplot(totYrs,aes(x=year,y=freq,fill=succ,order=rev(succ)))+
   geom_bar(stat = "identity")+
-  scale_fill_manual(values=yrsCols,name='Success?',breaks=c('1','0'),labels=c('no','yes'))+
+  scale_fill_manual(values=yrsCols,name='Success?',breaks=c('aff','neg'),labels=c('no','yes'))+
   theme(axis.line=element_line('black'),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
@@ -419,18 +432,50 @@ ggplot(totYrs,aes(x=year,y=freq,fill=succ,order=rev(succ)))+
   ylab('Number of datasets\n')+
   ggtitle('Temporal distrtibution of EVOS datasets collected\nbased on year data were collected')+
   theme(axis.text=element_text(size=14),
-        title=element_text(size=16,face="bold")) ### GOOD!
+        title=element_text(size=16,face="bold"))+
+  theme(axis.line.x = element_line(color="black"),
+        axis.line.y = element_line(color="black")) ### GOOD!
 ```
 
-#Why don't people share data?
+# s1. Why don't people share data?
+```{r Unrecoverable reasons, echo=F}
+reas=rslt2 %>%
+  filter(Status=='Unrecoverable') %>%
+  select(Status,reason)
+reasTab=as.data.frame(table(reas$reason))
+colnames(reasTab)=c('reason','nDatasets')
 
-# s2 - Comparison with other studies:
+## add in status = 'emailed' to 'no contact info' & status = "replied" to unwilling to share? ...discuss with group
+
+reasTab[reasTab$reason=='no contact info',"nDatasets"] <- (reasTab[reasTab$reason=='no contact info',"nDatasets"] + length(rslt2[rslt2$Status=='Emailed','Status']))
+
+reasTab[reasTab$reason=='unwilling to share',"nDatasets"] <- (reasTab[reasTab$reason=='unwilling to share',"nDatasets"] + length(rslt2[rslt2$Status=='Replied','Status']))
+reasTab<-arrange(reasTab,desc(nDatasets))
+reasTab$reason<-factor(reasTab$reason,levels = reasTab$reason,ordered = T)
+
+whyNot<-ggplot(reasTab,aes(x=reason,y=nDatasets))+
+  geom_bar(stat = "identity")+
+  theme(axis.line=element_line('black'),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())+
+  theme(axis.text.x = element_text(angle=90))+
+  xlab('\nReason data were not recovered')+
+  ylab('Number of datasets\n')+
+  ggtitle('Why are data not recovered?')+
+  theme(axis.text=element_text(size=14),
+        title=element_text(size=16,face="bold")) ## *** add each n as text above bar
+whyNot
+```
+
+# s2. Comparison with other studies:
 
 This is one of four studies I found that look at the ability to recover data that is supposed to be publicly available
 
 ```{r comparison data, echo=FALSE}
 
-comp=data.frame(study=c('SavageVickers2009','WichertsEtAl2006','Wolins1962','evostcProject'),
+comp=data.frame(study=c('SavageVickers2009','WichertsEtAl2006','Wolins1962','evostcProject2012'),
                 n=c(10,249,37,406),
                 successRate=c(0.10,0.26,0.24,0.32))
 comp
@@ -443,11 +488,17 @@ stComparison<-ggplot(comp,aes(x=study,y=successRate))+
         panel.border = element_blank(),
         panel.background = element_blank())+
   theme(axis.text.x = element_text(angle=90))+
-  xlab('\nSector of PIs home institution')+
+  xlab('\nStudy')+
   ylim(0,0.5)+
-  ylab('Proportion\n')+
-  ggtitle('Percent successful data recoveries for four studies')+
+  ylab('Percent successful\n')+
+  ggtitle('Success rates from four data recovery studies')+
   theme(axis.text=element_text(size=14),
-        title=element_text(size=16,face="bold")) ## *** add each n as text above bar
+        title=element_text(size=16,face="bold"))+
+  theme(axis.line.x = element_line(color="black"),
+        axis.line.y = element_line(color="black"))+
+  annotate("text",x=1,y=comp$successRate[4]+0.05,label=as.character(comp$n[4]))+
+  annotate("text",x=2,y=comp$successRate[1]+0.05,label=as.character(comp$n[1]))+
+  annotate("text",x=3,y=comp$successRate[2]+0.05,label=as.character(comp$n[2]))+
+  annotate("text",x=4,y=comp$successRate[3]+0.05,label=as.character(comp$n[3]))
 stComparison
 ```
