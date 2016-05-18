@@ -1,0 +1,373 @@
+---
+title: "EVOSTC data collection paper - Analysis"
+author: "Jessica Couture"
+date: "9/27/2015"
+output: html_document
+---
+
+#Background
+
+We are writing up a publication to report results of a two year data archiving effort by a small group of researchers and students at the National Center for Ecological Analysis and Synthesis at UC Santa Barbara. The [Exxon Valdez Oil Spill Trustee Council](http://www.evostc.state.ak.us) (EVOSTC) was formed following the Exon Valdez oil spill in Alaska in 1989. Since then, the EVOSTC has funded hundreds of projects and in 2012 we initiated an effort to recover and archive the data collected in these EVOSTC funded projects.
+
+For this paper we ask 4 main questions about the data collected from the Exxon Valdez Oil Spill Trustee Council funded projects:
+
+1. Twenty-five years after the EVOS, for how many projects funded by EVOSTC can we collect data?
+2. Are there certain **research fields** that are more likely to make data available than others?
+3. Are there certain **sectors** that are more likely to make data available than others?
+4. Is the availability of data correlated to how old the data are? (temporal relationships?)
+
+
+#Data setup
+*Pull in data and add agency affiliation and minor formatting
+*Load required libraries:
+  - library(dplyr)
+  - library(readr)
+  - library(ggpot2)
+  - library(reshape)
+*Set colors
+
+```{r data prep,echo=FALSE,message=FALSE}
+
+library(knitr)
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(reshape2)
+library(grid)
+library(gridExtra)
+
+rslt=read.csv('data/archResRevised.csv',header=T,stringsAsFactors=F)
+rslt[rslt$Status=='published','Status']<-'Published'
+
+rslt$succ=ifelse(rslt$Status %in% c('Published','SentData','Revised'),'aff','neg')
+rslt$statSucc=ifelse(rslt$Status %in% c('Published','SentData','Revised'),1,0)
+
+agDes=read.csv('data/ecoInfoAgencyDesig.csv',header=T,stringsAsFactors=T,col.names=c('agency','agGrp','agSubGrp'))
+agDes$agGrp=gsub('nonProf','private',agDes$agGrp)
+
+rslt2=merge(rslt,agDes,all.x=T)
+```
+Data table="rslt2"
+
+```{r}
+statusCols=c('Unrecoverable'='orangered',
+             'Emailed'='orange',
+             'Replied'='gold',
+             'SentData'='darkolivegreen2',
+             'Revised'='darkolivegreen3',
+             'Published'='forestgreen')
+
+succCols=c('aff'='grey17',
+           'neg'='grey89')
+
+```
+
+# 1. Project Status Reporting
+<h4>Twenty-five years after the EVOS, for how many projects funded by EVOSTC can we collect data?</h4>
+ 
+### Plot status of datasets at the end of the initial archiving effort:
+```{r status plot,echo=FALSE}
+
+overall=table(rslt2$Status)
+overallLong=melt(overall)
+colnames(overallLong)=c('Status','nDatasets')
+overall2=overallLong %>%
+  mutate(prop=nDatasets/sum(nDatasets))
+
+possible=overallLong %>%
+  filter(!Status=='Unrecoverable') %>%
+  mutate(prop=nDatasets/sum(nDatasets))
+
+statusOrd=c('Unrecoverable','Emailed','Replied','SentData','Revised','Published')
+#rslt2$Status=as.factor(rslt2$Status,levels=statusOrd,ordered=T)
+
+statPlot=ggplot()+
+  geom_bar(data=rslt2,
+                 aes(x=factor(Status,levels=statusOrd,ordered=T),fill=Status))+
+  scale_fill_manual(labels=statusOrd,values=statusCols,breaks=statusOrd)+
+  theme(legend.title=element_blank())+
+  theme(axis.line=element_line('black'),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())+
+  #theme(axis.text.x = element_text(angle=90))+
+  xlab('Status')+
+  ylab('Number of datasets\n')+
+  ggtitle('Dataset status distribution')+
+  theme(axis.text=element_text(size=14),
+        title=element_text(size=16,face="bold"),
+        legend.text = element_text(size = 14, face = "bold"))
+
+statPlot
+```
+
+### Test for equal proportions between status categories:
+```{r chi squared - test for eq prop,echo=FALSE}
+statusProps=table(rslt2$Status)
+eqProp=chisq.test(statusProps) #not equal proportions
+
+eqProp
+```
+
+### Binomial logistic regression: All data
+Which elements contribute most in determining if the data will be successfully collected?
+* research field
+* research sector of project PI
+* year project was last funded
+```{r BLM - all}
+
+succBlr<-glm(formula = statSucc~agGrp+end+dataType,family='binomial',data=rslt2)
+
+## statSucc = Binomial: did we recover the data?
+## agGrp = sector of home institution
+## end = last year project was funded by EVOSTC
+## dataType = field of study
+
+summary(succBlr)
+
+```
+
+The date the project ended is the strongest indicator of whether data will be reported:
+*** WHY IS THIS SO DIFFERENT THAN BEFORE (only oceanography was significant) ??? ***
+
+---
+
+# 2.Data type category
+### Are there certain **research fields** that are more likely to make data available than others?
+
+### Test for equal proportions between categories:
+
+Chi-squared test for equal proportions between research fields funded
+
+```{r chi squared - field of study,echo=FALSE}
+
+dtProps=table(rslt2$succ,rslt2$dataType)
+dtChi=chisq.test(dtProps)
+
+dtChi
+
+```
+
+### Binomial logistic regression: Research field
+Which elements contribute most in determining if the data will be successfully collected?
+Since the chi-square test p-vaule << 0.05, run a binomial logistic regression to pull out where the differences occur
+```{r dataType BLR,echo=FALSE}
+dtBlr<-glm(formula = statSucc~dataType,family='binomial',data=rslt2)
+
+summary(dtBlr)
+```
+
+### PLOT: Successes by data type
+```{r research field success plot,echo=FALSE}
+
+rfSums=as.data.frame(table(rslt2$dataType,rslt2$succ)) ### CALCULATE THESE DIFFERENTLY using mean to get SD too, not manually
+
+rfProp=rfSums %>%
+  mutate(neg=rep(rfSums[rfSums$Var2=='neg',3],2)) %>%
+  rename(aff=Freq) %>%
+  rename(fos=Var1) %>%
+  filter(!Var2=='neg') %>%
+  mutate(prop=aff/(aff+neg)) %>%
+  select(fos,prop)
+  
+fieldSucc<-ggplot(rfProp,aes(x=fos,y=prop))+
+  geom_bar(stat = "identity")+
+  theme(axis.line=element_line('black'),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())+
+  theme(axis.text.x = element_text(angle=90))+
+  xlab('\nProject field of study')+
+  ylim(0,1)+
+  ylab('Proportion\n')+
+  ggtitle('Percent successful data recoveries by field of study')+
+  theme(axis.text=element_text(size=14),
+        title=element_text(size=16,face="bold"))
+fieldSucc
+
+```
+
+---
+
+# 3. Research center type
+### Are there certain **sectors** that are more likely to make data available than others?
+(based on PI's affiliation)
+### Test for equal propportions between PI's home institution type/sector:
+```{r chi squared - sector,echo=FALSE}
+secProps=table(rslt2$succ,rslt2$agGrp)
+sectChi=chisq.test(secProps)
+
+sectChi
+```
+
+### PLOT: Success by sector
+
+``` {r sector success plot,echo=FALSE}
+
+secSums=as.data.frame(table(rslt2$agGrp,rslt2$succ))
+
+secProp=secSums %>%
+  mutate(neg=rep(secSums[secSums$Var2=='neg',3],2)) %>%
+  rename(aff=Freq) %>%
+  rename(sector=Var1) %>%
+  filter(!Var2=='neg') %>%
+  mutate(prop=aff/(aff+neg)) %>%
+  select(sector,prop)
+
+secSucc<-ggplot(secProp,aes(x=sector,y=prop))+
+  geom_bar(stat = "identity")+
+  theme(axis.line=element_line('black'),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())+
+  theme(axis.text.x = element_text(angle=90))+
+  xlab('\nSector of PIs home institution')+
+  ylim(0,1)+
+  ylab('Proportion\n')+
+  ggtitle('broad sectors')+
+  theme(axis.text=element_text(size=14),
+        title=element_text(size=16,face="bold"))
+
+
+subSums=as.data.frame(table(rslt2$agSubGrp,rslt2$succ))
+
+subProp=subSums %>%
+  mutate(neg=rep(subSums[subSums$Var2=='neg',3],2)) %>%
+  rename(aff=Freq) %>%
+  rename(subAg=Var1) %>%
+  filter(!Var2=='neg') %>%
+  mutate(prop=aff/(aff+neg)) %>%
+  select(subAg,prop)
+
+subSecc<-ggplot(subProp,aes(x=subAg,y=prop),fill='blue')+
+  geom_bar(stat = "identity")+
+  theme(axis.line=element_line('black'),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())+
+  theme(axis.text.x = element_text(angle=90))+
+  xlab('\nProject field of study')+
+  ylim(0,1)+
+  #ylab('Proportion\n')+
+  ggtitle('separate state/fed gov')+
+  theme(axis.text=element_text(size=14),
+        title=element_text(size=16,face="bold"))#
+
+grid.arrange(secSucc,subSecc,ncol = 2)
+```
+
+---
+
+# 4. Temporal relationships
+### Is the availability of data correlated to how old the data are?
+
+### Plot of data reporting based on the last year the data project was funded to represent length of time since data were produced
+```{r temporal-endYr}
+
+rslt2$succ<-ifelse(rslt2$Status %in% c('Unrecoverable','Emailed','Replied'),1,0)
+
+endYr=rslt2 %>%
+  filter(!end<1989) %>%
+  filter(!end>2010) %>%
+  select(succ,end)
+
+endYrs=as.data.frame(table(endYr$end,endYr$succ))
+colnames(endYrs)=c('year','succ','freq')
+
+yrsCols=c("1"='orangered',
+           "0"='forestgreen')
+
+ggplot(endYrs,aes(x=year,y=freq,fill=succ,order=rev(succ)))+
+  geom_bar(stat = "identity")+
+  scale_fill_manual(values=yrsCols,name='Success?',breaks=c('1','0'),labels=c('no','yes'))+
+  theme(axis.line=element_line('black'),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())+
+  theme(axis.text.x = element_text(angle=90))+
+  xlab('Year')+
+  ylab('Number of datasets\n')+
+  ggtitle('Temporal distrtibution of EVOS datasets collected\nbased on the LAST year projects were funded')+
+  theme(axis.text=element_text(size=14),
+        title=element_text(size=16,face="bold"))
+```
+
+### plot of data reporting based on the year the data were funded
+```{r temporal}
+yrsList=list()
+placer=1
+for(i in 1:nrow(rslt2)) {
+  yrsList[[i]]=as.numeric(rslt2$start[i]):as.numeric(rslt2$end[i])
+  placer=placer+1
+}
+
+yrsDf=ldply(yrsList,rbind)
+yrsDf$status=rslt2$Status
+yrsDf$category=rslt2$category
+colnames(yrsDf)=c(paste('yrs',colnames(yrsDf)[1:89],sep='.'),'status','category')
+
+yrsLng=reshape(yrsDf,varying=c(1:89),direction='long')
+yrs3=yrsLng %>%
+  filter(!is.na(yrs)) %>% 
+  filter(!yrs<1989) %>%
+  filter(!yrs>2010) %>%
+  select(status,category,yrs)
+
+totYrs=as.data.frame(table(yrs3$yrs,yrs3$succ))
+colnames(totYrs)=c('year','succ','freq')
+
+yrsCols=c("1"='orangered',
+           "0"='forestgreen')
+
+ggplot(totYrs,aes(x=year,y=freq,fill=succ,order=rev(succ)))+
+  geom_bar(stat = "identity")+
+  scale_fill_manual(values=yrsCols,name='Success?',breaks=c('1','0'),labels=c('no','yes'))+
+  theme(axis.line=element_line('black'),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())+
+  theme(axis.text.x = element_text(angle=90))+
+  xlab('Year')+
+  ylab('Number of datasets\n')+
+  ggtitle('Temporal distrtibution of EVOS datasets collected\nbased on year data were collected')+
+  theme(axis.text=element_text(size=14),
+        title=element_text(size=16,face="bold"))
+```
+
+#Why don't people share data?
+
+
+
+# Comparison with other studies:
+
+This is one of four studies I found that look at the ability to recover data that is supposed to be publicly available
+
+```{r comparison data, echo=FALSE}
+
+comp=data.frame(study=c('SavageVickers2009','WichertsEtAl2006','Wolins1962','evostcProject'),
+                n=c(10,249,37,406),
+                successRate=c(0.10,0.26,0.24,0.32))
+comp
+
+stComparison<-ggplot(comp,aes(x=study,y=successRate))+
+  geom_bar(stat = "identity")+
+  theme(axis.line=element_line('black'),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())+
+  theme(axis.text.x = element_text(angle=90))+
+  xlab('\nSector of PIs home institution')+
+  ylim(0,0.5)+
+  ylab('Proportion\n')+
+  ggtitle('Percent successful data recoveries for four studies')+
+  theme(axis.text=element_text(size=14),
+        title=element_text(size=16,face="bold")) ## *** add each n as text above bar
+stComparison
+```

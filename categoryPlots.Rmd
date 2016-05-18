@@ -1,0 +1,226 @@
+---
+title: "How do we want to display CATEGORY data?"
+author: "Jessica Couture"
+date: "5/14/2016"
+output: html_document
+---
+
+```{r setup, echo=FALSE, warning=FALSE,message=FALSE}
+library(knitr)
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(reshape2)
+library(grid)
+library(gridExtra)
+
+rslt=read.csv('data/archResRevised.csv',header=T,stringsAsFactors=F)
+rslt[rslt$Status=='published','Status']<-'Published'
+
+rslt$succ=ifelse(rslt$Status %in% c('Published','SentData','Revised'),'aff','neg')
+rslt$plotSucc=ifelse(rslt$Status %in% c('Published','SentData','Revised'),1,2)# 1 = success, 2 = not successful
+
+rslt$statSucc=ifelse(rslt$Status %in% c('Published','SentData','Revised'),1,0)# 1 = success, 0 = not successful
+
+
+agDes=read.csv('data/ecoInfoAgencyDesig.csv',header=T,stringsAsFactors=T,col.names=c('agency','agGrp','agSubGrp'))
+agDes$agGrp=gsub('nonProf','private',agDes$agGrp)
+
+rslt2=merge(rslt,agDes,all.x=T)
+```
+
+## Emphasize percents? number of datasets? differences between categories?...
+We have talked about a number of different ways to display these results. Here are the statistics to show what results we have, followed by the potential visulaizations. We'll use the same format for the sector plots (question 3) so I haven't included those here. 
+
+## Statistical outputs: Fine field of study categories
+We should talk about what test are appropriate to answer our question:
+> Q2. Are there certain **research fields** that are more likely to make data available than others?
+
+```{r stats-fine, echo=F}
+dtProps=table(rslt2$succ,rslt2$dataType)
+dtChi=chisq.test(dtProps)
+
+dtChi #diff between data fields
+
+succBlr<-glm(formula = statSucc~dataType,family='binomial',data=rslt2)
+
+## statSucc = Binomial: did we recover the data?
+## agGrp = sector of home institution
+## end = last year project was funded by EVOSTC
+## dataType = field of study
+
+summary(succBlr)
+```
+
+## Statistical outputs: Broad field of study categories
+```{r stats-broad, echo=F}
+fieldSpl=strsplit(rslt2$dataType,spl="-")
+rslt2$broadDT=sapply(fieldSpl,function(x) x[1])
+
+bdtProps=table(rslt2$succ,rslt2$broadDT)
+bdtChi=chisq.test(bdtProps)
+
+bdtChi
+
+succBlr<-glm(formula = statSucc~broadDT,family='binomial',data=rslt2)
+
+summary(succBlr)
+```
+#### Physical data is the leading indicator of success...
+
+***
+
+## Percentage plots:
+
+```{r nDatasets - broad, echo=FALSE}
+yrsCols=c("neg"='grey',
+          "aff"='black')
+
+catYN=as.data.frame(table(rslt2$dataType,rslt2$succ))
+colnames(catYN)=c('category','succ','nDatasets')
+
+broadSpl=strsplit(as.character(catYN$category),'-')
+catYN$broad=sapply(broadSpl,function(x) x[1])
+bioSub=sapply(broadSpl,function(x) x[2])
+
+bioYN=catYN %>%
+  filter(broad=='biological') %>%
+  mutate(subCat=na.omit(bioSub)) %>%
+  group_by(category) %>%
+  mutate(grpTots=sum(nDatasets)) %>%
+  mutate(prop=nDatasets/grpTots)
+
+bioYN$subCat=factor(bioYN$subCat,levels=c('plankton','benthicInverts','fish','birds','mammals'))
+
+##### general fields (biology grouped)
+
+sums=bioYN %>%
+  group_by(succ) %>%
+  summarise(nDatasets=sum(nDatasets)) %>%
+  mutate(category='biological') %>%
+  select(category,succ,nDatasets)
+
+broadDf=catYN %>%
+  filter(!broad=='biological') %>%
+  group_by(broad) %>%
+  mutate(grpTots=sum(nDatasets)) %>%
+  mutate(prop=nDatasets/grpTots)
+  
+broadDf$category<-factor(broadDf$category,levels=c('physical','chemical','biological','ecosystem/habitat','social'))
+broadDf[9:10,]<-sums
+broadDf[9:10,'prop'] <- c(broadDf$nDatasets[9]/sum(sums$nDatasets),broadDf$nDatasets[10]/sum(sums$nDatasets))
+broadDf[9:10,'grpTots'] <- sum(sums$nDatasets)
+
+broadSucc=ggplot(broadDf,aes(x=category,y=nDatasets,fill=succ,order=rev(succ)))+
+  geom_bar(stat = "identity")+
+  scale_fill_manual(values=yrsCols,name='Success?',breaks=c('neg','aff'),labels=c('no','yes'))+
+  theme(axis.line=element_line('black'),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())+
+  theme(axis.text.x = element_text(angle=90))+
+  #ylim=c(0,300)+
+  xlab('Field')+
+  ylab('Number of datasets\n')+
+  ggtitle('Successes by research field')+
+  theme(axis.text=element_text(size=14),
+        title=element_text(size=16,face="bold"))+
+  theme(axis.line.x = element_line(color="black"),
+        axis.line.y = element_line(color="black"))+
+  annotate("text", x = 1, y=broadDf$grpTots[[3]]+9, label = as.character(round(broadDf[broadDf$category=="physical" & broadDf$succ=="aff","prop"],2)))+
+  annotate("text", x = 2, y=broadDf$grpTots[[1]]+9, label = as.character(round(broadDf[broadDf$category=="chemical" & broadDf$succ=="aff","prop"],2)))+
+  annotate("text", x = 3, y=broadDf$grpTots[[9]]+9, label = as.character(round(broadDf[broadDf$category=="biological" & broadDf$succ=="aff","prop"],2)))+
+  annotate("text", x = 4, y=broadDf$grpTots[[2]]+9, label = as.character(round(broadDf[broadDf$category=="ecosystem/habitat" & broadDf$succ=="aff","prop"],2)))+
+  annotate("text", x = 5, y=broadDf$grpTots[[4]]+9, label = as.character(round(broadDf[broadDf$category=="social" & broadDf$succ=="aff","prop"],2)))
+```
+
+***
+
+```{r nDatasets - biology, echo=FALSE}
+bioSucc=ggplot(bioYN,aes(x=subCat,y=nDatasets,fill=succ,order=rev(succ)))+
+  geom_bar(stat = "identity")+
+  scale_fill_manual(values=yrsCols,name='Success?',breaks=c('neg','aff'),labels=c('no','yes'))+
+  theme(axis.line=element_line('black'),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())+
+  theme(axis.text.x = element_text(angle=90))+
+  #ylim=c(0,300)+
+  xlab('Field')+
+  ylab('Number of datasets\n')+
+  ggtitle('Successes of biology fields')+
+  theme(axis.text=element_text(size=14),
+        title=element_text(size=16,face="bold"))+
+  theme(axis.line.x = element_line(color="black"),
+        axis.line.y = element_line(color="black"))+
+  annotate("text", x = 1, y=bioYN$grpTots[[5]]+5, label = as.character(round(bioYN[bioYN$category=="biological-plankton" & bioYN$succ=="aff","prop"],2)))+
+  annotate("text", x = 2, y=bioYN$grpTots[[1]]+5, label = as.character(round(bioYN[bioYN$category=="biological-benthicInverts" & bioYN$succ=="aff","prop"],2)))+
+  annotate("text", x = 3, y=bioYN$grpTots[[3]]+5, label = as.character(round(bioYN[bioYN$category=="biological-fish" & bioYN$succ=="aff","prop"],2)))+
+  annotate("text", x = 4, y=bioYN$grpTots[[2]]+5, label = as.character(round(bioYN[bioYN$category=="biological-birds" & bioYN$succ=="aff","prop"],2)))+
+  annotate("text", x = 5, y=bioYN$grpTots[[4]]+5, label = as.character(round(bioYN[bioYN$category=="biological-mammals" & bioYN$succ=="aff","prop"],2)))
+broadSucc
+bioSucc
+```
+
+***
+
+## Percent successful:
+``` {r percent successful - broad, echo=FALSE}
+
+broadPerc=ggplot(broadDf[broadDf$succ=='aff',],aes(x=category,y=prop,order=rev(succ)))+
+  geom_bar(stat = "identity")+
+  #scale_fill_manual(values=yrsCols,name='Success?',breaks=c('neg','aff'),labels=c('no','yes'))+
+  theme(axis.line=element_line('black'),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())+
+  theme(axis.text.x = element_text(angle=90))+
+  ylim(0,1)+
+  xlab('Field')+
+  ylab('Percent successful')+
+  ggtitle('Percent success by reaserch field')+
+  theme(axis.text=element_text(size=14),
+        title=element_text(size=16,face="bold"))+
+  theme(axis.line.x = element_line(color="black"),
+        axis.line.y = element_line(color="black"))+
+  annotate("text", x = 1, y=broadDf$prop[[3]]+0.05, label = as.character(broadDf[broadDf$category=="physical" & broadDf$succ=="aff","grpTots"]))+
+  annotate("text", x = 2, y=broadDf$prop[[1]]+0.05, label = as.character(broadDf[broadDf$category=="chemical" & broadDf$succ=="aff","grpTots"]))+
+  annotate("text", x = 3, y=broadDf$prop[[9]]+0.05, label = as.character(broadDf[broadDf$category=="biological" & broadDf$succ=="aff","grpTots"]))+
+  annotate("text", x = 4, y=broadDf$prop[[2]]+0.05, label = as.character(broadDf[broadDf$category=="ecosystem/habitat" & broadDf$succ=="aff","grpTots"]))+
+  annotate("text", x = 5, y=broadDf$prop[[4]]+0.05, label = as.character(broadDf[broadDf$category=="social" & broadDf$succ=="aff","grpTots"]))
+```
+
+***
+
+```{r percent successful - biology, echo=FALSE}
+bioPerc=ggplot(bioYN[bioYN$succ=='aff',],aes(x=subCat,y=prop,order=rev(succ)))+
+  geom_bar(stat = "identity")+
+  #scale_fill_manual(values=yrsCols,name='Success?',breaks=c('neg','aff'),labels=c('no','yes'))+
+  theme(axis.line=element_line('black'),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())+
+  theme(axis.text.x = element_text(angle=90))+
+  #ylim=c(0,300)+
+  xlab('Field')+
+  ylab('Percent successful')+
+  ggtitle('Percent success within the biology field')+
+  theme(axis.text=element_text(size=14),
+        title=element_text(size=16,face="bold"))+
+  theme(axis.line.x = element_line(color="black"),
+        axis.line.y = element_line(color="black"))+
+  annotate("text", x = 1, y=bioYN$prop[[5]]+0.05, label = as.character(bioYN[bioYN$category=="biological-plankton" & bioYN$succ=="aff","grpTots"]))+
+  annotate("text", x = 2, y=bioYN$prop[[1]]+0.05, label = as.character(bioYN[bioYN$category=="biological-benthicInverts" & bioYN$succ=="aff","grpTots"]))+
+  annotate("text", x = 3, y=bioYN$prop[[3]]+0.05, label = as.character(bioYN[bioYN$category=="biological-fish" & bioYN$succ=="aff","grpTots"]))+
+  annotate("text", x = 4, y=bioYN$prop[[2]]+0.05, label = as.character(bioYN[bioYN$category=="biological-birds" & bioYN$succ=="aff","grpTots"]))+
+  annotate("text", x = 5, y=bioYN$prop[[4]]+0.05, label = as.character(bioYN[bioYN$category=="biological-mammals" & bioYN$succ=="aff","grpTots"]))
+broadPerc
+bioPerc
+```
+
+
+

@@ -1,0 +1,23 @@
+"PI","category","parentTask","start","end","agency","subCat","subCat2"
+"Carroll","anthropogenic",NA,1993,2004,"ADNR","projMgmt","habitat"
+"David Scheel","dataMgmt",1121,1994,1994,"Alaska Pacific U.","projMgmt","ecosystem"
+"Edward Mills","anthropogenic",1028,1989,1991,"Cornell Univ.","economics","recreation"
+"Fries Carol","anthropogenic",NA,1993,2004,"ADNR","projMgmt","habitat"
+"Fall","anthropogenic",NA,1998,1999,"EVOSTC","economics","subsistence"
+"Gary Kompkoff","anthropogenic",996,1998,1998,"ADFG","subsistence","film"
+"Jerome Selby","anthropogenic",1055,1997,1999,"Kodiak AK","communityMgmt","waste"
+"Jim Fall","anthropogenic",1002,1998,2004,"ADFG","social","subsistence"
+"Kim Sundberg","anthropogenic",1075,1994,1995,"ADFG","environmentalImpacts","infrastructure"
+"Marianne See","meta",1098,1999,2000,"ADFG","samplingImpacts","metaAnalysis"
+"Not Available","unk",1141,2004,2008,NA,"projMgmt",NA
+"Not Available","anthropogenic",1100,1999,1999,NA,"meeting","10yrSymposium"
+"Not Available","anthropogenic",1032,1989,1991,NA,"economics","resarchPrograms"
+"Not Available","anthropogenic",1030,1989,1991,NA,"economics","subsistence"
+"Not Available","anthropogenic",907,1989,1991,NA,"economics","fisheries"
+"Richard Carson","anthropogenic",1198,1989,1991,"UCSD","economics","resources"
+"Richard Carson","anthropogenic",1026,1989,1991,"UCSD","economics","resources"
+"Richard Carson","anthropogenic",1195,1989,1991,"UCSD","economics","fisheries"
+"Rita Miraglia","anthropogenic",1204,1993,1993,"ADFG","subsistence","resources"
+"Russell Kunibe","dataMgmt",1000,1999,2001,"AK Dept of Envtl Cons","dataMgmt",NA
+"Susan Ruddy","dataMgmt",1127,1993,1993,"TNC","dataMgmt",NA
+"Tom Turner","anthropogenic",1049,1999,2002,"ADFG","communityMgmt","waste"
