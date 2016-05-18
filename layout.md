@@ -1,4 +1,3 @@
-untitled.html
 h2_class_ltx_title_subsection_id_auto__3.html
 h2_class_ltx_title_subsection_id_auto__.html
 Results__.html
