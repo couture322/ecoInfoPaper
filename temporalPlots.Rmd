@@ -1,7 +1,7 @@
 ---
-title: "How do we want to display CATEGORY data?"
+title: "How do we want to display TEMPORAL data?"
 author: "Jessica Couture"
-date: "5/15/2016"
+date: "5/22/2016"
 output: html_document
 ---
 ```{r setup, include=FALSE}
@@ -13,6 +13,7 @@ library(ggplot2)
 library(reshape2)
 library(grid)
 library(gridExtra)
+library(gtable)
 
 rslt=read.csv('data/archResRevised.csv',header=T,stringsAsFactors=F)
 rslt[rslt$Status=='published','Status']<-'Published'
@@ -55,8 +56,8 @@ endYrs=as.data.frame(table(endYr$end,endYr$succ))
 colnames(endYrs)=c('year','succ','freq')
 endYrs<- mutate(endYrs,since=(2012-as.numeric(paste(endYrs$year))))
 
-yrsCols=c("1"='orangered',
-           "0"='forestgreen')
+yrsCols=c("1"='grey',
+          "0"='black')
 
 ggplot(endYrs,aes(x=since,y=freq,fill=succ,order=rev(succ)))+
   geom_bar(stat = "identity")+
@@ -92,10 +93,11 @@ yrsPercEnd=ggplot(yrsPropEnd[yrsPropEnd$succ==0,],aes(x=since,y=prop,))+
         panel.grid.minor = element_blank(),
         panel.border = element_blank(),
         panel.background = element_blank())+
+  xlim(max(endYrs$since),min(endYrs$since))+
   ylim(0,1)+
   xlab('Year')+
   ylab('Percent successful')+
-  ggtitle('Percent success based on the \nlast year a project was funded')+
+  ggtitle('Percent success based on the\nlast year a project was funded')+
   theme(axis.text=element_text(size=14),
         title=element_text(size=16,face="bold"))+
   theme(axis.line.x = element_line(color="black"),
@@ -126,16 +128,13 @@ yrs3=yrsLng %>%
   filter(!is.na(yrs)) %>% 
   filter(!yrs<1989) %>%
   filter(!yrs>2010) %>%
-  mutate(succ=ifelse(status %in% c('Published','SentData','Revised'),'aff','neg')) %>%
+  mutate(succ=ifelse(status %in% c('Published','SentData','Revised'),0,1)) %>%
   select(succ,category,yrs)
 
 totYrs=as.data.frame(table(yrs3$yrs,yrs3$succ))
 colnames(totYrs)=c('year','succ','freq')
 
-yrsCols=c("neg"='orangered',
-          "aff"='forestgreen')
-
-ggplot(totYrs,aes(x=year,y=freq,fill=succ,order=rev(succ)))+
+totYrsAll<-ggplot(totYrs,aes(x=year,y=freq,fill=succ,order=rev(succ)))+
   geom_bar(stat = "identity")+
   scale_fill_manual(values=yrsCols,name='Success?',breaks=c('neg','aff'),labels=c('no','yes'))+
   theme(axis.line=element_line('black'),
@@ -146,22 +145,25 @@ ggplot(totYrs,aes(x=year,y=freq,fill=succ,order=rev(succ)))+
   theme(axis.text.x = element_text(angle=90))+
   xlab('Year')+
   ylab('Number of datasets\n')+
-  ggtitle('Temporal distrtibution of EVOS datasets collected\nbased on year data were funded')+
+  ggtitle('Number of EVOS datasets collected\nbased on year data were funded')+
   theme(axis.text=element_text(size=14),
         title=element_text(size=16,face="bold"))+
   theme(axis.line.x = element_line(color="black"),
         axis.line.y = element_line(color="black")) ### GOOD!
+totYrsAll
 ```
 
 ***
 
-``` {r temporal percents - each year, echo=F}
+``` {r temporal percents - each year, echo=F,warnings=F}
+detach(package:plyr, unload = TRUE)
+library(dplyr)
 yrsProp<-totYrs %>%
   group_by(as.character(year)) %>%
   mutate(yrSum=sum(freq)) %>%
   mutate(prop=freq/yrSum)
 
-yrsPercEach=ggplot(yrsProp[yrsProp$succ=='aff',],aes(x=year,y=prop,))+
+yrsPercEach=ggplot(yrsProp[yrsProp$succ==0,],aes(x=year,y=prop,))+
   geom_bar(stat = "identity")+
   theme(axis.line=element_line('black'),
         panel.grid.major = element_blank(),
@@ -178,4 +180,144 @@ yrsPercEach=ggplot(yrsProp[yrsProp$succ=='aff',],aes(x=year,y=prop,))+
   theme(axis.line.x = element_line(color="black"),
         axis.line.y = element_line(color="black"))
 yrsPercEach
+```
+
+***
+
+#### __Combining the plots together:__
+
+```{r overlay yrs plot - end, echo=F}
+
+p2=ggplot(yrsPropEnd[yrsPropEnd$succ==0,],aes(x=since,y=prop))+
+  geom_line(stat = "identity",colour='red',size=1)+
+  theme(axis.line=element_line('black'),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(colour = "black", fill=NA),
+        panel.background = element_blank())+
+  xlim(max(endYrs$since),min(endYrs$since))+
+  ylim(0,1)+
+  #xlab('Years since funding award')+
+  ylab('Success rate')+
+  #ggtitle('Percent over time')+
+  theme(axis.text=element_text(size=14),
+        title=element_text(size=16,face="bold"))
+
+
+p1 <- ggplot(yrsPropEnd,aes(x=since,y=freq,fill=succ,order=rev(succ)))+
+  geom_bar(stat = "identity")+
+  scale_fill_manual(values=yrsCols,name='Success?',breaks=c('1','0'),labels=c('no','yes'),guide=F)+
+  theme(axis.line=element_line('black'),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())+
+  xlim(max(endYrs$since),min(endYrs$since))+
+  xlab('Years since project ended')+
+  ylab('Number of datasets\n')+
+  #ggtitle('Number of EVOS datasets collected\nbased on the number of years since a project ended')+
+  theme(axis.text=element_text(size=14),
+        title=element_text(size=16,face="bold"))
+
+# extract gtable
+g1 <- ggplot_gtable(ggplot_build(p1))
+g2 <- ggplot_gtable(ggplot_build(p2))
+
+# overlap the panel of 2nd plot on that of 1st plot
+pp <- c(subset(g1$layout, name == "panel", se = t:r))
+g <- gtable_add_grob(g1, g2$grobs[[which(g2$layout$name == "panel")]], pp$t, 
+                     pp$l, pp$b, pp$l)
+
+# axis tweaks
+ia <- which(g2$layout$name == "axis-l")
+ga <- g2$grobs[[ia]]
+ax <- ga$children[[2]]
+ax$widths <- rev(ax$widths)
+ax$grobs <- rev(ax$grobs)
+ax$grobs[[1]]$x <- ax$grobs[[1]]$x - unit(1, "npc") + unit(0.15, "cm")
+g <- gtable_add_cols(g, g2$widths[g2$layout[ia, ]$l], length(g$widths) - 1)
+g <- gtable_add_grob(g, ax, pp$t, length(g$widths) - 1, pp$b)
+
+# draw it
+grid.draw(g)
+```
+
+***
+
+#### __Two plots:__
+```{r stacked yrs plots - end, fig.width=6, fig.height=7,echo=F}
+stk2=ggplot(yrsPropEnd[yrsPropEnd$succ==0,],aes(x=since,y=round(prop*100)))+
+  geom_line(stat = "identity",colour='red',size=1)+
+  theme(axis.line=element_line('black'),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())+
+  xlim(max(endYrs$since),min(endYrs$since))+
+  ylim(0,100)+
+  ylab('Success rate (%)\n')+
+  theme(axis.text.y=element_text(size=14),
+        title=element_text(size=16,face="bold"),
+        axis.title.x = element_blank(),
+        axis.text.x  = element_blank())+
+  theme(axis.line.x = element_line(color="black"),
+        axis.line.y = element_line(color="black"))
+
+
+stk1 <- ggplot(yrsPropEnd,aes(x=since,y=freq,fill=succ,order=rev(succ)))+
+  geom_bar(stat = "identity")+
+  scale_fill_manual(values=yrsCols,name='Success?',breaks=c('1','0'),labels=c('no','yes'),guide=F)+
+  theme(axis.line=element_line('black'),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())+
+  xlim(max(endYrs$since),min(endYrs$since))+
+  xlab('Years since project ended')+
+  ylab('Number of datasets\n')+
+  theme(axis.text=element_text(size=14),
+        title=element_text(size=16,face="bold"))+
+  theme(axis.line.x = element_line(color="black"),
+        axis.line.y = element_line(color="black"))
+
+grid.arrange(stk2, stk1, ncol = 1, heights = c(1,2))
+
+```
+
+```{r stacked yrs plots - each year, fig.width=6, fig.height=7, echo=F}
+stkEa2=ggplot(yrsProp[yrsProp$succ==0,],aes(x=as.numeric(as.character(year)),y=(prop*100)))+
+    geom_line(stat = "identity",colour='red',size=1)+
+  theme(axis.line=element_line('black'),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())+
+  ylim(0,100)+
+  ylab('Success rate (%)\n')+
+  theme(axis.text.y=element_text(size=14),
+        title=element_text(size=16,face="bold"),
+        axis.title.x = element_blank(),
+        axis.text.x  = element_blank())+
+  theme(axis.line.x = element_line(color="black"),
+        axis.line.y = element_line(color="black"))
+
+
+stkEa1 <- ggplot(yrsProp,aes(x=year,y=freq,fill=succ,order=rev(succ)))+
+  geom_bar(stat = "identity")+
+  scale_fill_manual(values=yrsCols,name='Success?',breaks=c('1','0'),labels=c('no','yes'),guide=F)+
+  theme(axis.line=element_line('black'),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())+
+  xlab('Year of project funding')+
+  ylab('Number of datasets\n')+
+  #ggtitle('Number of EVOS datasets collected\nbased on the number of years since a project ended')+
+  theme(axis.text=element_text(size=14),
+        title=element_text(size=16,face="bold"),
+        axis.text.x  = element_text(angle=90, vjust=0.5))+
+  theme(axis.line.x = element_line(color="black"),
+        axis.line.y = element_line(color="black"))
+
+grid.arrange(stkEa2, stkEa1, ncol = 1, heights = c(1,2))
 ```
