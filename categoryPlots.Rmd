@@ -14,7 +14,7 @@ library(reshape2)
 library(grid)
 library(gridExtra)
 
-rslt=read.csv('data/archResRevised.csv',header=T,stringsAsFactors=F)
+rslt=read.csv('data/archResRevised2.csv',header=T,stringsAsFactors=F)
 rslt[rslt$Status=='published','Status']<-'Published'
 
 rslt$succ=ifelse(rslt$Status %in% c('Published','SentData','Revised'),'aff','neg')
@@ -27,12 +27,14 @@ agDes=read.csv('data/ecoInfoAgencyDesig.csv',header=T,stringsAsFactors=T,col.nam
 agDes$agGrp=gsub('nonProf','private',agDes$agGrp)
 
 rslt2=merge(rslt,agDes,all.x=T)
+rslt2=rslt2 %>%
+  filter(!end>2010) 
 ```
 
 ## Emphasize percents? number of datasets? differences between categories?...
 We have talked about a number of different ways to display these results. Here are the statistics to show what results we have, followed by the potential visulaizations. We'll use the same format for the sector plots (question 3) so I haven't included those here. 
 
-> Q2. Are there certain **research fields** that are more likely to make data available than others?
+> Q3. Are there certain **research fields** that are more likely to make data available than others?
 
 ```{r stats-fine, echo=F}
 dtProps=table(rslt2$succ,rslt2$dataType)
@@ -109,9 +111,8 @@ broadDf[9:10,]<-sums
 broadDf[9:10,'prop'] <- c(broadDf$nDatasets[9]/sum(sums$nDatasets),broadDf$nDatasets[10]/sum(sums$nDatasets))
 broadDf[9:10,'grpTots'] <- sum(sums$nDatasets)
 
-broadSucc=ggplot(broadDf,aes(x=category,y=nDatasets,fill=succ,order=rev(succ)))+
-  geom_bar(stat = "identity")+
-  scale_fill_manual(values=yrsCols,name='Success?',breaks=c('neg','aff'),labels=c('no','yes'))+
+broadSucc=ggplot(broadDf[broadDf$succ==0,],aes(x=category,y=grpTots))+
+  geom_bar(stat = "identity",fill="grey")+
   theme(axis.line=element_line('black'),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
@@ -121,16 +122,15 @@ broadSucc=ggplot(broadDf,aes(x=category,y=nDatasets,fill=succ,order=rev(succ)))+
   #ylim=c(0,300)+
   xlab('Field')+
   ylab('Number of datasets\n')+
-  ggtitle('Successes by research field')+
   theme(axis.text=element_text(size=14),
         title=element_text(size=16,face="bold"))+
   theme(axis.line.x = element_line(color="black"),
-        axis.line.y = element_line(color="black"))+
-  annotate("text", x = 1, y=broadDf$grpTots[[3]]+9, label = as.character(round(broadDf[broadDf$category=="physical" & broadDf$succ=="aff","prop"],2)))+
-  annotate("text", x = 2, y=broadDf$grpTots[[1]]+9, label = as.character(round(broadDf[broadDf$category=="chemical" & broadDf$succ=="aff","prop"],2)))+
-  annotate("text", x = 3, y=broadDf$grpTots[[9]]+9, label = as.character(round(broadDf[broadDf$category=="biological" & broadDf$succ=="aff","prop"],2)))+
-  annotate("text", x = 4, y=broadDf$grpTots[[2]]+9, label = as.character(round(broadDf[broadDf$category=="ecosystem/habitat" & broadDf$succ=="aff","prop"],2)))+
-  annotate("text", x = 5, y=broadDf$grpTots[[4]]+9, label = as.character(round(broadDf[broadDf$category=="social" & broadDf$succ=="aff","prop"],2)))
+        axis.line.y = element_line(color="black"))#+
+  # annotate("text", x = 1, y=broadDf$grpTots[[3]]+9, label = as.character(round(broadDf[broadDf$category=="physical" & broadDf$succ=="aff","prop"],2)))+
+  # annotate("text", x = 2, y=broadDf$grpTots[[1]]+9, label = as.character(round(broadDf[broadDf$category=="chemical" & broadDf$succ=="aff","prop"],2)))+
+  # annotate("text", x = 3, y=broadDf$grpTots[[9]]+9, label = as.character(round(broadDf[broadDf$category=="biological" & broadDf$succ=="aff","prop"],2)))+
+  # annotate("text", x = 4, y=broadDf$grpTots[[2]]+9, label = as.character(round(broadDf[broadDf$category=="ecosystem/habitat" & broadDf$succ=="aff","prop"],2)))+
+  # annotate("text", x = 5, y=broadDf$grpTots[[4]]+9, label = as.character(round(broadDf[broadDf$category=="social" & broadDf$succ=="aff","prop"],2)))
 broadSucc
 ```
 
@@ -138,7 +138,7 @@ broadSucc
 
 ``` {r percent successful - broad, echo=FALSE}
 
-broadPerc=ggplot(broadDf[broadDf$succ=='aff',],aes(x=category,y=prop,order=rev(succ)))+
+broadPerc=ggplot(broadDf[broadDf$succ==0,],aes(x=category,y=(prop*100)))+
   geom_bar(stat = "identity")+
   #scale_fill_manual(values=yrsCols,name='Success?',breaks=c('neg','aff'),labels=c('no','yes'))+
   theme(axis.line=element_line('black'),
@@ -147,19 +147,19 @@ broadPerc=ggplot(broadDf[broadDf$succ=='aff',],aes(x=category,y=prop,order=rev(s
         panel.border = element_blank(),
         panel.background = element_blank())+
   theme(axis.text.x = element_text(angle=90))+
-  ylim(0,1)+
+  ylim(0,75)+
   xlab('Field')+
   ylab('Percent successful')+
-  ggtitle('Percent success by reaserch field')+
+  #ggtitle('Percent success by reaserch field')+
   theme(axis.text=element_text(size=14),
         title=element_text(size=16,face="bold"))+
   theme(axis.line.x = element_line(color="black"),
         axis.line.y = element_line(color="black"))+
-  annotate("text", x = 1, y=broadDf$prop[[3]]+0.05, label = as.character(broadDf[broadDf$category=="physical" & broadDf$succ=="aff","grpTots"]))+
-  annotate("text", x = 2, y=broadDf$prop[[1]]+0.05, label = as.character(broadDf[broadDf$category=="chemical" & broadDf$succ=="aff","grpTots"]))+
-  annotate("text", x = 3, y=broadDf$prop[[9]]+0.05, label = as.character(broadDf[broadDf$category=="biological" & broadDf$succ=="aff","grpTots"]))+
-  annotate("text", x = 4, y=broadDf$prop[[2]]+0.05, label = as.character(broadDf[broadDf$category=="ecosystem/habitat" & broadDf$succ=="aff","grpTots"]))+
-  annotate("text", x = 5, y=broadDf$prop[[4]]+0.05, label = as.character(broadDf[broadDf$category=="social" & broadDf$succ=="aff","grpTots"]))
+  annotate("text", x = 1, y=broadDf$prop[[3]]+0.05, label = as.character(broadDf[broadDf$category=="physical" & broadDf$succ==0,"grpTots"]))+
+  annotate("text", x = 2, y=broadDf$prop[[1]]+0.05, label = as.character(broadDf[broadDf$category=="chemical" & broadDf$succ==0,"grpTots"]))+
+  annotate("text", x = 3, y=broadDf$prop[[9]]+0.05, label = as.character(broadDf[broadDf$category=="biological" & broadDf$succ==0,"grpTots"]))+
+  annotate("text", x = 4, y=broadDf$prop[[2]]+0.05, label = as.character(broadDf[broadDf$category=="ecosystem/habitat" & broadDf$succ==0,"grpTots"]))+
+  annotate("text", x = 5, y=broadDf$prop[[4]]+0.05, label = as.character(broadDf[broadDf$category=="social" & broadDf$succ==0,"grpTots"]))
 broadPerc
 ```
 

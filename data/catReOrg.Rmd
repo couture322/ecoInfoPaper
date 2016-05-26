@@ -175,3 +175,27 @@ cat(otherTabInsert, sep = "\n")
 ```
 
 ###### **Note:** I haven't sorted these into "terrestrial", "nearshore" and "pelagic" yet. That will take a bit more work.
+
+
+```{r removing no-EVOSTC}
+arr=read.csv("data/archResRevised.csv",header = T)
+arr2=arr %>%
+  filter(!dataEditNotes=="nonEvos?") %>%
+  mutate(project=paste(Status,parentTask,sep="-")) %>%
+  filter(!duplicated(project)) # 22 projects have data in multiple status'
+
+dupes=arr2[duplicated(arr2$parentTask),"parentTask"]
+dupeDf=arr2[arr2$parentTask %in% dupes,]
+dupPub<-dupeDf[dupeDf$Status %in% c("Published","SentData"),]
+dupNos<-dupeDf%>%
+  filter(!dupeDf$parentTask %in% dupPub$parentTask)%>%
+  filter(!duplicated(parentTask))
+dupNos$Status=c("Unrecoverable","Replied","Replied")
+
+arr3=arr2 %>%
+  filter(!parentTask %in% dupes)
+arr4=rbind(arr3,dupPub,dupNos)
+
+#write.csv(arr4,file="data/archResRevised2.csv",row.names=F)
+
+```
