@@ -136,7 +136,7 @@ broadSucc
 
 ***
 
-``` {r percent successful - broad, echo=FALSE}
+``` {r percent successful stacked - broad, echo=FALSE}
 
 broadPerc=ggplot(broadDf[broadDf$succ==0,],aes(x=category,y=(prop*100)))+
   geom_bar(stat = "identity")+
@@ -165,7 +165,7 @@ broadPerc
 
 ***
 
-```{r nDatasets - biology, echo=FALSE}
+```{r nDatasets original - biology, echo=FALSE}
 bioSucc=ggplot(bioYN,aes(x=subCat,y=nDatasets,fill=succ,order=rev(succ)))+
   geom_bar(stat = "identity")+
   scale_fill_manual(values=yrsCols,name='Success?',breaks=c('neg','aff'),labels=c('no','yes'))+
@@ -194,7 +194,7 @@ bioSucc
 
 ***
 
-```{r percent successful - biology, echo=FALSE}
+```{r percent successful - biologyOrig, echo=FALSE}
 bioPerc=ggplot(bioYN[bioYN$succ=='aff',],aes(x=subCat,y=prop,order=rev(succ)))+
   geom_bar(stat = "identity")+
   #scale_fill_manual(values=yrsCols,name='Success?',breaks=c('neg','aff'),labels=c('no','yes'))+
@@ -221,5 +221,53 @@ broadPerc
 bioPerc
 ```
 
+***
+
+```{r percent successful - biologyRevised, echo=FALSE}
+bioPerc=ggplot(bioYN[bioYN$succ==0,],aes(x=subCat,y=(prop*100)))+
+  geom_bar(stat = "identity",fill="black")+
+  theme(axis.line=element_line('black'),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())+
+  theme(axis.text.x = element_text(angle=90))+
+  ylim(0,75)+
+  xlab('Bio Field')+
+  ylab('% successful')+
+  theme(axis.text=element_text(size=14),
+        title=element_text(size=16,face="bold"))+
+  theme(axis.line.x = element_line(color="black"),
+        axis.line.y = element_line(color="black"))+
+  annotate("text", x = 1, y=bioYN$prop[[5]]*100+5, label = as.character(bioYN[bioYN$category=="biological-plankton" & bioYN$succ==0,"grpTots"]))+
+  annotate("text", x = 2, y=bioYN$prop[[1]]*100+5, label = as.character(bioYN[bioYN$category=="biological-benthicInverts" & bioYN$succ==0,"grpTots"]))+
+  annotate("text", x = 3, y=bioYN$prop[[3]]*100+5, label = as.character(bioYN[bioYN$category=="biological-fish" & bioYN$succ==0,"grpTots"]))+
+  annotate("text", x = 4, y=bioYN$prop[[2]]*100+5, label = as.character(bioYN[bioYN$category=="biological-birds" & bioYN$succ==0,"grpTots"]))+
+  annotate("text", x = 5, y=bioYN$prop[[4]]*100+5, label = as.character(bioYN[bioYN$category=="biological-mammals" & bioYN$succ==0,"grpTots"]))
+broadPerc
+bioPerc
+```
 
 
+***
+
+```{r nDatasets - biologyRevised, echo=FALSE}
+bioSucc=ggplot(bioYN[bioYN$succ==0,],aes(x=subCat,y=grpTots))+
+  geom_bar(stat = "identity",fill="grey")+
+  theme(axis.line=element_line('black'),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())+
+  theme(axis.text.x = element_text(angle=90),
+        axis.title.x = element_blank())+
+  #ylim=c(0,300)+
+  ggtitle('Biology sub-fields')+
+  ylab('Number of datasets\n')+
+  theme(axis.text=element_text(size=14),
+        title=element_text(size=16,face="bold"))+
+  theme(axis.line.x = element_line(color="black"),
+        axis.line.y = element_line(color="black"))
+broadSucc
+bioSucc
+```

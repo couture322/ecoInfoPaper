@@ -36,16 +36,20 @@ library(reshape2)
 library(grid)
 library(gridExtra)
 
-rslt=read.csv('data/archResRevised.csv',header=T,stringsAsFactors=F)
+rslt=read.csv('data/archResRevised2.csv',header=T,stringsAsFactors=F)
 rslt[rslt$Status=='published','Status']<-'Published'
 
-rslt$succ=ifelse(rslt$Status %in% c('Published','SentData','Revised'),'aff','neg')
-rslt$statSucc=ifelse(rslt$Status %in% c('Published','SentData','Revised'),1,0)
+rslt$succ=ifelse(rslt$Status %in% c('Published','SentData','Revised'),0,1)
+rslt$statSucc=ifelse(rslt$Status %in% c('Published','SentData','Revised'),1,2) # 1 = success, 2 = not successful
+
 
 agDes=read.csv('data/ecoInfoAgencyDesig.csv',header=T,stringsAsFactors=T,col.names=c('agency','agGrp','agSubGrp'))
 agDes$agGrp=gsub('nonProf','private',agDes$agGrp)
 
+
 rslt2=merge(rslt,agDes,all.x=T)
+rslt2=rslt2 %>%
+  filter(!end>2010) 
 ```
 Data table="rslt2"
 
@@ -97,18 +101,22 @@ statPlot=ggplot()+
   ggtitle('Dataset status distribution')+
   theme(axis.text=element_text(size=14),
         title=element_text(size=16,face="bold"),
-        legend.text = element_text(size = 14, face = "bold"))
+        legend.text = element_text(size = 14, face = "bold"))+
+  theme(axis.line.x = element_line(color="black"),
+        axis.line.y = element_line(color="black"))
 
 statPlot
 ```
 
 ### Test for equal proportions between status categories:
+Are the proportion of projects in each category equal?
 ```{r chi squared - test for eq prop,echo=FALSE}
 statusProps=table(rslt2$Status)
 eqProp=chisq.test(statusProps) #not equal proportions
 
 eqProp
 ```
+__Proportions are NOT equal between status groups__
 
 ### Binomial logistic regression: All data
 Which elements contribute most in determining if the data will be successfully collected?
@@ -117,7 +125,7 @@ Which elements contribute most in determining if the data will be successfully c
 * year project was last funded
 ```{r BLM - all}
 
-succBlr<-glm(formula = statSucc~agGrp+end+dataType,family='binomial',data=rslt2)
+succBlr<-glm(formula = succ~agSubGrp+end+dataType,family='binomial',data=rslt2)
 
 ## statSucc = Binomial: did we recover the data?
 ## agGrp = sector of home institution
@@ -127,9 +135,7 @@ succBlr<-glm(formula = statSucc~agGrp+end+dataType,family='binomial',data=rslt2)
 summary(succBlr)
 
 ```
-
-The date the project ended is the strongest indicator of whether data will be reported:
-*** WHY IS THIS SO DIFFERENT THAN BEFORE (only oceanography was significant) ??? ***
+__Only categories with low success rates are sginificant (if "low"" is <20%)__
 
 ---
 
@@ -146,17 +152,17 @@ dtProps=table(rslt2$succ,rslt2$dataType)
 dtChi=chisq.test(dtProps)
 
 dtChi
-
 ```
 
 ### Binomial logistic regression: Research field
 Which elements contribute most in determining if the data will be successfully collected?
 Since the chi-square test p-vaule << 0.05, run a binomial logistic regression to pull out where the differences occur
 ```{r dataType BLR,echo=FALSE}
-dtBlr<-glm(formula = statSucc~dataType,family='binomial',data=rslt2)
+dtBlr<-glm(formula = succ~dataType,family='binomial',data=rslt2)
 
 summary(dtBlr)
 ```
+__similar to above: fish, eco/hab and social are significant because they are so low__
 
 ### PLOT: Successes by data type
 ```{r research field success plot,echo=FALSE}
@@ -191,16 +197,17 @@ fieldSucc
 
 ---
 
-# 3. Research center type
+# 3. Research sector type
 ### Are there certain **sectors** that are more likely to make data available than others?
 (based on PI's affiliation)
 ### Test for equal propportions between PI's home institution type/sector:
 ```{r chi squared - sector,echo=FALSE}
-secProps=table(rslt2$succ,rslt2$agGrp)
+secProps=table(rslt2$succ,rslt2$agSubGrp)
 sectChi=chisq.test(secProps)
 
 sectChi
 ```
+__NOT significant__
 
 ### PLOT: Success by sector
 

@@ -178,7 +178,7 @@ cat(otherTabInsert, sep = "\n")
 
 
 ```{r removing no-EVOSTC}
-arr=read.csv("data/archResRevised.csv",header = T)
+arr=read.csv("data/archResRevised2.csv",header = T)
 arr2=arr %>%
   filter(!dataEditNotes=="nonEvos?") %>%
   mutate(project=paste(Status,parentTask,sep="-")) %>%
@@ -195,6 +195,16 @@ dupNos$Status=c("Unrecoverable","Replied","Replied")
 arr3=arr2 %>%
   filter(!parentTask %in% dupes)
 arr4=rbind(arr3,dupPub,dupNos)
+
+## reorganize dataType categories
+
+levels(arr4$dataType)=c(levels(arr4$dataType),"oil","biological-habitat","modeling")
+arr4$dataType[arr4$category=="oil"]<-"oil"
+arr4$dataType[arr4$category=="modeling"]<-"modeling"
+arr4$dataType[arr4$category=="habitat"]<-"biological-habitat"
+arr4$dataType[arr4$category=="terrestrial" & arr4$dataType=='ecosystem/habitat']<-"biological-habitat"
+arr4$dataType[arr4$category=="mapping" & arr4$dataType=='ecosystem/habitat']<-"biological-habitat"
+arr4$dataType<-gsub("chemical","physical",arr$dataType)
 
 #write.csv(arr4,file="data/archResRevised2.csv",row.names=F)
 
