@@ -1,3 +1,4 @@
+msAuthorea/title.html
 msAuthorea/IntroductionThis_will_be_the_introduction__.html
 msAuthorea/h2_class_ltx_title_subsection_id_auto__.html
 msAuthorea/Results__.html
