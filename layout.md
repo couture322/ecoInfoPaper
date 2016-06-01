@@ -1,5 +1,6 @@
 msAuthorea/IntroductionThis_will_be_the_introduction__.html
 msAuthorea/h2_class_ltx_title_subsection_id_auto__.html
+h1_class_ltx_title_section_id_auto__.html
 msAuthorea/Results__.html
 msAuthorea/h2_class_ltx_title_subsection_id_auto__2.html
 msAuthorea/Figures_Tables_list_Figure_1__.html
