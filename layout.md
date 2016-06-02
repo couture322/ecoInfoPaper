@@ -5,5 +5,5 @@ div_Discussion_br_div__.html
 msAuthorea/Results__.html
 msAuthorea/DiscussionLEAD_with_this_We_recovered__.html
 msAuthorea/Figures_Tables_list_Figure_1__.html
-msAuthorea/h2_class_ltx_title_subsection_id_auto__1.html
+msAuthorea/Acknowledgements__.html
 msAuthorea/Author_ContributionsJC_EF_Others_recovered__.html
