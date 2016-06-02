@@ -5,4 +5,4 @@ msAuthorea/Results__.html
 msAuthorea/DiscussionLEAD_with_this_We_recovered__.html
 msAuthorea/Figures_Tables_list_Figure_1__.html
 msAuthorea/Acknowledgements__.html
-msAuthorea/Author_ContributionsJC_EF_Others_recovered__.html
+msAuthorea/Author_ContributionsJC_GM_EF_recovered__.html
