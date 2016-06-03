@@ -1,7 +1,6 @@
 msAuthorea/IntroductionData_archiving_goal_is_longevity__.html
 msAuthorea/MethodsJessica_is_working_on_this__.html
-ResultsOur_data_recovery_and_archiving__.html
-msAuthorea/Results__.html
+msAuthorea/ResultsOur_data_recovery_and_archiving__.html
 msAuthorea/DiscussionLEAD_with_this_We_recovered__.html
 msAuthorea/Figures_Tables_list_Figure_1__.html
 msAuthorea/Acknowledgements__.html
