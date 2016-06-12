@@ -4,4 +4,4 @@ msAuthorea/MethodsJessica_is_working_on_this__.html
 msAuthorea/ResultsOur_data_recovery_and_archiving__.html
 msAuthorea/DiscussionColette_is_working_on_this__.html
 msAuthorea/Acknowledgements__.html
-msAuthorea/Author_ContributionsJC_GM_EF_recovered__.html
+msAuthorea/Author_ContributionsJC_GM_SC_EF__.html
