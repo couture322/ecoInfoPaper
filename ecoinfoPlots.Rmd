@@ -192,7 +192,7 @@ broadDf=catYN %>%
   mutate(grpTots=sum(nDatasets)) %>%
   mutate(prop=nDatasets/grpTots)
   
-broadDf$category<-factor(broadDf$category,levels=c('physical','chemical','biological','ecosystem/habitat','social'))
+broadDf$category<-factor(broadDf$category,levels=c('physical',"biological",'social',"oil",'modeling'))
 broadDf[9:10,]<-sums
 broadDf[9:10,'prop'] <- c(broadDf$nDatasets[9]/sum(sums$nDatasets),broadDf$nDatasets[10]/sum(sums$nDatasets))
 broadDf[9:10,'grpTots'] <- sum(sums$nDatasets)
@@ -215,7 +215,7 @@ broadNds=ggplot(broadDf[broadDf$succ==0,],aes(x=category,y=grpTots))+
   
 broadPerc=ggplot(broadDf[broadDf$succ==0,],aes(x=category,y=(prop*100)))+
   geom_bar(stat = "identity",fill="black")+
-  scale_x_discrete(labels=c("physical","chemical","biological","eco/hab","social"))+
+  scale_x_discrete(labels=c('physical',"biological",'social',"oil",'modeling'))+
   theme(axis.line=element_line('black'),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
@@ -230,10 +230,10 @@ broadPerc=ggplot(broadDf[broadDf$succ==0,],aes(x=category,y=(prop*100)))+
   theme(axis.line.x = element_line(color="black"),
         axis.line.y = element_line(color="black"))+
   annotate("text", x = 1, y=broadDf$prop[[3]]*100+3, label = as.character(broadDf[broadDf$category=="physical" & broadDf$succ==0,"grpTots"]))+
-  annotate("text", x = 2, y=broadDf$prop[[1]]*100+3, label = as.character(broadDf[broadDf$category=="chemical" & broadDf$succ==0,"grpTots"]))+
-  annotate("text", x = 3, y=broadDf$prop[[9]]*100+3, label = as.character(broadDf[broadDf$category=="biological" & broadDf$succ==0,"grpTots"]))+
-  annotate("text", x = 4, y=broadDf$prop[[2]]*100+3, label = as.character(broadDf[broadDf$category=="ecosystem/habitat" & broadDf$succ==0,"grpTots"]))+
-  annotate("text", x = 5, y=broadDf$prop[[4]]*100+3, label = as.character(broadDf[broadDf$category=="social" & broadDf$succ==0,"grpTots"]))
+  annotate("text", x = 2, y=broadDf$prop[[9]]*100+3, label = as.character(broadDf[broadDf$category=="biological" & broadDf$succ==0,"grpTots"]))+
+  annotate("text", x = 3, y=broadDf$prop[[4]]*100+3, label = as.character(broadDf[broadDf$category=="social" & broadDf$succ==0,"grpTots"]))+
+  annotate("text", x = 4, y=broadDf$prop[[2]]*100+3, label = as.character(broadDf[broadDf$category=="oil" & broadDf$succ==0,"grpTots"]))+
+  annotate("text", x = 5, y=broadDf$prop[[1]]*100+3, label = as.character(broadDf[broadDf$category=="modeling" & broadDf$succ==0,"grpTots"]))
 
 #biology fields
 
@@ -279,6 +279,30 @@ bioNds=ggplot(bioYN[bioYN$succ==0,],aes(x=subCat,y=grpTots))+
 
 grid.arrange(broadNds,bioNds,broadPerc,bioPerc, ncol = 2,heights=c(1,1.5))
 
+```
+
+#### bubble plot?
+
+``` {r broad - bubble plot,echo=F}
+ggplot(broadDf[broadDf$succ==0,], aes(x=factor(broad,levels=c('physical',"biological",'social',"oil",'modeling')), y=prop*100, size=grpTots, label=grpTots),guide=FALSE)+
+  geom_point(colour="black", fill="grey", shape=21)+
+  scale_size_area(max_size = 15)+
+  geom_text(size=3,colour="red")+
+  #scale_x_discrete(breaks=c('physical',"biological",'social',"oil",'modeling'))+
+  scale_y_continuous(name="% successful", limits=c(0,100))+
+  theme(axis.line=element_line('black'),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())+
+  theme(axis.text.x = element_text(angle=90),
+        axis.title.x = element_blank())+
+  #ylim=c(0,300)+
+  ggtitle('General categories: bubble plot')+
+  theme(axis.text=element_text(size=14),
+        title=element_text(size=16,face="bold"))+
+  theme(axis.line.x = element_line(color="black"),
+        axis.line.y = element_line(color="black"))
 ```
 
 ***

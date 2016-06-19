@@ -271,3 +271,8 @@ bioSucc=ggplot(bioYN[bioYN$succ==0,],aes(x=subCat,y=grpTots))+
 broadSucc
 bioSucc
 ```
+
+Bubble plots?:
+``` {r bubble plots, echo=F}
+
+```
