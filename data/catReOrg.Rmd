@@ -209,3 +209,12 @@ arr4$dataType<-gsub("chemical","physical",arr$dataType)
 #write.csv(arr4,file="data/archResRevised2.csv",row.names=F)
 
 ```
+
+#### Identify which "unrecoverable" datasets 'should be on the evostcCD
+We never received the CD or much information about it so the only way we know if the data should be on the CD is if a contact notified us. Therefore I will look though the "unrecoverable" and "replied" projects:
+
+``` {r evostc CD, echo=F}
+ec<-read.csv("data/archResRevised2.csv",header = T)
+theList<-ec %>%
+  filter(Status %in% c('Replied',"Unrecoverable"))
+```
