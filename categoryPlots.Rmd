@@ -274,5 +274,24 @@ bioSucc
 
 Bubble plots?:
 ``` {r bubble plots, echo=F}
+ggplot(broadDf[broadDf$succ=='aff',], aes(x=factor(broad,levels=c('physical',"biological",'social',"oil",'modeling')), y=prop, size=grpTots, label=grpTots),guide=FALSE)+
+  geom_point(colour="black", fill="grey", shape=21)+
+  scale_size_area(max_size = 15)+
+  geom_text(size=3,colour="red")+
+  #scale_x_discrete(breaks=c('physical',"biological",'social',"oil",'modeling'))+
+  scale_y_continuous(name="% successful", limits=c(0,1))+
+  theme(axis.line=element_line('black'),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())+
+  theme(axis.text.x = element_text(angle=90),
+        axis.title.x = element_blank())+
+  #ylim=c(0,300)+
+  ggtitle('General categories: bubble plot')+
+  theme(axis.text=element_text(size=14),
+        title=element_text(size=16,face="bold"))+
+  theme(axis.line.x = element_line(color="black"),
+        axis.line.y = element_line(color="black"))
 
 ```
