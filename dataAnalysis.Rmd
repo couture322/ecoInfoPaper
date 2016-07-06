@@ -30,8 +30,8 @@ library(gridExtra)
 rslt=read.csv('data/archResRevised2.csv',header=T,stringsAsFactors=F)
 rslt[rslt$Status=='published','Status']<-'Published'
 
-rslt$succ=ifelse(rslt$Status %in% c('Published','SentData','Revised'),0,1)
-rslt$statSucc=ifelse(rslt$Status %in% c('Published','SentData','Revised'),1,2) # 1 = success, 2 = not successful
+rslt$succ=ifelse(rslt$Status %in% c('Published','SentData','Revised'),0,1) # 0=success???
+rslt$statSucc=ifelse(rslt$Status %in% c('Published','SentData','Revised'),1,0) # 1 = success, 2 = not successful
 
 
 agDes=read.csv('data/ecoInfoAgencyDesig.csv',header=T,stringsAsFactors=T,col.names=c('agency','agGrp','agSubGrp'))
@@ -83,7 +83,7 @@ Which elements contribute most in determining if the data will be successfully c
 
 ```{r BLM - all}
 
-succBlr<-glm(formula = succ~agSubGrp+end+dataType,family='binomial',data=rslt2)
+succBlr<-glm(formula = statSucc~agSubGrp+end+dataType,family='binomial',data=rslt2)
 
 ## statSucc = Binomial: did we recover the data?
 ## agGrp = sector of home institution
@@ -111,7 +111,7 @@ Chi-squared test for equal proportions between research fields funded
 
 ```{r chi squared - field of study,echo=FALSE,warning=FALSE}
 
-dtProps=table(rslt2$succ,rslt2$dataType)
+dtProps=table(rslt2$statSucc,rslt2$dataType)
 dtChi=chisq.test(dtProps)
 
 dtChi
@@ -121,7 +121,7 @@ dtChi
 Which elements contribute most in determining if the data will be successfully collected?
 Since the chi-square test p-vaule << 0.05, run a binomial logistic regression to pull out where the differences occur
 ```{r dataType BLR,echo=FALSE}
-dtBlr<-glm(formula = succ~dataType,family='binomial',data=rslt2)
+dtBlr<-glm(formula = statSucc~dataType,family='binomial',data=rslt2)
 
 summary(dtBlr)
 ```
@@ -134,12 +134,12 @@ __similar to above: bio-fish and social are significant because they are so low_
 (based on PI's affiliation)
 ### Test for equal propportions between PI's home institution type/sector:
 ```{r chi squared - sector,echo=FALSE,warning=FALSE}
-secProps=table(rslt2$succ,rslt2$agGrp)
+secProps=table(rslt2$statSucc,rslt2$agGrp)
 sectChi=chisq.test(secProps)
 
 sectChi
 
-subSecProps=table(rslt2$succ,rslt2$agSubGrp)
+subSecProps=table(rslt2$statSucc,rslt2$agSubGrp)
 subSectChi=chisq.test(subSecProps)
 
 subSectChi
@@ -156,7 +156,7 @@ Chi-squared test for equal proportions between age of data
 
 ```{r chi squared - end years,echo=FALSE,warning=FALSE}
 
-tempProps=table(rslt2$succ,as.character(rslt2$end))
+tempProps=table(rslt2$statSucc,as.character(rslt2$end))
 tempChi=chisq.test(tempProps)
 
 tempChi
@@ -165,7 +165,7 @@ tempChi
 ### Binomial logistic regression: Research field
 Didn't get significant differences above but just running the BLM for fun...
 ```{r end years BLR,echo=FALSE}
-tempBlr<-glm(formula = succ~as.character(end),family='binomial',data=rslt2)
+tempBlr<-glm(formula = statSucc~as.character(end),family='binomial',data=rslt2)
 
 summary(tempBlr)
 ```
@@ -211,7 +211,7 @@ unsChi
 Which elements contribute most in determining if the data will be successfully collected?
 Since the chi-square test p-vaule << 0.05, run a binomial logistic regression to pull out where the differences occur
 ```{r reasons BLR,echo=FALSE}
-dtBlr<-glm(formula = succ~dataType,family='binomial',data=rslt2)
+dtBlr<-glm(formula = statSucc~dataType,family='binomial',data=rslt2)
 
 summary(dtBlr)
 ```
