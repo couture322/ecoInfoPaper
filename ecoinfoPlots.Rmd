@@ -84,7 +84,7 @@ statPlot=ggplot()+
         panel.background = element_blank())+
   #theme(axis.text.x = element_text(angle=90))+
   xlab('Status')+
-  ylab('Number of Projects\n')+
+  ylab('Number of projects\n')+
   ggtitle('Dataset status distribution')+
   theme(axis.text=element_text(size=14),
         title=element_text(size=16,face="bold"),
@@ -155,7 +155,7 @@ broadNds=ggplot(broadDf[broadDf$succ==0,],aes(x=category,y=grpTots))+
   theme(axis.text.x = element_blank(),
         axis.title.x = element_blank())+
   ggtitle('General fields')+
-  ylab('Number of datasets\n')+
+  ylab('Number of projects\n')+
   theme(axis.text=element_text(size=14),
         title=element_text(size=16,face="bold"))+
   theme(axis.line.x = element_line(color="black"),
@@ -220,7 +220,7 @@ bioNds=ggplot(bioYN[bioYN$succ==0,],aes(x=subCat,y=grpTots))+
         axis.title = element_blank())+
   #ylim=c(0,300)+
   ggtitle('Biology sub-fields')+
-  ylab('Number of datasets\n')+
+  ylab('Number of projects\n')+
   theme(axis.text=element_text(size=14),
         title=element_text(size=16,face="bold"))+
   theme(axis.line.x = element_line(color="black"),
@@ -259,7 +259,7 @@ subSecNds=ggplot(secSubYN2,aes(x=subSector,y=nDatasets))+
         panel.background = element_blank())+
   theme(axis.text.x = element_blank(),
         axis.title.x = element_blank())+
-  ylab('Number of Projects\n')+
+  ylab('Number of projects\n')+
   theme(axis.text=element_text(size=14),
         title=element_text(size=16,face="bold"))+
   theme(axis.line.x = element_line(color="black"),
@@ -275,7 +275,7 @@ subSecPerc=ggplot(secSubYN2[secSubYN2$succ==0,],aes(x=subSector,y=as.numeric(pro
         panel.border = element_blank(),
         panel.background = element_blank(),
         axis.text.x = element_text(angle=90))+
-  xlab('Sector')+
+  xlab('\nSector')+
   ylab('% successful\n')+
   ylim(0,63)+
   #ggtitle('Percent success by research sector type')+
@@ -334,7 +334,7 @@ yrsNds=ggplot(yrsPropEnd[yrsPropEnd$succ==0,],aes(x=since,y=yrSum)) +
   xlim(min(endYrs$since),max(endYrs$since))+
   #ylim(0,100)+ 
   #xlab('Years since funding award')+
-  ylab('Number\nof Projects')+
+  ylab('Number\nof projects')+
   theme(legend.position="none",
         axis.text=element_text(size=14),
         title=element_text(size=16,face="bold"),
