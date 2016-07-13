@@ -63,7 +63,17 @@ succCols=c('aff'='grey17',
 
 
 ### Test for equal proportions between status categories:
-Are the proportion of projects in each category equal?
+Are the proportion of projects in each category equal? --> chi-squared test
+
+
+Limitations of the Chi-Square Test: 
+
+* The chi-square test does not give us much information about the strength of the relationship or its substantive significance in the population.
+* The chi-square test is sensitive to sample size. The size of the calculated chi-square is directly proportional to the size of the sample, independent of the strength of the relationship between the variables.
+* The chi-square test is also sensitive to small expected frequencies in one or more of the cells in the table. 
+
+I feel like these are things that we have always been aware of and in our don't create any false significance...opinions? Social data?
+
 ```{r chi squared - test for eq prop,echo=FALSE}
 statusProps=table(rslt2$Status)
 eqProp=chisq.test(statusProps) #not equal proportions
@@ -117,16 +127,6 @@ dtChi=chisq.test(dtProps)
 dtChi
 ```
 
-### Binomial logistic regression: Research field
-Which elements contribute most in determining if the data will be successfully collected?
-Since the chi-square test p-vaule << 0.05, run a binomial logistic regression to pull out where the differences occur
-```{r dataType BLR,echo=FALSE}
-dtBlr<-glm(formula = statSucc~dataType,family='binomial',data=rslt2)
-
-summary(dtBlr)
-```
-__similar to above: bio-fish and social are significant because they are so low__
-
 ***
 
 # 4. Research sector type
@@ -162,24 +162,13 @@ tempChi=chisq.test(tempProps)
 tempChi
 ```
 
-### Binomial logistic regression: Research field
-Didn't get significant differences above but just running the BLM for fun...
-```{r end years BLR,echo=FALSE}
-tempBlr<-glm(formula = statSucc~as.character(end),family='binomial',data=rslt2)
-
-summary(tempBlr)
-```
-__NOT SIGNIFICANT, both tests__
-
 ***
 
 # 6. Why don't people share data?
 
-### Test for equal proportions between reasons:
+### Do we need stats here?
 
-Chi-squared test for equal proportions between reasons
-
-```{r chi squared - reasons,echo=FALSE,warning=FALSE}
+```{r data prep - reasons,echo=FALSE,warning=FALSE}
 
 reas=rslt2 %>%
   filter(Status=='Unrecoverable') %>%
@@ -201,21 +190,8 @@ reasTab[1,2]<-as.numeric(as.character(reasTab[reasTab$reason=="data lost","nData
 reasTab<-arrange(reasTab,desc(as.numeric(nDatasets)))
 reasTab$reason<-factor(reasTab$reason,levels = reasTab$reason,ordered = T)
 
-unsProps=table(reas$reason)
-unsChi=chisq.test(unsProps)
-
-unsChi
 ```
 
-### Binomial logistic regression: Research field
-Which elements contribute most in determining if the data will be successfully collected?
-Since the chi-square test p-vaule << 0.05, run a binomial logistic regression to pull out where the differences occur
-```{r reasons BLR,echo=FALSE}
-dtBlr<-glm(formula = statSucc~dataType,family='binomial',data=rslt2)
-
-summary(dtBlr)
-```
-__similar to above: bio-fish and social are significant because they are so low__
 
 ```{r whyNot, echo=F}
 
