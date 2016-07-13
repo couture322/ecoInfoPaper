@@ -1,7 +1,7 @@
 ---
 title: "EVOSTC data collection paper - Data Visualizations"
 author: "Jessica Couture"
-date: "5/25/2016"
+date: "7/13/2016"
 output: html_document
 ---
 
@@ -9,18 +9,13 @@ output: html_document
 
 We are writing up a publication to report results of a two year data archiving effort by a small group of researchers and students at the National Center for Ecological Analysis and Synthesis at UC Santa Barbara. The [Exxon Valdez Oil Spill Trustee Council](http://www.evostc.state.ak.us) (EVOSTC) was formed following the Exon Valdez oil spill in Alaska in 1989. Since then, the EVOSTC has funded hundreds of projects and in 2012 we began a project to recover and archive the data collected in these EVOSTC funded projects.
 
-For this paper we ask 4 main questions about the data collected from the Exxon Valdez Oil Spill Trustee Council funded projects:
+For this paper we ask 5 main questions about the data collected from the Exxon Valdez Oil Spill Trustee Council funded projects:
 
 1. Twenty-five years after the EVOS, for how many projects funded by EVOSTC can we collect data?
 2. Are there certain **research fields** that are more likely to make data available than others?
 3. Are there certain **sectors** that are more likely to make data available than others?
 4. Is the availability of data correlated to how old the data are? (temporal relationships?)
 5.Why did people refuse to share their data?
-
-## Statistics:
-So far the plan is to run both Chi-squared and Binomial Logistic Regression. Chi-sq will test for differences in reporting between these different slices of data and if there are differences, the BLM will help ID which are the most important indicators of success amongst the groups. I ran this on an early set of data and plan to re-run this weekend.
-
-If anyone has experience with binomial data and can suggest other tests we're all ears!
 
 ***
 
@@ -52,18 +47,6 @@ rslt2=rslt2 %>%
 
 ## Plots:
 
-```{r, echo=F}
-statusCols=c('Unrecoverable'='orangered',
-             'Emailed'='orange',
-             'Replied'='gold',
-             'SentData'='darkolivegreen2',
-             'Revised'='darkolivegreen3',
-             'Published'='forestgreen')
-
-```
-
-***
-
 # 1. Project Status Reporting
 > Twenty-five years after the EVOS, for how many projects funded by EVOSTC can we collect data?</h4>
 
@@ -83,11 +66,17 @@ possible=overallLong %>%
 
 statusOrd=c('Unrecoverable','Emailed','Replied','SentData','Revised','Published')
 #rslt2$Status=as.factor(rslt2$Status,levels=statusOrd,ordered=T)
+statGrey=c('Unrecoverable'='gray87',
+             'Emailed'='gray67',
+             'Replied'='gray47',
+             'SentData'='gray27',
+             'Revised'='grey7',
+             'Published'='black')
 
 statPlot=ggplot()+
   geom_bar(data=rslt2,
                  aes(x=factor(Status,levels=statusOrd,ordered=T),fill=Status))+
-  scale_fill_manual(labels=statusOrd,values=statusCols,breaks=statusOrd)+
+  scale_fill_manual(labels=statusOrd,breaks=statusOrd,values=statGrey)+
   theme(legend.title=element_blank())+
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
@@ -251,15 +240,14 @@ plot_grid(broadNds,bioNds,broadPerc,bioPerc, ncol = 2, rel_heights=c(0.5,1),alig
 
 We want to display these results similar to above (#3). Here we really liked the nProjects graph since it shows how many projects were initially funded which is an interesting anecdote, but still just an anectdote.
 
-***
-
 ```{r, subSector stacked, fig.height=10,echo=FALSE}
 secSubYN=as.data.frame(table(rslt2$agSubGrp,rslt2$succ))
 colnames(secSubYN)=c('subSector','succ','nDatasets')
 
 secSubYN2=secSubYN %>%
   group_by(subSector) %>%
-  mutate(prop=nDatasets/sum(nDatasets))
+  mutate(grpTots=sum(nDatasets)) %>%
+  mutate(prop=nDatasets/grpTots)
 secSubYN2$subSector=factor(secSubYN2$subSector,levels=c("gov_fed","gov_state","academia","nonProf","private","tribe"),ordered = T)
 
 subSecNds=ggplot(secSubYN2,aes(x=subSector,y=nDatasets))+
@@ -280,7 +268,7 @@ subSecNds=ggplot(secSubYN2,aes(x=subSector,y=nDatasets))+
 subSecPerc=ggplot(secSubYN2[secSubYN2$succ==0,],aes(x=subSector,y=as.numeric(prop*100)))+
   geom_bar(stat = "identity",fill="black")+
   scale_x_discrete(breaks=levels(secSubYN2$subSector),
-                   labels=c("govFed","govState","academia","nonProfit","forProfit","tribes"))+
+                   labels=c("Gov - fed","Gov - State","academia","non-profit","for-profit","AK native"))+
   theme(axis.line=element_line('black'),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
@@ -294,7 +282,13 @@ subSecPerc=ggplot(secSubYN2[secSubYN2$succ==0,],aes(x=subSector,y=as.numeric(pro
   theme(axis.text=element_text(size=14),
         title=element_text(size=16,face="bold"))+
   theme(axis.line.x = element_line(color="black"),
-        axis.line.y = element_line(color="black"))
+        axis.line.y = element_line(color="black"))+
+  annotate("text", x = 1, y=secSubYN2$prop[[2]]*100+3, label = as.character(secSubYN2[secSubYN2$subSector=="gov_fed" & secSubYN2$succ==0,"grpTots"]))+
+  annotate("text", x = 2, y=secSubYN2$prop[[3]]*100+3, label = as.character(secSubYN2[secSubYN2$subSector=="gov_state" & secSubYN2$succ==0,"grpTots"]))+
+  annotate("text", x = 3, y=secSubYN2$prop[[1]]*100+3, label = as.character(secSubYN2[secSubYN2$subSector=="academia" & secSubYN2$succ==0,"grpTots"]))+
+  annotate("text", x = 4, y=secSubYN2$prop[[4]]*100+3, label = as.character(secSubYN2[secSubYN2$subSector=="nonProf" & secSubYN2$succ==0,"grpTots"]))+
+  annotate("text", x = 5, y=secSubYN2$prop[[5]]*100+3, label = as.character(secSubYN2[secSubYN2$subSector=="private" & secSubYN2$succ==0,"grpTots"]))+
+  annotate("text", x = 6, y=secSubYN2$prop[[6]]*100+3, label = as.character(secSubYN2[secSubYN2$subSector=="tribe" & secSubYN2$succ==0,"grpTots"]))
 
 # grid.arrange(subSecNds, subSecPerc, ncol = 1, heights=c(1,1.75))
 plot_grid(subSecNds, subSecPerc, ncol = 1, rel_heights=c(1,1.75),align="v")
@@ -306,9 +300,9 @@ plot_grid(subSecNds, subSecPerc, ncol = 1, rel_heights=c(1,1.75),align="v")
 # 4. Temporal trends?
 > Is the availability of data correlated to how old the data are?
 
-We decided we are intersted in the percent success, so again, successes we grouped and percent was calculated based on each year total. We also wanted to display the number of datasets since it varies a lot and especially in the later years there is a significant increase in success, likely due to a decrease in projects, among other things (such as relationships to data collectors, etc.)
+We decided we are intersted in the percent success so, again, successes were grouped and percent was calculated based on each year total. We also wanted to display the number of datasets since it varies a lot and especially in the later years there is a significant increase in success, likely due to a decrease in projects, among other things (such as relationships to data collectors, etc.)
 
-The markdown file "temporalPlots.Rmd" shows all of our other test plots, if interested in other drafts.
+The x-axis might not be initially intuitive but we are representing years since a project ended in opposite-chronological order to show any effect of increasing age of a dataset. We chose this design to be able to compare to [Michener et al. 1997](http://onlinelibrary.wiley.com/doi/10.1890/1051-0761(1997)007[0330:NMFTES]2.0.CO;2/abstract;jsessionid=57D1E6F52B947ABD71ABEA56185DA7D3.f01t04) - fig 1.
 
 ```{r temporal - stacked plots,fig.height=10, echo=F, message=F, warning=F}
 
@@ -337,7 +331,7 @@ yrsNds=ggplot(yrsPropEnd[yrsPropEnd$succ==0,],aes(x=since,y=yrSum)) +
         panel.background = element_blank(),
         axis.title.y=element_text(color="black"),
         axis.title.x=element_blank())+
-  xlim(max(endYrs$since),min(endYrs$since))+
+  xlim(min(endYrs$since),max(endYrs$since))+
   #ylim(0,100)+ 
   #xlab('Years since funding award')+
   ylab('Number\nof Projects')+
@@ -350,16 +344,15 @@ yrsNds=ggplot(yrsPropEnd[yrsPropEnd$succ==0,],aes(x=since,y=yrSum)) +
 
 yrsPerc=ggplot(yrsPropEnd[yrsPropEnd$succ==0,],aes(x=since,y=as.numeric(prop*100)))+
   geom_bar(stat = "identity",fill="black")+
-  xlim(max(endYrs$since),min(endYrs$since))+
+  xlim(min(endYrs$since),max(endYrs$since))+
   theme(axis.line=element_line('black'),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.border = element_blank(),
         panel.background = element_blank())+
-  xlab('Sector')+
+  xlab('Age of data (years)')+
   ylab('% successful\n')+
   ylim(0,63)+
-  #ggtitle('Percent success by research sector type')+
   theme(axis.text=element_text(size=14),
         title=element_text(size=16,face="bold"))+
   theme(axis.line.x = element_line(color="black"),
@@ -375,6 +368,9 @@ plot_grid(yrsNds, yrsPerc, ncol = 1, rel_heights=c(1,1.5),align="v")
 
 > Why don't people share data?
 
+Here we decided to flip the axes to separate this analysis from the others. These data are not a sub-grouping of our results but rather a analysis of only the unrecovered datasets. Also unlike the other data above, we did not run stats here. 
+
+__Data details__
 Here I used all of the data that were not collected and sorted them into categories based on the redmine notes we took:
 
 * All datasets labeled "emailed" were grouped with a other datasets that were labeled "unrecoverable" because no contact information could be found.
@@ -401,7 +397,7 @@ levels(reasTab$reason)=c(levels(reasTab$reason),'communication lost')
 reasTab[6,]<-c('communication lost', length(rslt2[rslt2$Status=='Replied','Status'])+1)# +1 for one of the 'data unavailable' datasets, add the other to "data lost"
 reasTab[1,2]<-as.numeric(as.character(reasTab[reasTab$reason=="data lost","nDatasets"]))+1
 
-reasTab<-arrange(reasTab,desc(as.numeric(nDatasets)))
+reasTab<-arrange(reasTab,as.numeric(nDatasets))
 reasTab$reason<-factor(reasTab$reason,levels = reasTab$reason,ordered = T)
 
 reasTot=sum(as.numeric(reasTab$nDatasets))
@@ -409,14 +405,16 @@ reasTab$perc=as.numeric(reasTab$nDatasets)/reasTot
 
 whyNot<-ggplot(reasTab,aes(x=reason,y=as.numeric(perc)*100))+
   geom_bar(stat = "identity")+
+  coord_flip()+
   theme(axis.line=element_line('black'),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.border = element_blank(),
         panel.background = element_blank())+
-  theme(axis.text.x = element_text(angle=90))+
+  #theme(axis.text.x = element_text(angle=90))+
   ylim(0,63)+
-  ylab('% of unsuccessful\nprojects\n')+
+  xlab('')+
+  ylab('\nPercent of unsuccessful projects')+
   ggtitle('Why are data not recovered?')+
   theme(axis.text=element_text(size=14),
         title=element_text(size=16,face="bold"))+
