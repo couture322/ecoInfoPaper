@@ -66,11 +66,11 @@ possible=overallLong %>%
 
 statusOrd=c('Unrecoverable','Emailed','Replied','SentData','Revised','Published')
 #rslt2$Status=as.factor(rslt2$Status,levels=statusOrd,ordered=T)
-statGrey=c('Unrecoverable'='gray87',
+statGrey=c('Unrecoverable'='gray67',
              'Emailed'='gray67',
-             'Replied'='gray47',
-             'SentData'='gray27',
-             'Revised'='grey7',
+             'Replied'='gray67',
+             'SentData'='black',
+             'Revised'='black',
              'Published'='black')
 
 statPlot=ggplot()+
@@ -85,7 +85,7 @@ statPlot=ggplot()+
   #theme(axis.text.x = element_text(angle=90))+
   xlab('Status')+
   ylab('Number of projects\n')+
-  ggtitle('Dataset status distribution')+
+  ggtitle('Recovery stage %->%')+
   theme(axis.text=element_text(size=14),
         title=element_text(size=16,face="bold"),
         legend.text = element_text(size = 14, face = "bold"))+
@@ -177,11 +177,11 @@ broadPerc=ggplot(broadDf[broadDf$succ==0,],aes(x=category,y=(prop*100)))+
         title=element_text(size=16,face="bold"))+
   theme(axis.line.x = element_line(color="black"),
         axis.line.y = element_line(color="black"))+
-  annotate("text", x = 1, y=broadDf$prop[[3]]*100+2, label = as.character(broadDf[broadDf$category=="physical" & broadDf$succ==0,"grpTots"]))+
-  annotate("text", x = 2, y=broadDf$prop[[9]]*100+2, label = as.character(broadDf[broadDf$category=="biological" & broadDf$succ==0,"grpTots"]))+
-  annotate("text", x = 3, y=broadDf$prop[[4]]*100+2, label = as.character(broadDf[broadDf$category=="social" & broadDf$succ==0,"grpTots"]))+
-  annotate("text", x = 4, y=broadDf$prop[[2]]*100+2, label = as.character(broadDf[broadDf$category=="oil" & broadDf$succ==0,"grpTots"]))+
-  annotate("text", x = 5, y=broadDf$prop[[1]]*100+2, label = as.character(broadDf[broadDf$category=="modeling" & broadDf$succ==0,"grpTots"]))
+  # annotate("text", x = 1, y=broadDf$prop[[3]]*100+2, label = as.character(broadDf[broadDf$category=="physical" & broadDf$succ==0,"grpTots"]))+
+  # annotate("text", x = 2, y=broadDf$prop[[9]]*100+2, label = as.character(broadDf[broadDf$category=="biological" & broadDf$succ==0,"grpTots"]))+
+  annotate("text", x = 3, y=broadDf$prop[[4]]*100+1, label = "*",size=7) #as.character(broadDf[broadDf$category=="social" & broadDf$succ==0,"grpTots"]))+
+  # annotate("text", x = 4, y=broadDf$prop[[2]]*100+2, label = as.character(broadDf[broadDf$category=="oil" & broadDf$succ==0,"grpTots"]))+
+  # annotate("text", x = 5, y=broadDf$prop[[1]]*100+2, label = as.character(broadDf[broadDf$category=="modeling" & broadDf$succ==0,"grpTots"]))
 
 #biology fields
 
@@ -202,12 +202,12 @@ bioPerc=ggplot(bioYN[bioYN$succ==0,],aes(x=subCat,y=(prop*100)))+
         title=element_text(size=16,face="bold"))+
   theme(axis.line.x = element_line(color="black"),
         axis.line.y = element_line(color="black"))+
-  annotate("text", x = 1, y=bioYN$prop[[4]]*100+3, label = as.character(bioYN[bioYN$category=="biological-habitat" & bioYN$succ==0,"grpTots"]))+
-  annotate("text", x = 2, y=bioYN$prop[[6]]*100+3, label = as.character(bioYN[bioYN$category=="biological-plankton" & bioYN$succ==0,"grpTots"]))+
-  annotate("text", x = 3, y=bioYN$prop[[1]]*100+3, label = as.character(bioYN[bioYN$category=="biological-benthicInverts" & bioYN$succ==0,"grpTots"]))+
-  annotate("text", x = 4, y=bioYN$prop[[3]]*100+3, label = as.character(bioYN[bioYN$category=="biological-fish" & bioYN$succ==0,"grpTots"]))+
-  annotate("text", x = 5, y=bioYN$prop[[2]]*100+3, label = as.character(bioYN[bioYN$category=="biological-birds" & bioYN$succ==0,"grpTots"]))+
-  annotate("text", x = 6, y=bioYN$prop[[5]]*100+3, label = as.character(bioYN[bioYN$category=="biological-mammals" & bioYN$succ==0,"grpTots"]))
+  # annotate("text", x = 1, y=bioYN$prop[[4]]*100+3, label = as.character(bioYN[bioYN$category=="biological-habitat" & bioYN$succ==0,"grpTots"]))+
+  # annotate("text", x = 2, y=bioYN$prop[[6]]*100+3, label = as.character(bioYN[bioYN$category=="biological-plankton" & bioYN$succ==0,"grpTots"]))+
+  # annotate("text", x = 3, y=bioYN$prop[[1]]*100+3, label = as.character(bioYN[bioYN$category=="biological-benthicInverts" & bioYN$succ==0,"grpTots"]))+
+  annotate("text", x = 4, y=bioYN$prop[[3]]*100+1, label = "*",size=7) #as.character(bioYN[bioYN$category=="biological-fish" & bioYN$succ==0,"grpTots"]))+
+  # annotate("text", x = 5, y=bioYN$prop[[2]]*100+3, label = as.character(bioYN[bioYN$category=="biological-birds" & bioYN$succ==0,"grpTots"]))+
+  # annotate("text", x = 6, y=bioYN$prop[[5]]*100+3, label = as.character(bioYN[bioYN$category=="biological-mammals" & bioYN$succ==0,"grpTots"]))
 
 bioNds=ggplot(bioYN[bioYN$succ==0,],aes(x=subCat,y=grpTots))+
   geom_bar(stat = "identity",fill="grey")+
@@ -282,13 +282,13 @@ subSecPerc=ggplot(secSubYN2[secSubYN2$succ==0,],aes(x=subSector,y=as.numeric(pro
   theme(axis.text=element_text(size=14),
         title=element_text(size=16,face="bold"))+
   theme(axis.line.x = element_line(color="black"),
-        axis.line.y = element_line(color="black"))+
-  annotate("text", x = 1, y=secSubYN2$prop[[2]]*100+3, label = as.character(secSubYN2[secSubYN2$subSector=="gov_fed" & secSubYN2$succ==0,"grpTots"]))+
-  annotate("text", x = 2, y=secSubYN2$prop[[3]]*100+3, label = as.character(secSubYN2[secSubYN2$subSector=="gov_state" & secSubYN2$succ==0,"grpTots"]))+
-  annotate("text", x = 3, y=secSubYN2$prop[[1]]*100+3, label = as.character(secSubYN2[secSubYN2$subSector=="academia" & secSubYN2$succ==0,"grpTots"]))+
-  annotate("text", x = 4, y=secSubYN2$prop[[4]]*100+3, label = as.character(secSubYN2[secSubYN2$subSector=="nonProf" & secSubYN2$succ==0,"grpTots"]))+
-  annotate("text", x = 5, y=secSubYN2$prop[[5]]*100+3, label = as.character(secSubYN2[secSubYN2$subSector=="private" & secSubYN2$succ==0,"grpTots"]))+
-  annotate("text", x = 6, y=secSubYN2$prop[[6]]*100+3, label = as.character(secSubYN2[secSubYN2$subSector=="tribe" & secSubYN2$succ==0,"grpTots"]))
+        axis.line.y = element_line(color="black"))
+  # annotate("text", x = 1, y=secSubYN2$prop[[2]]*100+3, label = as.character(secSubYN2[secSubYN2$subSector=="gov_fed" & secSubYN2$succ==0,"grpTots"]))+
+  # annotate("text", x = 2, y=secSubYN2$prop[[3]]*100+3, label = as.character(secSubYN2[secSubYN2$subSector=="gov_state" & secSubYN2$succ==0,"grpTots"]))+
+  # annotate("text", x = 3, y=secSubYN2$prop[[1]]*100+3, label = as.character(secSubYN2[secSubYN2$subSector=="academia" & secSubYN2$succ==0,"grpTots"]))+
+  # annotate("text", x = 4, y=secSubYN2$prop[[4]]*100+3, label = as.character(secSubYN2[secSubYN2$subSector=="nonProf" & secSubYN2$succ==0,"grpTots"]))+
+  # annotate("text", x = 5, y=secSubYN2$prop[[5]]*100+3, label = as.character(secSubYN2[secSubYN2$subSector=="private" & secSubYN2$succ==0,"grpTots"]))+
+  # annotate("text", x = 6, y=secSubYN2$prop[[6]]*100+3, label = as.character(secSubYN2[secSubYN2$subSector=="tribe" & secSubYN2$succ==0,"grpTots"]))
 
 # grid.arrange(subSecNds, subSecPerc, ncol = 1, heights=c(1,1.75))
 plot_grid(subSecNds, subSecPerc, ncol = 1, rel_heights=c(1,1.75),align="v")
