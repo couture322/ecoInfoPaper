@@ -83,9 +83,9 @@ statPlot=ggplot()+
         panel.border = element_blank(),
         panel.background = element_blank())+
   #theme(axis.text.x = element_text(angle=90))+
-  xlab('Status')+
+  xlab(expression(RecoveryStage %->% .))+ # %->%, symbol(/256)
   ylab('Number of projects\n')+
-  ggtitle('Recovery stage %->%')+
+  ggtitle('Projects status')+
   theme(axis.text=element_text(size=14),
         title=element_text(size=16,face="bold"),
         legend.text = element_text(size = 14, face = "bold"))+
