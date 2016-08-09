@@ -40,21 +40,10 @@ agDes$agGrp=gsub('nonProf','private',agDes$agGrp)
 
 rslt2=merge(rslt,agDes,all.x=T)
 rslt2=rslt2 %>%
-  filter(!end>2010) 
-```
-Data table="rslt2"
+  filter(!end>2010) %>%
+  select(Status,start,end,ecosystem,dataType,statSucc,agGrp,agSubGrp,reason)
 
-```{r colorSetup, echo=F}
-statusCols=c('Unrecoverable'='orangered',
-             'Emailed'='orange',
-             'Replied'='gold',
-             'SentData'='darkolivegreen2',
-             'Revised'='darkolivegreen3',
-             'Published'='forestgreen')
-
-succCols=c('aff'='grey17',
-           'neg'='grey89')
-
+head(rslt2)
 ```
 
 # 1. Project Status Reporting
@@ -91,16 +80,32 @@ Which elements contribute most in determining if the data will be successfully c
 * research sector of project PI
 * year project recieved its last year of EVOSTC funding
 
-```{r BLM - all}
+```{r BLM - allGen}
+splBio=strsplit(rslt2$dataType,'-')
+rslt3<-rslt2 %>%
+  mutate(dtGen=sapply(splBio,function(x) x[1]))
 
-succBlr<-glm(formula = statSucc~agSubGrp+end+dataType,family='binomial',data=rslt2)
+succBlrGen<-glm(formula = statSucc~agSubGrp+end+dtGen,family='binomial',data=rslt3)
 
 ## statSucc = Binomial: did we recover the data?
 ## agGrp = sector of home institution
 ## end = last year project was funded by EVOSTC
-## dataType = field of study
+## dtgeb = general field of study (bio grouped)
 
-summary(succBlr)
+summary(succBlrGen)
+
+```
+
+```{r BLM - allBioSep}
+
+succBlrBio<-glm(formula = statSucc~agSubGrp+end+dataType,family='binomial',data=rslt2)
+
+## statSucc = Binomial: did we recover the data?
+## agGrp = sector of home institution
+## end = last year project was funded by EVOSTC
+## dataType = field of study (bio ungrouped)
+
+summary(succBlrBio)
 
 ```
 __Only categories with low success rates are sginificant ("low"" is <20%): fish data and social data__
@@ -110,9 +115,12 @@ Potential explanations:
 * Fish: Culture around protecting fishing locations and catches
 * Social: formats of data collection and storage diffcult to share
 
+__THESE RESULTS CHANGE WHEN I CHANGE THE ORDER OF FACTORS__
+
 ***
 
 # 2. Data type category
+
 ### Are there certain **research fields** that are more likely to make data available than others?
 
 ### Test for equal proportions between categories:
@@ -129,16 +137,25 @@ dtChi
 
 ***
 
-# 4. Research sector type
+# 3. Research sector type
+
 ### Are there certain **sectors** that are more likely to make data available than others?
 (based on PI's affiliation)
-### Test for equal propportions between PI's home institution type/sector:
+
+#### Test for equal propportions between PI's home institution type/sector: 
+
+government and private grouped
 ```{r chi squared - sector,echo=FALSE,warning=FALSE}
 secProps=table(rslt2$statSucc,rslt2$agGrp)
 sectChi=chisq.test(secProps)
 
 sectChi
+```
 
+#### Test for equal propportions between PI's home institution type/sector:
+
+government and private split: govFed, govState, nonProf, forProf
+```{r chi squared - subSector,echo=FALSE,warning=FALSE}
 subSecProps=table(rslt2$statSucc,rslt2$agSubGrp)
 subSectChi=chisq.test(subSecProps)
 
@@ -148,8 +165,10 @@ __NOT SIGNIFICANT: neither sectors nor subsectors are significant__
 
 ***
 
-# 5. Temporal relationships
+# 4. Temporal relationships
+
 ### Is the availability of data correlated to how old the data are?
+
 #### Test for equal proportions between categories:
 
 Chi-squared test for equal proportions between age of data
@@ -164,7 +183,7 @@ tempChi
 
 ***
 
-# 6. Why don't people share data?
+# 5. Why don't people share data?
 
 ### Do we need stats here?
 
