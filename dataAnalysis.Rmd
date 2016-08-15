@@ -27,7 +27,7 @@ library(reshape2)
 library(grid)
 library(gridExtra)
 
-rslt=read.csv('data/archResRevised2.csv',header=T,stringsAsFactors=F)
+rslt=read.csv('data/archResRevised2.csv',header=T,stringsAsFactors=T)
 rslt[rslt$Status=='published','Status']<-'Published'
 
 rslt$succ=ifelse(rslt$Status %in% c('Published','SentData','Revised'),0,1) # 0=success???
@@ -73,53 +73,9 @@ __Proportions are NOT equal between status groups__
 
 ***
 
-### Binomial logistic regression: ALL data
-Which elements contribute most in determining if the data will be successfully collected?
+# Chi-square tests for each group
 
-* research field
-* research sector of project PI
-* year project recieved its last year of EVOSTC funding
-
-```{r BLM - allGen}
-splBio=strsplit(rslt2$dataType,'-')
-rslt3<-rslt2 %>%
-  mutate(dtGen=sapply(splBio,function(x) x[1]))
-
-succBlrGen<-glm(formula = statSucc~agSubGrp+end+dtGen,family='binomial',data=rslt3)
-
-## statSucc = Binomial: did we recover the data?
-## agGrp = sector of home institution
-## end = last year project was funded by EVOSTC
-## dtgeb = general field of study (bio grouped)
-
-summary(succBlrGen)
-
-```
-
-```{r BLM - allBioSep}
-
-succBlrBio<-glm(formula = statSucc~agSubGrp+end+dataType,family='binomial',data=rslt2)
-
-## statSucc = Binomial: did we recover the data?
-## agGrp = sector of home institution
-## end = last year project was funded by EVOSTC
-## dataType = field of study (bio ungrouped)
-
-summary(succBlrBio)
-
-```
-__Only categories with low success rates are sginificant ("low"" is <20%): fish data and social data__
-
-Potential explanations:
-
-* Fish: Culture around protecting fishing locations and catches
-* Social: formats of data collection and storage diffcult to share
-
-__THESE RESULTS CHANGE WHEN I CHANGE THE ORDER OF FACTORS__
-
-***
-
-# 2. Data type category
+### 1. Data type category
 
 ### Are there certain **research fields** that are more likely to make data available than others?
 
@@ -137,7 +93,7 @@ dtChi
 
 ***
 
-# 3. Research sector type
+### 2. Research sector type
 
 ### Are there certain **sectors** that are more likely to make data available than others?
 (based on PI's affiliation)
@@ -165,7 +121,7 @@ __NOT SIGNIFICANT: neither sectors nor subsectors are significant__
 
 ***
 
-# 4. Temporal relationships
+### 3. Temporal relationships
 
 ### Is the availability of data correlated to how old the data are?
 
@@ -183,52 +139,102 @@ tempChi
 
 ***
 
-# 5. Why don't people share data?
+### Binomial logistic regression: ALL data
+Which elements contribute most in determining if the data will be successfully collected?
+Groups tested:
 
-### Do we need stats here?
+* research field
+  + levels: biological, chemical, modeling, oil, physical, social 
+  + levels: biological-benthicInverts, biological-birds, biological-fish, biological-habitat, biological-mammals, biological-plankton, chemical, physical, oil, modeling
+* research sector of project PI
+  + levels: academia, govFed, govState, nonProf, forProf, tribe
+* year project recieved its last year of EVOSTC funding
+  + continuous variable
 
-```{r data prep - reasons,echo=FALSE,warning=FALSE}
+## Binomial logistic model: dummy variables
 
-reas=rslt2 %>%
-  filter(Status=='Unrecoverable') %>%
-  filter(!reason=="no data generated") %>%
-  filter(!reason=="data uvailable") %>%
-  select(Status,reason)
-reasTab=as.data.frame(table(reas$reason))
-colnames(reasTab)=c('reason','nDatasets')
+#### General data types
 
-## add in status = 'emailed' to 'no contact info' & status = "replied" to unwilling to share? ...discuss with group
+```{r BLM - allGen}
+splBio=strsplit(as.character(rslt2$dataType),'-')
+rslt3<-rslt2 %>%
+  mutate(dtGen=sapply(splBio,function(x) as.factor(x[1])))
 
-reasTab[reasTab$reason=='no contact info',"nDatasets"] <- (reasTab[reasTab$reason=='no contact info',"nDatasets"] + length(rslt2[rslt2$Status=='Emailed','Status'])) 
+succBlrGen<-glm(formula = statSucc~agSubGrp+end+dtGen,family='binomial',data=rslt3)
 
-levels(reasTab$reason)=c(levels(reasTab$reason),'communication lost')
+## statSucc = Binomial: did we recover the data?
+## agGrp = sector of home institution
+## end = last year project was funded by EVOSTC
+## dtgeb = general field of study (bio grouped)
 
-reasTab[6,]<-c('communication lost', length(rslt2[rslt2$Status=='Replied','Status'])+1)# +1 for one of the 'data unavailable' datasets, add the other to "data lost"
-reasTab[1,2]<-as.numeric(as.character(reasTab[reasTab$reason=="data lost","nDatasets"]))+1
-
-reasTab<-arrange(reasTab,desc(as.numeric(nDatasets)))
-reasTab$reason<-factor(reasTab$reason,levels = reasTab$reason,ordered = T)
+summary(succBlrGen)
 
 ```
 
+#### Biological data types defined
 
-```{r whyNot, echo=F}
+```{r BLM - allBioSep}
 
-whyNot<-ggplot(reasTab,aes(x=reason,y=as.numeric(nDatasets)))+
-  geom_bar(stat = "identity")+
-  theme(axis.line=element_line('black'),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        panel.background = element_blank())+
-  theme(axis.text.x = element_text(angle=90))+
-  #xlab('\nReason data were not recovered')+
-  ylab('Number of Projects\n')+
-  #ggtitle('Why are data not recovered?')+
-  theme(axis.text=element_text(size=14),
-        title=element_text(size=16,face="bold"))+
-  theme(axis.line.x = element_line(color="black"),
-        axis.line.y = element_line(color="black")) ## *** add each n as text above bar
-whyNot
+succBlrBio<-glm(formula = statSucc~agSubGrp+end+dataType,family='binomial',data=rslt3)
+
+## statSucc = Binomial: did we recover the data?
+## agGrp = sector of home institution
+## end = last year project was funded by EVOSTC
+## dataType = field of study (bio ungrouped)
+
+summary(succBlrBio)
+
+```
+__Only categories with low success rates are sginificant ("low"" is <20%): fish data and social data__
+
+Potential explanations:
+
+* Fish: Culture around protecting fishing locations and catches
+* Social: formats of data collection and storage diffcult to share
+
+__THESE RESULTS CHANGE WHEN I CHANGE THE ORDER OF FACTORS__
+
+***
+
+## Binomial logistic model: deviation coding
+
+Some notes on this technique: This method compares each level to the mean of the group. This still results in the issue we were having in which it cuts off the last level since its assumed you can calculate it from the rest of the results. The _estimate_ can be calculated in this way but as I read: ["So far I could not find a way to assess the significance of the difference between the overall mean and the last group…"](https://www.r-bloggers.com/using-and-interpreting-different-contrasts-in-linear-models-in-r/) Anyone know a way around this? Re-order the levels?
+
+#### General data types
+
+```{r BLMdevCode - allGen}
+
+
+contrasts(rslt3$dtGen) = contr.sum(5)
+contrasts(rslt3$agSubGrp) = contr.sum(6)
+
+succBlrGen<-glm(formula = statSucc~agSubGrp+end+dtGen,family='binomial',data=rslt3)
+
+## statSucc = Binomial: did we recover the data?
+## agGrp = sector of home institution
+## end = last year project was funded by EVOSTC
+## dtgeb = general field of study (bio grouped)
+
+summary(succBlrGen)
+
 ```
 
+#### Biological data types defined
+
+```{r BLMdevCode - allBioSep}
+
+contrasts(rslt3$dataType) = contr.sum(10)
+
+succBlrBio<-glm(formula = statSucc~agSubGrp+end+dataType,family='binomial',data=rslt3)
+
+## statSucc = Binomial: did we recover the data?
+## agGrp = sector of home institution
+## end = last year project was funded by EVOSTC
+## dataType = field of study (bio ungrouped)
+
+summary(succBlrBio)
+
+```
+__Nothing is significant__
+
+The results don't change if I change the order of the levels
