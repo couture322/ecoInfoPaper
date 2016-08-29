@@ -26,6 +26,7 @@ library(ggplot2)
 library(reshape2)
 library(grid)
 library(gridExtra)
+library(party)
 
 rslt=read.csv('data/archResRevised2.csv',header=T,stringsAsFactors=T)
 rslt[rslt$Status=='published','Status']<-'Published'
@@ -43,7 +44,11 @@ rslt2=rslt2 %>%
   filter(!end>2010) %>%
   select(Status,start,end,ecosystem,dataType,statSucc,agGrp,agSubGrp,reason)
 
-head(rslt2)
+splBio=strsplit(as.character(rslt2$dataType),'-')
+rslt3<-rslt2 %>%
+  mutate(dtGen=sapply(splBio,function(x) as.factor(x[1])))
+
+head(rslt3)
 ```
 
 # 1. Project Status Reporting
@@ -85,10 +90,20 @@ Chi-squared test for equal proportions between research fields funded
 
 ```{r chi squared - field of study,echo=FALSE,warning=FALSE}
 
-dtProps=table(rslt2$statSucc,rslt2$dataType)
+dtProps=table(rslt3$statSucc,rslt3$dtGen)
 dtChi=chisq.test(dtProps)
 
 dtChi
+```
+
+Chi-squared test for equal proportions between research fields - bio broken out
+
+```{r chi squared - field of study BIO,echo=FALSE,warning=FALSE}
+
+bioProps=table(rslt2$statSucc,rslt2$dataType)
+bioChi=chisq.test(bioProps)
+
+bioChi
 ```
 
 ***
@@ -156,9 +171,6 @@ Groups tested:
 #### General data types
 
 ```{r BLM - allGen}
-splBio=strsplit(as.character(rslt2$dataType),'-')
-rslt3<-rslt2 %>%
-  mutate(dtGen=sapply(splBio,function(x) as.factor(x[1])))
 
 succBlrGen<-glm(formula = statSucc~agSubGrp+end+dtGen,family='binomial',data=rslt3)
 
@@ -238,3 +250,31 @@ summary(succBlrBio)
 __Nothing is significant__
 
 The results don't change if I change the order of the levels
+
+***
+
+## Classification tree
+
+I use the "party" package in R to create a decision tree using the same model as the glm. 
+
+#### General data types
+
+```{r class tree, message=F}
+
+partree<-ctree(statSucc~agSubGrp+end+dtGen,data=rslt3)
+
+partree
+
+plot(partree)
+```
+
+#### Biological data types defined
+
+```{r class tree bio, message=F}
+rm(partree)
+partreeBio<-ctree(statSucc~agSubGrp+end+dataType,data=rslt3)
+
+partreeBio
+
+plot(partreeBio)
+```
