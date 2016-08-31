@@ -96,7 +96,7 @@ dtChi=chisq.test(dtProps)
 dtChi
 ```
 
-Chi-squared test for equal proportions between research fields - bio broken out
+Chi-squared test for equal proportions between research fields - _bio broken out_
 
 ```{r chi squared - field of study BIO,echo=FALSE,warning=FALSE}
 
@@ -168,7 +168,7 @@ Groups tested:
 
 ## Binomial logistic model: dummy variables
 
-#### General data types
+#### _General data types_
 
 ```{r BLM - allGen}
 
@@ -183,7 +183,7 @@ summary(succBlrGen)
 
 ```
 
-#### Biological data types defined
+#### _Biological data types defined_
 
 ```{r BLM - allBioSep}
 
@@ -212,7 +212,7 @@ __THESE RESULTS CHANGE WHEN I CHANGE THE ORDER OF FACTORS__
 
 Some notes on this technique: This method compares each level to the mean of the group. This still results in the issue we were having in which it cuts off the last level since its assumed you can calculate it from the rest of the results. The _estimate_ can be calculated in this way but as I read: ["So far I could not find a way to assess the significance of the difference between the overall mean and the last group…"](https://www.r-bloggers.com/using-and-interpreting-different-contrasts-in-linear-models-in-r/) Anyone know a way around this? Re-order the levels?
 
-#### General data types
+#### _General data types_
 
 ```{r BLMdevCode - allGen}
 
@@ -231,7 +231,7 @@ summary(succBlrGen)
 
 ```
 
-#### Biological data types defined
+#### _Biological data types defined_
 
 ```{r BLMdevCode - allBioSep}
 
@@ -253,11 +253,13 @@ The results don't change if I change the order of the levels
 
 ***
 
-## Classification tree
+## Trees & forests
 
-I use the "party" package in R to create a decision tree using the same model as the glm. 
+I use the "party" package in R to create a decision tree using the same model as the glm, then calculate importance of each variable using the cforest function in the party package. This package is be better than randomForest when independent variables are different types (Strobl et al. 2009)
 
-#### General data types
+#### _General data types_
+
+##### Classification tree
 
 ```{r class tree, message=F}
 
@@ -268,7 +270,15 @@ partree
 plot(partree)
 ```
 
-#### Biological data types defined
+##### Random Forests
+```{r randForest, message=F}
+partyFor<-cforest(statSucc~agSubGrp+end+dtGen,data=rslt3,controls = cforest_unbiased(mtry = 2, ntree = 1000))
+varimp(partyFor)
+```
+
+#### _Biological data types defined_
+
+##### Classification tree
 
 ```{r class tree bio, message=F}
 rm(partree)
@@ -277,4 +287,10 @@ partreeBio<-ctree(statSucc~agSubGrp+end+dataType,data=rslt3)
 partreeBio
 
 plot(partreeBio)
+```
+
+##### Random forests
+```{r randForestBio, message=F}
+partyForBio<-cforest(statSucc~agSubGrp+end+dataType,data=rslt3,controls = cforest_unbiased(mtry = 2, ntree = 1000))
+varimp(partyForBio)
 ```
