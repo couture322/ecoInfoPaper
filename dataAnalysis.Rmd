@@ -244,7 +244,7 @@ I use the "party" package in R to create a decision tree using the same model as
 
 ```{r class tree bio, message=F}
 rm(partree)
-partreeBio<-ctree(statSucc~agSubGrp+end+dataType,data=rslt3)
+partreeBio<-ctree(statSucc~agSubGrp+endBin+dataType,data=rslt3)
 
 partreeBio
 
@@ -254,5 +254,8 @@ plot(partreeBio)
 ##### Random forests
 ```{r randForestBio, message=F}
 partyForBio<-cforest(statSucc~agSubGrp+end+dataType,data=rslt3,controls = cforest_unbiased(mtry = 2, ntree = 1000))
+varimp(partyForBio)
+
+partyForBio<-cforest(statSucc~agSubGrp+endBin+dataType,data=rslt3,controls = cforest_unbiased(mtry = 2, ntree = 1000))
 varimp(partyForBio)
 ```

@@ -477,14 +477,14 @@ summary(succEndBin) </code></pre>
 <h5>Classification tree</h5>
 <pre class="r"><code>rm(partree)</code></pre>
 <pre><code>## Warning in rm(partree): object 'partree' not found</code></pre>
-<pre class="r"><code>partreeBio&lt;-ctree(statSucc~agSubGrp+end+dataType,data=rslt3)
+<pre class="r"><code>partreeBio&lt;-ctree(statSucc~agSubGrp+endBin+dataType,data=rslt3)
 
 partreeBio</code></pre>
 <pre><code>## 
 ##   Conditional inference tree with 2 terminal nodes
 ## 
 ## Response:  statSucc 
-## Inputs:  agSubGrp, end, dataType 
+## Inputs:  agSubGrp, endBin, dataType 
 ## Number of observations:  315 
 ## 
 ## 1) dataType == {biological-benthicInverts, biological-plankton, oil, physical}; criterion = 0.993, statistic = 25.499
@@ -499,7 +499,11 @@ partreeBio</code></pre>
 <pre class="r"><code>partyForBio&lt;-cforest(statSucc~agSubGrp+end+dataType,data=rslt3,controls = cforest_unbiased(mtry = 2, ntree = 1000))
 varimp(partyForBio)</code></pre>
 <pre><code>##     agSubGrp          end     dataType 
-## -0.001662371  0.005605569  0.015610839</code></pre>
+## -0.002559355  0.004968752  0.013836941</code></pre>
+<pre class="r"><code>partyForBio&lt;-cforest(statSucc~agSubGrp+endBin+dataType,data=rslt3,controls = cforest_unbiased(mtry = 2, ntree = 1000))
+varimp(partyForBio)</code></pre>
+<pre><code>##     agSubGrp       endBin     dataType 
+## -0.003540715  0.002853326  0.012626459</code></pre>
 </div>
 </div>
 </div>
