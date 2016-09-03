@@ -68,16 +68,6 @@ Limitations of the Chi-Square Test:
 
 I feel like these are things that we have always been aware of and in our don't create any false significance...opinions? Social data?
 
-```{r chi squared - test for eq prop,echo=FALSE}
-statusProps=table(rslt2$Status)
-eqProp=chisq.test(statusProps) #not equal proportions
-
-eqProp
-```
-__Proportions are NOT equal between status groups__
-
-***
-
 # Chi-square tests for each group
 
 ### 1. Data type category
@@ -85,16 +75,6 @@ __Proportions are NOT equal between status groups__
 ### Are there certain **research fields** that are more likely to make data available than others?
 
 ### Test for equal proportions between categories:
-
-Chi-squared test for equal proportions between research fields funded
-
-```{r chi squared - field of study,echo=FALSE,warning=FALSE}
-
-dtProps=table(rslt3$statSucc,rslt3$dtGen)
-dtChi=chisq.test(dtProps)
-
-dtChi
-```
 
 Chi-squared test for equal proportions between research fields - _bio broken out_
 
@@ -112,16 +92,6 @@ bioChi
 
 ### Are there certain **sectors** that are more likely to make data available than others?
 (based on PI's affiliation)
-
-#### Test for equal propportions between PI's home institution type/sector: 
-
-government and private grouped
-```{r chi squared - sector,echo=FALSE,warning=FALSE}
-secProps=table(rslt2$statSucc,rslt2$agGrp)
-sectChi=chisq.test(secProps)
-
-sectChi
-```
 
 #### Test for equal propportions between PI's home institution type/sector:
 
@@ -144,12 +114,30 @@ __NOT SIGNIFICANT: neither sectors nor subsectors are significant__
 
 Chi-squared test for equal proportions between age of data
 
+* Un-binned data
+* Binned every 2yrs (bins are factors)
+* Binned every 2yrs (bins are integers)
+
 ```{r chi squared - end years,echo=FALSE,warning=FALSE}
 
-tempProps=table(rslt2$statSucc,as.character(rslt2$end))
+tempProps=table(rslt3$statSucc,as.character(rslt3$end))
 tempChi=chisq.test(tempProps)
 
 tempChi
+
+## bin years into 2 bins
+rslt3$endBin<-cut(rslt3$end,11) #factor bins
+rslt3$endBinNum<-cut(rslt3$end,11,labels=F) #numeric bins
+
+tempProps1=table(rslt3$statSucc,as.character(rslt3$endBin))
+tempChi1=chisq.test(tempProps1)
+
+tempChi1
+
+tempProps2=table(rslt3$statSucc,rslt3$endBinNum)
+tempChi2=chisq.test(tempProps2)
+
+tempChi2
 ```
 
 ***
@@ -167,21 +155,6 @@ Groups tested:
   + continuous variable
 
 ## Binomial logistic model: dummy variables
-
-#### _General data types_
-
-```{r BLM - allGen}
-
-succBlrGen<-glm(formula = statSucc~agSubGrp+end+dtGen,family='binomial',data=rslt3)
-
-## statSucc = Binomial: did we recover the data?
-## agGrp = sector of home institution
-## end = last year project was funded by EVOSTC
-## dtgeb = general field of study (bio grouped)
-
-summary(succBlrGen)
-
-```
 
 #### _Biological data types defined_
 
@@ -208,28 +181,24 @@ __THESE RESULTS CHANGE WHEN I CHANGE THE ORDER OF FACTORS__
 
 ***
 
+### _Just temporal_
+
+```{r BLM - time}
+## bins as factors
+succEndBin<-glm(formula = statSucc~endBin,family='binomial',data=rslt3)
+
+summary(succEndBin) 
+
+## bins as continuous
+succEndBin<-glm(formula = statSucc~endBinNum,family='binomial',data=rslt3)
+
+summary(succEndBin)
+
+```
+
 ## Binomial logistic model: deviation coding
 
 Some notes on this technique: This method compares each level to the mean of the group. This still results in the issue we were having in which it cuts off the last level since its assumed you can calculate it from the rest of the results. The _estimate_ can be calculated in this way but as I read: ["So far I could not find a way to assess the significance of the difference between the overall mean and the last group…"](https://www.r-bloggers.com/using-and-interpreting-different-contrasts-in-linear-models-in-r/) Anyone know a way around this? Re-order the levels?
-
-#### _General data types_
-
-```{r BLMdevCode - allGen}
-
-
-contrasts(rslt3$dtGen) = contr.sum(5)
-contrasts(rslt3$agSubGrp) = contr.sum(6)
-
-succBlrGen<-glm(formula = statSucc~agSubGrp+end+dtGen,family='binomial',data=rslt3)
-
-## statSucc = Binomial: did we recover the data?
-## agGrp = sector of home institution
-## end = last year project was funded by EVOSTC
-## dtgeb = general field of study (bio grouped)
-
-summary(succBlrGen)
-
-```
 
 #### _Biological data types defined_
 
@@ -253,28 +222,21 @@ The results don't change if I change the order of the levels
 
 ***
 
+### _Just temporal_
+
+```{r BLM - timeCode}
+## bins as factors
+contrasts(rslt3$endBin) = contr.sum(11)
+succEndBin<-glm(formula = statSucc~endBin,family='binomial',data=rslt3)
+
+summary(succEndBin) 
+
+```
+
+***
 ## Trees & forests
 
 I use the "party" package in R to create a decision tree using the same model as the glm, then calculate importance of each variable using the cforest function in the party package. This package is be better than randomForest when independent variables are different types (Strobl et al. 2009)
-
-#### _General data types_
-
-##### Classification tree
-
-```{r class tree, message=F}
-
-partree<-ctree(statSucc~agSubGrp+end+dtGen,data=rslt3)
-
-partree
-
-plot(partree)
-```
-
-##### Random Forests
-```{r randForest, message=F}
-partyFor<-cforest(statSucc~agSubGrp+end+dtGen,data=rslt3,controls = cforest_unbiased(mtry = 2, ntree = 1000))
-varimp(partyFor)
-```
 
 #### _Biological data types defined_
 
