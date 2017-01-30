@@ -34,7 +34,7 @@ library(cowplot)
 rslt=read.csv('data/archResRevised2.csv',header=T,stringsAsFactors=F)
 rslt[rslt$Status=='published','Status']<-'Published'
 
-rslt$succ=ifelse(rslt$Status %in% c('Published','SentData','Revised'),0,1)
+rslt$succ=ifelse(rslt$Status %in% c('Published','SentData','Revised'),0,1) # success=0, not successful=1....why?
 rslt$statSucc=ifelse(rslt$Status %in% c('Published','SentData','Revised'),1,2) # 1 = success, 2 = not successful
 
 agDes=read.csv('data/ecoInfoAgencyDesig.csv',header=T,stringsAsFactors=T,col.names=c('agency','agGrp','agSubGrp'))
@@ -73,10 +73,14 @@ statGrey=c('Unrecoverable'='gray67',
              'Revised'='black',
              'Published'='black')
 
+stSuccCols=c(1='gray67',2="black")
+
 statPlot=ggplot()+
   geom_bar(data=rslt2,
-                 aes(x=factor(Status,levels=statusOrd,ordered=T),fill=Status))+
-  scale_fill_manual(labels=statusOrd,breaks=statusOrd,values=statGrey)+
+                 aes(x=factor(Status,levels=statusOrd,ordered=T,fill=statSucc)))+
+  scale_fill_manual(breaks=stSuccCols,values=stSuccCols,
+                    name  ="Data obtained?",
+                    labels=c("Yes", "No"))+
   theme(legend.title=element_blank())+
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),

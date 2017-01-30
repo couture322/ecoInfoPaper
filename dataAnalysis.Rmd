@@ -31,7 +31,7 @@ library(party)
 rslt=read.csv('data/archResRevised2.csv',header=T,stringsAsFactors=T)
 rslt[rslt$Status=='published','Status']<-'Published'
 
-rslt$succ=ifelse(rslt$Status %in% c('Published','SentData','Revised'),0,1) # 0=success???
+rslt$succ=ifelse(rslt$Status %in% c('Published','SentData','Revised'),0,1) # 0=success??? ### RM?
 rslt$statSucc=ifelse(rslt$Status %in% c('Published','SentData','Revised'),1,0) # 1 = success, 2 = not successful
 
 
