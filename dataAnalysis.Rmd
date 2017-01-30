@@ -1,23 +1,31 @@
 ---
 title: "EVOSTC data collection paper - Analysis"
 author: "Jessica Couture"
-date: "5/31/2016"# started: "9/27/2015"
-output: html_document
+date: "9/6/2016"# started: "9/27/2015"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 3
 ---
 
-#Background
+## Background
 
-We are writing up a publication to report results of a two year data archiving effort by a small group of researchers and students at the National Center for Ecological Analysis and Synthesis at UC Santa Barbara. The [Exxon Valdez Oil Spill Trustee Council](http://www.evostc.state.ak.us) (EVOSTC) was formed following the Exon Valdez oil spill in Alaska in 1989. Since then, the EVOSTC has funded hundreds of projects and in 2012 we initiated an effort to recover and archive the data collected in these EVOSTC funded projects.
+We are writing up a publication to report results of a two year data archiving effort by a small group of researchers and students at the National Center for Ecological Analysis and Synthesis at UC Santa Barbara. The [Exxon Valdez Oil Spill Trustee Council](http://www.evostc.state.ak.us) (EVOSTC) was formed following the Exxon Valdez oil spill in Alaska in 1989. Since then, the EVOSTC has funded hundreds of projects and in 2012 we initiated an effort to recover and archive the data collected in these EVOSTC funded projects which lasted for two years.
 
 For this paper we ask 4 main questions about the data collected from the Exxon Valdez Oil Spill Trustee Council funded projects:
 
 1. Twenty-five years after the EVOS, for how many projects funded by EVOSTC can we collect data?
-2. Are there certain **research fields** that are more likely to make data available than others?
-3. Are there certain **sectors** that are more likely to make data available than others?
-4. Is the availability of data correlated to how old the data are? (temporal relationships?)
+2. Are there differences in data reporting based on data characteristics?
+
+  * Research field
+  * Sector of researching body
+  * Year data projects ended
+
+3. Which characteristics are most *important* in determining if a dataset will be successfully recovered?
+4. How do the important characteristics influence the output (success)?
 
 
-```{r data prep,echo=FALSE,message=FALSE}
+```{r data prep,echo=FALSE,message=FALSE,warning=F}
 
 library(knitr)
 library(dplyr)
@@ -51,14 +59,65 @@ rslt3<-rslt2 %>%
 head(rslt3)
 ```
 
-# 1. Project Status Reporting
+## 1. Project Status Reporting
 <h4>Twenty-five years after the EVOS, for how many projects funded by EVOSTC can we collect data?</h4>
  
+```{r status plot, fig.width=10,echo=FALSE}
 
+overall=table(rslt2$Status)
+overallLong=melt(overall)
+colnames(overallLong)=c('Status','nDatasets')
+overall2=overallLong %>%
+  mutate(prop=nDatasets/sum(nDatasets))
 
-### Test for equal proportions between status categories:
-Are the proportion of projects in each category equal? --> chi-squared test
+possible=overallLong %>%
+  filter(!Status=='Unrecoverable') %>%
+  mutate(prop=nDatasets/sum(nDatasets))
 
+statusOrd=c('Unrecoverable','Emailed','Replied','SentData','Revised','Published')
+#rslt2$Status=as.factor(rslt2$Status,levels=statusOrd,ordered=T)
+statGrey=c('Unrecoverable'='gray67',
+             'Emailed'='gray67',
+             'Replied'='gray67',
+             'SentData'='black',
+             'Revised'='black',
+             'Published'='black')
+
+statPlot=ggplot()+
+  geom_bar(data=rslt2,
+                 aes(x=factor(Status,levels=statusOrd,ordered=T),fill=Status))+
+  scale_fill_manual(labels=statusOrd,breaks=statusOrd,values=statGrey)+
+  theme(legend.title=element_blank())+
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())+
+  #theme(axis.text.x = element_text(angle=90))+
+  xlab(expression(RecoveryStage %->% .))+ # %->%, symbol(/256)
+  ylab('Number of projects\n')+
+  ggtitle('Projects status')+
+  theme(axis.text=element_text(size=14),
+        title=element_text(size=16,face="bold"),
+        legend.text = element_text(size = 14, face = "bold"))+
+  theme(axis.line.x = element_line(color="black"),
+        axis.line.y = element_line(color="black"))
+
+statPlot
+
+```
+
+```{r Effort results}
+# Number of projects requested
+sum(overall)
+
+# percent successful
+sum(overall[c("Published","SentData")])/sum(overall)
+```
+
+***
+
+## 2. Are there differences in data reporting based on data characteristics?
+#### Chi-square tests for each variable (characteristic)
 
 Limitations of the Chi-Square Test: 
 
@@ -68,33 +127,9 @@ Limitations of the Chi-Square Test:
 
 I feel like these are things that we have always been aware of and in our don't create any false significance...opinions? Social data?
 
-```{r chi squared - test for eq prop,echo=FALSE}
-statusProps=table(rslt2$Status)
-eqProp=chisq.test(statusProps) #not equal proportions
+### Research field
 
-eqProp
-```
-__Proportions are NOT equal between status groups__
-
-***
-
-# Chi-square tests for each group
-
-### 1. Data type category
-
-### Are there certain **research fields** that are more likely to make data available than others?
-
-### Test for equal proportions between categories:
-
-Chi-squared test for equal proportions between research fields funded
-
-```{r chi squared - field of study,echo=FALSE,warning=FALSE}
-
-dtProps=table(rslt3$statSucc,rslt3$dtGen)
-dtChi=chisq.test(dtProps)
-
-dtChi
-```
+#### Are there certain **research fields** that are more likely to make data available than others?
 
 Chi-squared test for equal proportions between research fields - _bio broken out_
 
@@ -105,23 +140,11 @@ bioChi=chisq.test(bioProps)
 
 bioChi
 ```
+__SIGNIFICANT: There are differences between successes in different research fields__
 
 ***
 
-### 2. Research sector type
-
-### Are there certain **sectors** that are more likely to make data available than others?
-(based on PI's affiliation)
-
-#### Test for equal propportions between PI's home institution type/sector: 
-
-government and private grouped
-```{r chi squared - sector,echo=FALSE,warning=FALSE}
-secProps=table(rslt2$statSucc,rslt2$agGrp)
-sectChi=chisq.test(secProps)
-
-sectChi
-```
+### Research sector
 
 #### Test for equal propportions between PI's home institution type/sector:
 
@@ -132,156 +155,46 @@ subSectChi=chisq.test(subSecProps)
 
 subSectChi
 ```
-__NOT SIGNIFICANT: neither sectors nor subsectors are significant__
+__NOT SIGNIFICANT: sectors are not significant__
 
 ***
 
-### 3. Temporal relationships
+### Year project ended
 
-### Is the availability of data correlated to how old the data are?
-
-#### Test for equal proportions between categories:
+#### Test for equal proportions between years:
 
 Chi-squared test for equal proportions between age of data
 
 ```{r chi squared - end years,echo=FALSE,warning=FALSE}
 
-tempProps=table(rslt2$statSucc,as.character(rslt2$end))
+tempProps=table(rslt3$statSucc,as.character(rslt3$end))
 tempChi=chisq.test(tempProps)
 
 tempChi
+
 ```
+__NOT SIGNIFICANT: no detectable temporal trends in reporting data__
+
+***
+## 3. Which characteristics are most important in determining if a dataset will be successfully recovered?
+
+I use the "party" package in R to run a random forests analysis to determine which variables are most important (cforet() function). I use the same model as the glm, then create a classification tree below to show how the important variables influence the outcome. This package is be better than randomForest when independent variables are different types (Strobl et al. 2009)
+
+### Random forests
+```{r randForestBio, message=F}
+partyForBio<-cforest(statSucc~agSubGrp+end+dataType,data=rslt3,controls = cforest_unbiased(mtry = 2, ntree = 1000))
+varimp(partyForBio)
+```
+
+__Since the importance value for research field is so much higher than the others, the most important variable in determining the outcome is research field__
+We would also like to discuss in the discussion that temporal relationships are _almost_ siginficantly different (chi-sq above), and although much less important, still recognized in this analysis. So we may have ghosts of the Michner theory even if our data aren't strong/clean enough to completely pull out the significance.
 
 ***
 
-### Binomial logistic regression: ALL data
-Which elements contribute most in determining if the data will be successfully collected?
-Groups tested:
+## 4. How do the important characteristics influence the output (success)? 
+### Classification tree
 
-* research field
-  + levels: biological, chemical, modeling, oil, physical, social 
-  + levels: biological-benthicInverts, biological-birds, biological-fish, biological-habitat, biological-mammals, biological-plankton, chemical, physical, oil, modeling
-* research sector of project PI
-  + levels: academia, govFed, govState, nonProf, forProf, tribe
-* year project recieved its last year of EVOSTC funding
-  + continuous variable
-
-## Binomial logistic model: dummy variables
-
-#### _General data types_
-
-```{r BLM - allGen}
-
-succBlrGen<-glm(formula = statSucc~agSubGrp+end+dtGen,family='binomial',data=rslt3)
-
-## statSucc = Binomial: did we recover the data?
-## agGrp = sector of home institution
-## end = last year project was funded by EVOSTC
-## dtgeb = general field of study (bio grouped)
-
-summary(succBlrGen)
-
-```
-
-#### _Biological data types defined_
-
-```{r BLM - allBioSep}
-
-succBlrBio<-glm(formula = statSucc~agSubGrp+end+dataType,family='binomial',data=rslt3)
-
-## statSucc = Binomial: did we recover the data?
-## agGrp = sector of home institution
-## end = last year project was funded by EVOSTC
-## dataType = field of study (bio ungrouped)
-
-summary(succBlrBio)
-
-```
-__Only categories with low success rates are sginificant ("low"" is <20%): fish data and social data__
-
-Potential explanations:
-
-* Fish: Culture around protecting fishing locations and catches
-* Social: formats of data collection and storage diffcult to share
-
-__THESE RESULTS CHANGE WHEN I CHANGE THE ORDER OF FACTORS__
-
-***
-
-## Binomial logistic model: deviation coding
-
-Some notes on this technique: This method compares each level to the mean of the group. This still results in the issue we were having in which it cuts off the last level since its assumed you can calculate it from the rest of the results. The _estimate_ can be calculated in this way but as I read: ["So far I could not find a way to assess the significance of the difference between the overall mean and the last group…"](https://www.r-bloggers.com/using-and-interpreting-different-contrasts-in-linear-models-in-r/) Anyone know a way around this? Re-order the levels?
-
-#### _General data types_
-
-```{r BLMdevCode - allGen}
-
-
-contrasts(rslt3$dtGen) = contr.sum(5)
-contrasts(rslt3$agSubGrp) = contr.sum(6)
-
-succBlrGen<-glm(formula = statSucc~agSubGrp+end+dtGen,family='binomial',data=rslt3)
-
-## statSucc = Binomial: did we recover the data?
-## agGrp = sector of home institution
-## end = last year project was funded by EVOSTC
-## dtgeb = general field of study (bio grouped)
-
-summary(succBlrGen)
-
-```
-
-#### _Biological data types defined_
-
-```{r BLMdevCode - allBioSep}
-
-contrasts(rslt3$dataType) = contr.sum(10)
-
-succBlrBio<-glm(formula = statSucc~agSubGrp+end+dataType,family='binomial',data=rslt3)
-
-## statSucc = Binomial: did we recover the data?
-## agGrp = sector of home institution
-## end = last year project was funded by EVOSTC
-## dataType = field of study (bio ungrouped)
-
-summary(succBlrBio)
-
-```
-__Nothing is significant__
-
-The results don't change if I change the order of the levels
-
-***
-
-## Trees & forests
-
-I use the "party" package in R to create a decision tree using the same model as the glm, then calculate importance of each variable using the cforest function in the party package. This package is be better than randomForest when independent variables are different types (Strobl et al. 2009)
-
-#### _General data types_
-
-##### Classification tree
-
-```{r class tree, message=F}
-
-partree<-ctree(statSucc~agSubGrp+end+dtGen,data=rslt3)
-
-partree
-
-plot(partree)
-```
-
-##### Random Forests
-```{r randForest, message=F}
-partyFor<-cforest(statSucc~agSubGrp+end+dtGen,data=rslt3,controls = cforest_unbiased(mtry = 2, ntree = 1000))
-varimp(partyFor)
-```
-
-#### _Biological data types defined_
-
-##### Classification tree
-
-```{r class tree bio, message=F}
-rm(partree)
+```{r class tree bio, message=F, warning=FALSE}
 partreeBio<-ctree(statSucc~agSubGrp+end+dataType,data=rslt3)
 
 partreeBio
@@ -289,8 +202,3 @@ partreeBio
 plot(partreeBio)
 ```
 
-##### Random forests
-```{r randForestBio, message=F}
-partyForBio<-cforest(statSucc~agSubGrp+end+dataType,data=rslt3,controls = cforest_unbiased(mtry = 2, ntree = 1000))
-varimp(partyForBio)
-```
