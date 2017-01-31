@@ -53,10 +53,9 @@ rslt2=rslt2 %>%
   select(Status,start,end,ecosystem,dataType,statSucc,agGrp,agSubGrp,reason)
 
 splBio=strsplit(as.character(rslt2$dataType),'-')
-rslt3<-rslt2 %>%
-  mutate(dtGen=sapply(splBio,function(x) as.factor(x[1])))
 
-head(rslt3)
+rslt2$dataType<-gsub("biological-",'',rslt2$dataType)
+
 ```
 
 ## 1. Project Status Reporting
@@ -167,7 +166,7 @@ Chi-squared test for equal proportions between age of data
 
 ```{r chi squared - end years,echo=FALSE,warning=FALSE}
 
-tempProps=table(rslt3$statSucc,as.character(rslt3$end))
+tempProps=table(rslt2$statSucc,as.character(rslt2$end))
 tempChi=chisq.test(tempProps)
 
 tempChi
@@ -182,7 +181,7 @@ I use the "party" package in R to run a random forests analysis to determine whi
 
 ### Random forests
 ```{r randForestBio, message=F}
-partyForBio<-cforest(statSucc~agSubGrp+end+dataType,data=rslt3,controls = cforest_unbiased(mtry = 2, ntree = 1000))
+partyForBio<-cforest(statSucc~agSubGrp+end+dataType,data=rslt2,controls = cforest_unbiased(mtry = 2, ntree = 1000))
 varimp(partyForBio)
 ```
 
@@ -195,7 +194,7 @@ We would also like to discuss in the discussion that temporal relationships are 
 ### Classification tree
 
 ```{r class tree bio, message=F, warning=FALSE}
-partreeBio<-ctree(statSucc~agSubGrp+end+dataType,data=rslt3)
+partreeBio<-ctree(statSucc~agSubGrp+end+dataType,data=rslt2)
 
 partreeBio
 
