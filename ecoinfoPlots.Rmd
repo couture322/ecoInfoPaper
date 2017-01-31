@@ -1,7 +1,7 @@
 ---
 title: "EVOSTC data collection paper - Data Visualizations"
 author: "Jessica Couture"
-date: "7/13/2016"
+date: "1/30/2017"
 output: html_document
 ---
 
@@ -30,6 +30,7 @@ library(grid)
 library(gridExtra)
 library(gtable)
 library(cowplot)
+library(party)
 
 rslt=read.csv('data/archResRevised2.csv',header=T,stringsAsFactors=F)
 rslt[rslt$Status=='published','Status']<-'Published'
@@ -43,6 +44,8 @@ agDes$agGrp=gsub('nonProf','private',agDes$agGrp)
 rslt2=merge(rslt,agDes,all.x=T)
 rslt2=rslt2 %>%
   filter(!end>2010) 
+
+rslt2$dataType<-gsub("biological-",'',rslt2$dataType)
 ```
 
 ## Plots:
@@ -50,7 +53,9 @@ rslt2=rslt2 %>%
 # 1. Project Status Reporting
 > Twenty-five years after the EVOS, for how many projects funded by EVOSTC can we collect data?</h4>
 
-For this first question, we decided to use the original plot generated from redmine that simply displays the number of datasets in each staus at the end to the 2 year data collection effort. We can discuss colors/shades/fill for thie gradient as a group.
+__Figure 1:__ Final status of all projects requested. Black are bars are projects for which data were successfully acquired, grey bars represent projects for which no data were acquired.
+
+_NOTES: For this first plot, we decided to use the original plot generated from redmine that simply displays the number of datasets in each staus at the end to the 2 year data collection effort. Still having issues getting the arrow in the x-axis title without the period or other character after it._
 
 ```{r status plot, fig.width=10,echo=FALSE}
 
@@ -73,14 +78,15 @@ statGrey=c('Unrecoverable'='gray67',
              'Revised'='black',
              'Published'='black')
 
-stSuccCols=c(1='gray67',2="black")
+stSuccCols=c("2"='gray67',"1"="black")
 
 statPlot=ggplot()+
   geom_bar(data=rslt2,
-                 aes(x=factor(Status,levels=statusOrd,ordered=T,fill=statSucc)))+
-  scale_fill_manual(breaks=stSuccCols,values=stSuccCols,
-                    name  ="Data obtained?",
-                    labels=c("Yes", "No"))+
+                 aes(x=factor(Status,levels=statusOrd,ordered=T),fill=factor(statSucc)))+
+  scale_fill_manual(name="Data obtained?",
+                    breaks=c("1","2"),
+                    values=stSuccCols,
+                    labels=c("Data acquired", "No data acquired"))+
   theme(legend.title=element_blank())+
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
@@ -89,7 +95,7 @@ statPlot=ggplot()+
   #theme(axis.text.x = element_text(angle=90))+
   xlab(expression(RecoveryStage %->% .))+ # %->%, symbol(/256)
   ylab('Number of projects\n')+
-  ggtitle('Projects status')+
+  #ggtitle('Projects status')+
   theme(axis.text=element_text(size=14),
         title=element_text(size=16,face="bold"),
         legend.text = element_text(size = 14, face = "bold"))+
@@ -105,51 +111,25 @@ statPlot
 # 2.Research field
 > Are there certain **research fields** that are more likely to make data available than others?
  
-__STILL A WORK IN PROGRESS__
+__Figure 2:__ Percent success of projects by research field. The top plot is total number of projects funded for each field, the bottom plot shows the percent success for the given field.
 
-Here we have a few tiers of 'research field' and we decided to keep the groupings as broad general fields of study and more investigate the specifics of the biology field since it is so big.
-
-We still want to get feedback on whether to use the stacked nProjects/percent graphs or just the percent bars with n printed on top of the bars.
-
+_NOTES: We ended up looking at all fields separately so classifications are "broad". We decided to use the stacked nProjects/percent graphs to display variation in nProjects between groups as well as variation in relative responses for each group._
 
 ```{r research field success plots,fig.height=9, echo=FALSE}
 
 catYN=as.data.frame(table(rslt2$dataType,rslt2$succ))
 colnames(catYN)=c('category','succ','nDatasets')
 
-broadSpl=strsplit(as.character(catYN$category),'-')
-catYN$broad=sapply(broadSpl,function(x) x[1])
-bioSub=sapply(broadSpl,function(x) x[2])
-
-bioYN=catYN %>%
-  filter(broad=='biological') %>%
-  mutate(subCat=na.omit(bioSub)) %>%
+fldYN=catYN %>%
   group_by(category) %>%
   mutate(grpTots=sum(nDatasets)) %>%
   mutate(prop=nDatasets/grpTots)
 
-bioYN$subCat=factor(bioYN$subCat,levels=c("habitat",'plankton','benthicInverts','fish','birds','mammals'))
+fldYN$category=factor(fldYN$category,levels=c("oil","physical","habitat",'plankton','benthicInverts','fish','birds','mammals',"social","modeling"))
 
-##### general fields (biology grouped)
+##### all fields
 
-sums=bioYN %>%
-  group_by(succ) %>%
-  summarise(nDatasets=sum(nDatasets)) %>%
-  mutate(category='biological') %>%
-  select(category,succ,nDatasets)
-
-broadDf=catYN %>%
-  filter(!broad=='biological') %>%
-  group_by(broad) %>%
-  mutate(grpTots=sum(nDatasets)) %>%
-  mutate(prop=nDatasets/grpTots)
-  
-broadDf$category<-factor(broadDf$category,levels=c('physical',"biological",'social',"oil",'modeling'))
-broadDf[9:10,]<-sums
-broadDf[9:10,'prop'] <- c(broadDf$nDatasets[9]/sum(sums$nDatasets),broadDf$nDatasets[10]/sum(sums$nDatasets))
-broadDf[9:10,'grpTots'] <- sum(sums$nDatasets)
-
-broadNds=ggplot(broadDf[broadDf$succ==0,],aes(x=category,y=grpTots))+
+fieldNDs=ggplot(fldYN[fldYN$succ==0,],aes(x=category,y=grpTots))+
   geom_bar(stat = "identity",fill="grey")+
   theme(axis.line=element_line('black'),
         panel.grid.major = element_blank(),
@@ -158,91 +138,128 @@ broadNds=ggplot(broadDf[broadDf$succ==0,],aes(x=category,y=grpTots))+
         panel.background = element_blank())+
   theme(axis.text.x = element_blank(),
         axis.title.x = element_blank())+
-  ggtitle('General fields')+
+  ylim(0,100)+
   ylab('Number of projects\n')+
   theme(axis.text=element_text(size=14),
         title=element_text(size=16,face="bold"))+
   theme(axis.line.x = element_line(color="black"),
         axis.line.y = element_line(color="black"))
   
-broadPerc=ggplot(broadDf[broadDf$succ==0,],aes(x=category,y=(prop*100)))+
+fieldPerc=ggplot(fldYN[fldYN$succ==0,],aes(x=category,y=(prop*100)))+
   geom_bar(stat = "identity",fill="black")+
-  scale_x_discrete(labels=c('physical',"biological",'social',"oil",'modeling'))+
+  scale_x_discrete(labels=c("oil","physical","habitat",'plankton','benthicInverts','fish','birds','mammals',"social","modeling"))+
   theme(axis.line=element_line('black'),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.border = element_blank(),
         panel.background = element_blank(),
-        axis.text.x = element_text(angle=90))+
+        axis.text.x = element_text(angle=45,size = 14,vjust = 1,hjust = 1))+
   xlab('Field')+
   ylab('% successful\n')+
   ylim(0,63)+
-  theme(axis.text=element_text(size=14),
-        title=element_text(size=16,face="bold"))+
-  theme(axis.line.x = element_line(color="black"),
-        axis.line.y = element_line(color="black"))+
+  theme(title=element_text(size=18,face="bold"),
+        axis.line.x = element_line(color="black"),
+        axis.line.y = element_line(color="black"))
   # annotate("text", x = 1, y=broadDf$prop[[3]]*100+2, label = as.character(broadDf[broadDf$category=="physical" & broadDf$succ==0,"grpTots"]))+
   # annotate("text", x = 2, y=broadDf$prop[[9]]*100+2, label = as.character(broadDf[broadDf$category=="biological" & broadDf$succ==0,"grpTots"]))+
-  annotate("text", x = 3, y=broadDf$prop[[4]]*100+1, label = "*",size=7) #as.character(broadDf[broadDf$category=="social" & broadDf$succ==0,"grpTots"]))+
+  #annotate("text", x = 3, y=broadDf$prop[[4]]*100+1, label = "*",size=7) #as.character(broadDf[broadDf$category=="social" & broadDf$succ==0,"grpTots"]))+
   # annotate("text", x = 4, y=broadDf$prop[[2]]*100+2, label = as.character(broadDf[broadDf$category=="oil" & broadDf$succ==0,"grpTots"]))+
   # annotate("text", x = 5, y=broadDf$prop[[1]]*100+2, label = as.character(broadDf[broadDf$category=="modeling" & broadDf$succ==0,"grpTots"]))
 
-#biology fields
 
-bioPerc=ggplot(bioYN[bioYN$succ==0,],aes(x=subCat,y=(prop*100)))+
-  geom_bar(stat = "identity",fill="black")+
-  scale_x_discrete(labels=c("habitat","plankton","inverts","fish","birds","mammals"))+
-  theme(axis.line=element_line('black'),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        panel.background = element_blank())+
-  theme(axis.text.x = element_text(angle=90),
-        axis.title.y = element_blank())+
-  ylim(0,63)+
-  xlab('Bio Field')+
-  #ylab('% successful')+
-  theme(axis.text=element_text(size=14),
-        title=element_text(size=16,face="bold"))+
-  theme(axis.line.x = element_line(color="black"),
-        axis.line.y = element_line(color="black"))+
-  # annotate("text", x = 1, y=bioYN$prop[[4]]*100+3, label = as.character(bioYN[bioYN$category=="biological-habitat" & bioYN$succ==0,"grpTots"]))+
-  # annotate("text", x = 2, y=bioYN$prop[[6]]*100+3, label = as.character(bioYN[bioYN$category=="biological-plankton" & bioYN$succ==0,"grpTots"]))+
-  # annotate("text", x = 3, y=bioYN$prop[[1]]*100+3, label = as.character(bioYN[bioYN$category=="biological-benthicInverts" & bioYN$succ==0,"grpTots"]))+
-  annotate("text", x = 4, y=bioYN$prop[[3]]*100+1, label = "*",size=7) #as.character(bioYN[bioYN$category=="biological-fish" & bioYN$succ==0,"grpTots"]))+
-  # annotate("text", x = 5, y=bioYN$prop[[2]]*100+3, label = as.character(bioYN[bioYN$category=="biological-birds" & bioYN$succ==0,"grpTots"]))+
-  # annotate("text", x = 6, y=bioYN$prop[[5]]*100+3, label = as.character(bioYN[bioYN$category=="biological-mammals" & bioYN$succ==0,"grpTots"]))
-
-bioNds=ggplot(bioYN[bioYN$succ==0,],aes(x=subCat,y=grpTots))+
-  geom_bar(stat = "identity",fill="grey")+
-  theme(axis.line=element_line('black'),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        panel.background = element_blank())+
-  theme(axis.text.x = element_blank(),
-        axis.title = element_blank())+
-  #ylim=c(0,300)+
-  ggtitle('Biology sub-fields')+
-  ylab('Number of projects\n')+
-  theme(axis.text=element_text(size=14),
-        title=element_text(size=16,face="bold"))+
-  theme(axis.line.x = element_line(color="black"),
-        axis.line.y = element_line(color="black"))
-
-# grid.arrange(broadNds,bioNds,broadPerc,bioPerc, ncol = 2,heights=c(1,1.5))
-
-plot_grid(broadNds,bioNds,broadPerc,bioPerc, ncol = 2, rel_heights=c(0.5,1),align="v")
+plot_grid(fieldNDs,fieldPerc, ncol = 1, rel_heights=c(1,1.5),align="v")
 
 ```
 
 ***
 
-# 3. Awardee agency type
+# 3. Classification tree
+> How do the important characteristics influence the output (success)? 
+
+__Figure 3:__ Classification tree of which data variables and characterizations predict successful and non-successful data acquisition. Data field was the only variable that could be used to predict data availability. 
+
+_NOTES: This is the original output I think I'll construct this from scratch outside of R since the names are the important part and I don't see a way to make this part cleaner even with rpart, rattle, etc._
+
+```{r class tree bio, message=F, warning=FALSE}
+rslt2$dataType<-factor(rslt2$dataType)
+partreeBio<-ctree(succ~agSubGrp+end+dataType,data=rslt2)
+
+plot(partreeBio)
+```
+
+***
+
+# 4. Reasons for not sharing
+
+> Why don't people share data?
+
+__Figure 4:__ Reasons given for not providing data. Communication loss and lack of contact information were the main reasons data were not obtained.
+
+_NOTES:Here we decided to flip the axes to separate this analysis from the others. These data are not a sub-grouping of our results but rather a analysis of only the unrecovered datasets. Also unlike the other data above, we did not run stats here._
+
+Data details:
+Here I used all of the data that were not collected and sorted them into categories based on the redmine notes we took:
+
+* All datasets labeled "emailed" were grouped with a other datasets that were labeled "unrecoverable" because no contact information could be found.
+* All datasets labeled "replied" we put into their own category called "communication lost".
+* The "data lost" category includes all datasets in which someone confirmed that the data no longer existed either due to damage, non-persistent formats (not including printed/non-digital), etc.
+* The other are self-explanatory, but represent confirmed responses as to one of these reasons.
+* I tried to separate out the datasets that were not recovered but "should be on the CD" to sort these into their own category, but we acked sufficient notes to confidently add this grouping.
+
+```{r Unrecoverable reasons, echo=F}
+reas=rslt2 %>%
+  filter(Status=='Unrecoverable') %>%
+  filter(!reason=="no data generated") %>%
+  filter(!reason=="data uvailable") %>%
+  select(Status,reason)
+reasTab=as.data.frame(table(reas$reason))
+colnames(reasTab)=c('reason','nDatasets')
+
+## add in status = 'emailed' to 'no contact info' & status = "replied" to unwilling to share? ...discuss with group
+
+reasTab[reasTab$reason=='no contact info',"nDatasets"] <- (reasTab[reasTab$reason=='no contact info',"nDatasets"] + length(rslt2[rslt2$Status=='Emailed','Status'])) 
+
+levels(reasTab$reason)=c(levels(reasTab$reason),'communication lost')
+
+reasTab[6,]<-c('communication lost', length(rslt2[rslt2$Status=='Replied','Status'])+1)# +1 for one of the 'data unavailable' datasets, add the other to "data lost"
+reasTab[1,2]<-as.numeric(as.character(reasTab[reasTab$reason=="data lost","nDatasets"]))+1
+
+reasTab<-arrange(reasTab,as.numeric(nDatasets))
+reasTab$reason<-factor(reasTab$reason,levels = reasTab$reason,ordered = T)
+
+reasTot=sum(as.numeric(reasTab$nDatasets))
+reasTab$perc=as.numeric(reasTab$nDatasets)/reasTot
+
+whyNot<-ggplot(reasTab,aes(x=reason,y=as.numeric(perc)*100))+
+  geom_bar(stat = "identity")+
+  coord_flip()+
+  #scale_x_discrete(breaks = seq(0,60,by=10), labels=seq(0,60,by=10)) +
+  theme(axis.line=element_line('black'),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())+
+  theme_light()+
+  ylim(0,60)+
+  xlab('')+
+  ylab('\n% of unsuccessful projects')+
+  #ggtitle('Why are data not recovered?')+
+  theme(axis.text=element_text(size=14),
+        title=element_text(size=16,face="bold"))+
+  theme(axis.line.x = element_line(color="black"),
+        axis.line.y = element_line(color="black")) ## *** add each n as text above bar
+whyNot
+```
+
+***
+
+# S1 Figure. Awardee agency sector
 > Are there certain **sectors** that are more likely to make data available than others?
 (based on PI's affiliation)
 
-We want to display these results similar to above (#3). Here we really liked the nProjects graph since it shows how many projects were initially funded which is an interesting anecdote, but still just an anectdote.
+__SuppFigure 1:__ Percent success of projects by agency sector. The top plot is total number of projects funded for each sector, the bottom plot shows the percent success for the given sector.
+
+_NOTES: We want to display these results similar to above (#3). Here we really liked the nProjects graph since it shows how many projects were initially funded which is an interesting anecdote, but still just an anectdote._
 
 ```{r, subSector stacked, fig.height=10,echo=FALSE}
 secSubYN=as.data.frame(table(rslt2$agSubGrp,rslt2$succ))
@@ -278,7 +295,7 @@ subSecPerc=ggplot(secSubYN2[secSubYN2$succ==0,],aes(x=subSector,y=as.numeric(pro
         panel.grid.minor = element_blank(),
         panel.border = element_blank(),
         panel.background = element_blank(),
-        axis.text.x = element_text(angle=90))+
+        axis.text.x = element_text(angle=45,size = 14,vjust = 1,hjust = 1))+
   xlab('\nSector')+
   ylab('% successful\n')+
   ylim(0,63)+
@@ -295,18 +312,20 @@ subSecPerc=ggplot(secSubYN2[secSubYN2$succ==0,],aes(x=subSector,y=as.numeric(pro
   # annotate("text", x = 6, y=secSubYN2$prop[[6]]*100+3, label = as.character(secSubYN2[secSubYN2$subSector=="tribe" & secSubYN2$succ==0,"grpTots"]))
 
 # grid.arrange(subSecNds, subSecPerc, ncol = 1, heights=c(1,1.75))
-plot_grid(subSecNds, subSecPerc, ncol = 1, rel_heights=c(1,1.75),align="v")
+plot_grid(subSecNds, subSecPerc, ncol = 1, rel_heights=c(1,1.5),align="v")
 
 ```
 
 ***
 
-# 4. Temporal trends?
+# S2 Figure. Temporal trends?
 > Is the availability of data correlated to how old the data are?
 
-We decided we are intersted in the percent success so, again, successes were grouped and percent was calculated based on each year total. We also wanted to display the number of datasets since it varies a lot and especially in the later years there is a significant increase in success, likely due to a decrease in projects, among other things (such as relationships to data collectors, etc.)
+__SuppFigure 2:__ Percent success of projects by age of data. Age is calculated based on number of years between the last year of EVOSTC funding and start of the archiving project (2012). The top plot is total number of projects that ended each year, the bottom plot shows the percent success for the given year.
 
-The x-axis might not be initially intuitive but we are representing years since a project ended in opposite-chronological order to show any effect of increasing age of a dataset. We chose this design to be able to compare to [Michener et al. 1997](http://onlinelibrary.wiley.com/doi/10.1890/1051-0761(1997)007[0330:NMFTES]2.0.CO;2/abstract;jsessionid=57D1E6F52B947ABD71ABEA56185DA7D3.f01t04) - fig 1.
+_NOTES: We decided we are intersted in the percent success so, again, successes were grouped and percent was calculated based on each year total. We also wanted to display the number of datasets since it varies a lot and especially in the later years there is a significant increase in success, likely due to a decrease in projects, among other things (such as relationships to data collectors, etc.)_
+
+_The x-axis might not be initially intuitive but we are representing years since a project ended in opposite-chronological order to show any effect of increasing age of a dataset. We chose this design to be able to compare to [Michener et al. 1997](http://onlinelibrary.wiley.com/doi/10.1890/1051-0761(1997)007[0330:NMFTES]2.0.CO;2/abstract;jsessionid=57D1E6F52B947ABD71ABEA56185DA7D3.f01t04) - fig 1._
 
 ```{r temporal - stacked plots,fig.height=10, echo=F, message=F, warning=F}
 
@@ -366,67 +385,4 @@ yrsPerc=ggplot(yrsPropEnd[yrsPropEnd$succ==0,],aes(x=since,y=as.numeric(prop*100
 plot_grid(yrsNds, yrsPerc, ncol = 1, rel_heights=c(1,1.5),align="v")
 ```
 
-***
 
-# 5. Reasons for not sharing
-
-> Why don't people share data?
-
-Here we decided to flip the axes to separate this analysis from the others. These data are not a sub-grouping of our results but rather a analysis of only the unrecovered datasets. Also unlike the other data above, we did not run stats here. 
-
-__Data details__
-Here I used all of the data that were not collected and sorted them into categories based on the redmine notes we took:
-
-* All datasets labeled "emailed" were grouped with a other datasets that were labeled "unrecoverable" because no contact information could be found.
-* All datasets labeled "replied" we put into their own category called "communication lost".
-* The "data lost" category includes all datasets in which someone confirmed that the data no longer existed either due to damage, non-persistent formats (not including printed/non-digital), etc.
-* The other are self-explanatory, but represent confirmed responses as to one of these reasons.
-* I tried to separate out the datasets that were not recovered but "should be on the CD" to sort these into their own category, but we acked sufficient notes to confidently add this grouping.
-
-```{r Unrecoverable reasons, echo=F}
-reas=rslt2 %>%
-  filter(Status=='Unrecoverable') %>%
-  filter(!reason=="no data generated") %>%
-  filter(!reason=="data uvailable") %>%
-  select(Status,reason)
-reasTab=as.data.frame(table(reas$reason))
-colnames(reasTab)=c('reason','nDatasets')
-
-## add in status = 'emailed' to 'no contact info' & status = "replied" to unwilling to share? ...discuss with group
-
-reasTab[reasTab$reason=='no contact info',"nDatasets"] <- (reasTab[reasTab$reason=='no contact info',"nDatasets"] + length(rslt2[rslt2$Status=='Emailed','Status'])) 
-
-levels(reasTab$reason)=c(levels(reasTab$reason),'communication lost')
-
-reasTab[6,]<-c('communication lost', length(rslt2[rslt2$Status=='Replied','Status'])+1)# +1 for one of the 'data unavailable' datasets, add the other to "data lost"
-reasTab[1,2]<-as.numeric(as.character(reasTab[reasTab$reason=="data lost","nDatasets"]))+1
-
-reasTab<-arrange(reasTab,as.numeric(nDatasets))
-reasTab$reason<-factor(reasTab$reason,levels = reasTab$reason,ordered = T)
-
-reasTot=sum(as.numeric(reasTab$nDatasets))
-reasTab$perc=as.numeric(reasTab$nDatasets)/reasTot
-
-whyNot<-ggplot(reasTab,aes(x=reason,y=as.numeric(perc)*100))+
-  geom_bar(stat = "identity")+
-  coord_flip()+
-  theme(axis.line=element_line('black'),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        panel.background = element_blank())+
-  #theme(axis.text.x = element_text(angle=90))+
-  ylim(0,63)+
-  xlab('')+
-  ylab('\nPercent of unsuccessful projects')+
-  ggtitle('Why are data not recovered?')+
-  theme(axis.text=element_text(size=14),
-        title=element_text(size=16,face="bold"))+
-  theme(axis.line.x = element_line(color="black"),
-        axis.line.y = element_line(color="black")) ## *** add each n as text above bar
-whyNot
-```
-
-
-
-_Note: We have reinvigorated these efforts for one last year and I plan to add the added progress from the latest recovery efforts to the discussion section._
