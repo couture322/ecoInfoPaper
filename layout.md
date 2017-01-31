@@ -3,5 +3,6 @@ msAuthorea/IntroductionIn_order_to_enhance_discovery__.html
 msAuthorea/MethodsIn_order_to_assess_our__.html
 msAuthorea/ResultsData_recovery_and_archiving_success__.html
 msAuthorea/DiscussionOverall_we_documented_a_low__.html
+h1_id_auto_label_section__.html
 msAuthorea/Acknowledgements__.html
 msAuthorea/Author_ContributionsJC_GM_recovered_the__.html
