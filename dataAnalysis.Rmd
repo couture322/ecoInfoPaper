@@ -1,10 +1,13 @@
 ---
 title: "EVOSTC data collection paper - Analysis"
 author: "Jessica Couture"
-date: "9/6/2016"# started: "9/27/2015"
-output: 
+date: "9/6/2016"
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
   html_document:
-    toc: true
+    toc: yes
     toc_depth: 3
 ---
 
@@ -36,7 +39,7 @@ library(grid)
 library(gridExtra)
 library(party)
 
-rslt=read.csv('data/archResRevised2.csv',header=T,stringsAsFactors=T)
+rslt=read.csv('data/evosArchResults.csv',header=T,stringsAsFactors=T)
 rslt[rslt$Status=='published','Status']<-'Published'
 
 rslt$succ=ifelse(rslt$Status %in% c('Published','SentData','Revised'),0,1) # 0=success??? ### RM?
@@ -181,6 +184,7 @@ I use the "party" package in R to run a random forests analysis to determine whi
 
 ### Random forests
 ```{r randForestBio, message=F}
+rslt2$dataType<-as.factor(rslt2$dataType)
 partyForBio<-cforest(statSucc~agSubGrp+end+dataType,data=rslt2,controls = cforest_unbiased(mtry = 2, ntree = 1000))
 varimp(partyForBio)
 ```
