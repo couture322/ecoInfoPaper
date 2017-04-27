@@ -123,11 +123,11 @@ sum(overall[c("Published","SentData")])/sum(overall)
 
 Limitations of the Chi-Square Test: 
 
-* The chi-square test does not give us much information about the strength of the relationship or its substantive significance in the population.
+* The chi-square test does not give us information about the strength of the relationship or its substantive significance in the population.
 * The chi-square test is sensitive to sample size. The size of the calculated chi-square is directly proportional to the size of the sample, independent of the strength of the relationship between the variables.
 * The chi-square test is also sensitive to small expected frequencies in one or more of the cells in the table. 
 
-I feel like these are things that we have always been aware of and in our don't create any false significance...opinions? Social data?
+These limitations are helpful with these data since the sample sizes _are_ so variable it is helpful that the test takes that into account. Therefore, when we find a significant difference we can be confident in the results. Here we test whether there are differences between groups within a characterization: research field, agency sector, age of data. 
 
 ### Research field
 
@@ -180,7 +180,7 @@ __NOT SIGNIFICANT: no detectable temporal trends in reporting data__
 ***
 ## 3. Which characteristics are most important in determining if a dataset will be successfully recovered?
 
-I use the "party" package in R to run a random forests analysis to determine which variables are most important (cforet() function). I use the same model as the glm, then create a classification tree below to show how the important variables influence the outcome. This package is be better than randomForest when independent variables are different types (Strobl et al. 2009)
+We use the "party" package in R to run a random forests analysis to determine which variables are most important (cforest() function). I use the same model as the glm, then create a classification tree below to show how the important variables influence the outcome. This package is be better than randomForest when independent variables are different types (Strobl et al. 2009)
 
 ### Random forests
 ```{r randForestBio, message=F}
@@ -190,12 +190,13 @@ varimp(partyForBio)
 ```
 
 __Since the importance value for research field is so much higher than the others, the most important variable in determining the outcome is research field__
-We would also like to discuss in the discussion that temporal relationships are _almost_ siginficantly different (chi-sq above), and although much less important, still recognized in this analysis. So we may have ghosts of the Michner theory even if our data aren't strong/clean enough to completely pull out the significance.
 
 ***
 
 ## 4. How do the important characteristics influence the output (success)? 
 ### Classification tree
+
+Here we run one iteration of the forest analysis above to display which variables whithin each classification determine positive or negative results.
 
 ```{r class tree bio, message=F, warning=FALSE}
 partreeBio<-ctree(statSucc~agSubGrp+end+dataType,data=rslt2)

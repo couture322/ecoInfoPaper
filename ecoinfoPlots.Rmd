@@ -98,10 +98,8 @@ statPlot=ggplot()+
         panel.grid.minor = element_blank(),
         panel.border = element_blank(),
         panel.background = element_blank())+
-  #theme(axis.text.x = element_text(angle=90))+
-  xlab(expression(RecoveryStage %->% .))+ # %->%, symbol(/256)
+  xlab("Recovery stage")+
   ylab('Number of projects\n')+
-  #ggtitle('Projects status')+
   theme(axis.text=element_text(size=14),
         title=element_text(size=16,face="bold"),
         legend.text = element_text(size = 14, face = "bold"))+
@@ -119,7 +117,7 @@ statPlot
  
 __Figure 2:__ Percent success of projects by research field. The top plot is total number of projects funded for each field, the bottom plot shows the percent success for the given field.
 
-_NOTES: We ended up looking at all fields separately so classifications are "broad". We decided to use the stacked nProjects/percent graphs to display variation in nProjects between groups as well as variation in relative responses for each group._
+_NOTES: We stack nProjects/percent graphs to display variation in nProjects between groups as well as variation in relative responses for each group._
 
 ```{r research field success plots,fig.height=9, echo=FALSE}
 
@@ -161,16 +159,11 @@ fieldPerc=ggplot(fldYN[fldYN$succ==0,],aes(x=category,y=(prop*100)))+
         panel.background = element_blank(),
         axis.text.x = element_text(angle=45,size = 14,vjust = 1,hjust = 1))+
   xlab('Field')+
-  ylab('% successful\n')+
+  ylab('% recovered\n')+
   ylim(0,63)+
   theme(title=element_text(size=18,face="bold"),
         axis.line.x = element_line(color="black"),
         axis.line.y = element_line(color="black"))
-  # annotate("text", x = 1, y=broadDf$prop[[3]]*100+2, label = as.character(broadDf[broadDf$category=="physical" & broadDf$succ==0,"grpTots"]))+
-  # annotate("text", x = 2, y=broadDf$prop[[9]]*100+2, label = as.character(broadDf[broadDf$category=="biological" & broadDf$succ==0,"grpTots"]))+
-  #annotate("text", x = 3, y=broadDf$prop[[4]]*100+1, label = "*",size=7) #as.character(broadDf[broadDf$category=="social" & broadDf$succ==0,"grpTots"]))+
-  # annotate("text", x = 4, y=broadDf$prop[[2]]*100+2, label = as.character(broadDf[broadDf$category=="oil" & broadDf$succ==0,"grpTots"]))+
-  # annotate("text", x = 5, y=broadDf$prop[[1]]*100+2, label = as.character(broadDf[broadDf$category=="modeling" & broadDf$succ==0,"grpTots"]))
 
 
 plot_grid(fieldNDs,fieldPerc, ncol = 1, rel_heights=c(1,1.5),align="v")
@@ -184,7 +177,6 @@ plot_grid(fieldNDs,fieldPerc, ncol = 1, rel_heights=c(1,1.5),align="v")
 
 __Figure 3:__ Classification tree of which data variables and characterizations predict successful and non-successful data acquisition. Data field was the only variable that could be used to predict data availability. 
 
-_NOTES: This is the original output I think I'll construct this from scratch outside of R since the names are the important part and I don't see a way to make this part cleaner even with rpart, rattle, etc._
 
 ```{r class tree bio, message=F, warning=FALSE}
 rslt2$dataType<-factor(rslt2$dataType)
@@ -201,7 +193,7 @@ plot(partreeBio)
 
 __Figure 4:__ Reasons given for not providing data. Communication loss and lack of contact information were the main reasons data were not obtained.
 
-_NOTES:Here we decided to flip the axes to separate this analysis from the others. These data are not a sub-grouping of our results but rather a analysis of only the unrecovered datasets. Also unlike the other data above, we did not run stats here._
+_NOTES:Here we flip the axes to separate this analysis from the others. These data are not a sub-grouping of our results like the others, but rather a deeper analysis of only the unrecovered datasets. Also, unlike the other data above, we did not run stats here._
 
 Data details:
 Here I used all of the data that were not collected and sorted them into categories based on the redmine notes we took:
@@ -248,7 +240,7 @@ whyNot<-ggplot(reasTab,aes(x=reason,y=as.numeric(perc)*100))+
   theme_light()+
   ylim(0,60)+
   xlab('')+
-  ylab('\n% of unsuccessful projects')+
+  ylab('\n% of unrecovered projects')+
   #ggtitle('Why are data not recovered?')+
   theme(axis.text=element_text(size=14),
         title=element_text(size=16,face="bold"))+
@@ -269,7 +261,7 @@ whyNot
 
 __SuppFigure 1:__ Percent success of projects by agency sector. The top plot is total number of projects funded for each sector, the bottom plot shows the percent success for the given sector.
 
-_NOTES: We want to display these results similar to above (#3). Here we really liked the nProjects graph since it shows how many projects were initially funded which is an interesting anecdote, but still just an anectdote._
+_NOTES: We stack nProjects/percent graphs to display variation in nProjects between groups as well as variation in relative responses for each group. These data show interesting opposing trends in nProjects and %recovery_
 
 ```{r, subSector stacked, fig.height=10,echo=FALSE}
 secSubYN=as.data.frame(table(rslt2$agSubGrp,rslt2$succ))
@@ -307,7 +299,7 @@ subSecPerc=ggplot(secSubYN2[secSubYN2$succ==0,],aes(x=subSector,y=as.numeric(pro
         panel.background = element_blank(),
         axis.text.x = element_text(angle=45,size = 14,vjust = 1,hjust = 1))+
   xlab('\nSector')+
-  ylab('% successful\n')+
+  ylab('% recovered\n')+
   ylim(0,63)+
   #ggtitle('Percent success by research sector type')+
   theme(axis.text=element_text(size=14),
@@ -333,7 +325,7 @@ plot_grid(subSecNds, subSecPerc, ncol = 1, rel_heights=c(1,1.5),align="v")
 
 __SuppFigure 2:__ Percent success of projects by age of data. Age is calculated based on number of years between the last year of EVOSTC funding and start of the archiving project (2012). The top plot is total number of projects that ended each year, the bottom plot shows the percent success for the given year.
 
-_NOTES: We decided we are intersted in the percent success so, again, successes were grouped and percent was calculated based on each year total. We also wanted to display the number of datasets since it varies a lot and especially in the later years there is a significant increase in success, likely due to a decrease in projects, among other things (such as relationships to data collectors, etc.)_
+_NOTES: We stack nProjects/percent graphs to display variation in nProjects between groups as well as variation in relative responses for each group._
 
 _The x-axis might not be initially intuitive but we are representing years since a project ended in opposite-chronological order to show any effect of increasing age of a dataset. We chose this design to be able to compare to [Michener et al. 1997](http://onlinelibrary.wiley.com/doi/10.1890/1051-0761(1997)007[0330:NMFTES]2.0.CO;2/abstract;jsessionid=57D1E6F52B947ABD71ABEA56185DA7D3.f01t04) - fig 1._
 
@@ -384,7 +376,7 @@ yrsPerc=ggplot(yrsPropEnd[yrsPropEnd$succ==0,],aes(x=since,y=as.numeric(prop*100
         panel.border = element_blank(),
         panel.background = element_blank())+
   xlab('Age of data (years)')+
-  ylab('% successful\n')+
+  ylab('% recovered\n')+
   ylim(0,63)+
   theme(axis.text=element_text(size=14),
         title=element_text(size=16,face="bold"))+

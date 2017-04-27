@@ -233,7 +233,7 @@ This data is licensed under CC0. The person who associated a work with this deed
 <entityType>Other</entityType>
 </otherEntity>
 <otherEntity><entityName>Data analysis R markdown script</entityName>
-<entityDescription>R markdown script for statistical analysis of archResRevised.csv data</entityDescription>
+<entityDescription>R markdown script for statistical analysis of evosArchResults.csv data</entityDescription>
 <physical><objectName>dataAnalysis.Rmd</objectName>
 <size unit="byte">7511</size>
 <dataFormat><externallyDefinedFormat><formatName>application/octet-stream</formatName>
