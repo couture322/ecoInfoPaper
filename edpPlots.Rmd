@@ -1,7 +1,7 @@
 ---
-title: "EVOSTC data collection paper - Data Visualizations"
+title: "EVOS data project - Plots"
 author: "Jessica Couture"
-date: "1/30/2017"
+date: "4/26/2017"
 output:
   pdf_document:
     toc: yes
@@ -61,7 +61,7 @@ rslt2$dataType<-gsub("biological-",'',rslt2$dataType)
 
 __Figure 1:__ Final status of all projects requested. Black are bars are projects for which data were successfully acquired, grey bars represent projects for which no data were acquired.
 
-_NOTES: For this first plot, we decided to use the original plot generated from redmine that simply displays the number of datasets in each staus at the end to the 2 year data collection effort. Still having issues getting the arrow in the x-axis title without the period or other character after it._
+_NOTES: This first plot displays the number of datasets within each staus classification at the end to the 2 year data collection effort._
 
 ```{r status plot, fig.width=10,echo=FALSE}
 
@@ -76,7 +76,7 @@ possible=overallLong %>%
   mutate(prop=nDatasets/sum(nDatasets))
 
 statusOrd=c('Unrecoverable','Emailed','Replied','SentData','Revised','Published')
-#rslt2$Status=as.factor(rslt2$Status,levels=statusOrd,ordered=T)
+
 statGrey=c('Unrecoverable'='gray67',
              'Emailed'='gray67',
              'Replied'='gray67',
@@ -86,19 +86,22 @@ statGrey=c('Unrecoverable'='gray67',
 
 stSuccCols=c("2"='gray67',"1"="black")
 
+statRename<-c()
+
 statPlot=ggplot()+
   geom_bar(data=rslt2,
                  aes(x=factor(Status,levels=statusOrd,ordered=T),fill=factor(statSucc)))+
+  scale_x_discrete(labels=c("unrecoverable","outreach\nattempted","contact\nestablished","data\nreceived","published"))+
   scale_fill_manual(name="Data obtained?",
                     breaks=c("1","2"),
                     values=stSuccCols,
-                    labels=c("Data acquired", "No data acquired"))+
+                    labels=c("Data recovered", "No data recovered"))+
   theme(legend.title=element_blank())+
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.border = element_blank(),
         panel.background = element_blank())+
-  xlab("Recovery stage")+
+  xlab("Recovery stage")+ 
   ylab('Number of projects\n')+
   theme(axis.text=element_text(size=14),
         title=element_text(size=16,face="bold"),
@@ -117,7 +120,7 @@ statPlot
  
 __Figure 2:__ Percent success of projects by research field. The top plot is total number of projects funded for each field, the bottom plot shows the percent success for the given field.
 
-_NOTES: We stack nProjects/percent graphs to display variation in nProjects between groups as well as variation in relative responses for each group._
+_NOTES: We use the stacked nProjects & percent recovered graphs to display variation in nProjects between groups as well as variation in relative responses for each group._
 
 ```{r research field success plots,fig.height=9, echo=FALSE}
 
@@ -165,7 +168,6 @@ fieldPerc=ggplot(fldYN[fldYN$succ==0,],aes(x=category,y=(prop*100)))+
         axis.line.x = element_line(color="black"),
         axis.line.y = element_line(color="black"))
 
-
 plot_grid(fieldNDs,fieldPerc, ncol = 1, rel_heights=c(1,1.5),align="v")
 
 ```
@@ -193,7 +195,7 @@ plot(partreeBio)
 
 __Figure 4:__ Reasons given for not providing data. Communication loss and lack of contact information were the main reasons data were not obtained.
 
-_NOTES: Here we flip the axes to separate this analysis from the others. These data are not a sub-grouping of our results like the others, but rather a deeper analysis of only the unrecovered datasets. Also, unlike the other data above, we did not run stats here._
+_NOTES:Here we flip the axes to separate this analysis from the others. These data are not a sub-grouping of our results like the others, but rather a analysis of only the unrecovered datasets. Also unlike the other data above, we did not run stats here._
 
 Data details:
 Here I used all of the data that were not collected and sorted them into categories based on the redmine notes we took:
@@ -261,7 +263,7 @@ whyNot
 
 __SuppFigure 1:__ Percent success of projects by agency sector. The top plot is total number of projects funded for each sector, the bottom plot shows the percent success for the given sector.
 
-_NOTES: We stack nProjects/percent graphs to display variation in nProjects between groups as well as variation in relative responses for each group. These data show interesting opposing trends in nProjects and %recovery_
+_NOTES: We stack nProjects/percent graphs to display variation in nProjects between groups as well as variation in relative responses for each group. These data show interesting opposing trends in nProjects and percent recovery_
 
 ```{r, subSector stacked, fig.height=10,echo=FALSE}
 secSubYN=as.data.frame(table(rslt2$agSubGrp,rslt2$succ))
@@ -306,14 +308,7 @@ subSecPerc=ggplot(secSubYN2[secSubYN2$succ==0,],aes(x=subSector,y=as.numeric(pro
         title=element_text(size=16,face="bold"))+
   theme(axis.line.x = element_line(color="black"),
         axis.line.y = element_line(color="black"))
-  # annotate("text", x = 1, y=secSubYN2$prop[[2]]*100+3, label = as.character(secSubYN2[secSubYN2$subSector=="gov_fed" & secSubYN2$succ==0,"grpTots"]))+
-  # annotate("text", x = 2, y=secSubYN2$prop[[3]]*100+3, label = as.character(secSubYN2[secSubYN2$subSector=="gov_state" & secSubYN2$succ==0,"grpTots"]))+
-  # annotate("text", x = 3, y=secSubYN2$prop[[1]]*100+3, label = as.character(secSubYN2[secSubYN2$subSector=="academia" & secSubYN2$succ==0,"grpTots"]))+
-  # annotate("text", x = 4, y=secSubYN2$prop[[4]]*100+3, label = as.character(secSubYN2[secSubYN2$subSector=="nonProf" & secSubYN2$succ==0,"grpTots"]))+
-  # annotate("text", x = 5, y=secSubYN2$prop[[5]]*100+3, label = as.character(secSubYN2[secSubYN2$subSector=="private" & secSubYN2$succ==0,"grpTots"]))+
-  # annotate("text", x = 6, y=secSubYN2$prop[[6]]*100+3, label = as.character(secSubYN2[secSubYN2$subSector=="tribe" & secSubYN2$succ==0,"grpTots"]))
 
-# grid.arrange(subSecNds, subSecPerc, ncol = 1, heights=c(1,1.75))
 plot_grid(subSecNds, subSecPerc, ncol = 1, rel_heights=c(1,1.5),align="v")
 
 ```
@@ -357,8 +352,6 @@ yrsNds=ggplot(yrsPropEnd[yrsPropEnd$succ==0,],aes(x=since,y=yrSum)) +
         axis.title.y=element_text(color="black"),
         axis.title.x=element_blank())+
   xlim(min(endYrs$since),max(endYrs$since))+
-  #ylim(0,100)+ 
-  #xlab('Years since funding award')+
   ylab('Number\nof projects')+
   theme(legend.position="none",
         axis.text=element_text(size=14),
@@ -383,7 +376,6 @@ yrsPerc=ggplot(yrsPropEnd[yrsPropEnd$succ==0,],aes(x=since,y=as.numeric(prop*100
   theme(axis.line.x = element_line(color="black"),
         axis.line.y = element_line(color="black"))
 
-# grid.arrange(yrsNds, yrsPerc, ncol = 1, heights=c(1,1.5))
 plot_grid(yrsNds, yrsPerc, ncol = 1, rel_heights=c(1,1.5),align="v")
 ```
 
@@ -398,8 +390,6 @@ _To test if there were temporal trends in reasons given for not sharing data, we
 
 ```{r reasons - temp, echo=F, message=F, warning=F}
 reas2a=rslt2 %>%
-  #filter(!reason=="no data generated") %>%
-  #filter(!reason=="data uvailable") %>%
   filter(Status %in% c('Unrecoverable',"Emailed","Replied")) %>%
   select(Status,reason,end,agSubGrp,dataType)
 reas2a[reas2a$Status=="Emailed","reason"]<-"no contact info"

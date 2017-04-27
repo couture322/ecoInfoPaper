@@ -208,7 +208,7 @@ This data is licensed under CC0. The person who associated a work with this deed
 </dataTable>
 <otherEntity><entityName>MS figures R markdown script</entityName>
 <entityDescription>R markdown script that plots the data (evosArchResults.csv) representing total results and data field, agency and temporal breakdowns.</entityDescription>
-<physical><objectName>ecoinfoPlots.Rmd</objectName>
+<physical><objectName>edpPlots.Rmd</objectName>
 <size unit="byte">18464</size>
 <dataFormat><externallyDefinedFormat><formatName>application/octet-stream</formatName>
 </externallyDefinedFormat>
@@ -221,7 +221,7 @@ This data is licensed under CC0. The person who associated a work with this deed
 </otherEntity>
 <otherEntity><entityName>MS figures PDF</entityName>
 <entityDescription>Output PDF from MS figures R markdown script</entityDescription>
-<physical><objectName>ecoinfoPlots.pdf</objectName>
+<physical><objectName>edpPlots.pdf</objectName>
 <size unit="byte">234827</size>
 <dataFormat><externallyDefinedFormat><formatName>application/pdf</formatName>
 </externallyDefinedFormat>
