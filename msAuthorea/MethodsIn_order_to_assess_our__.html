@@ -1,79 +1,54 @@
-<h1 class="ltx_title_section">Methods<br></h1><div>In order to assess our success, we
-asked: for how many EVOSTC funded projects can we recover data? Of these
-projects we were interested in trends in reporting. Particularly, we asked
-which grantees were more likely to provide data and if there was a temporal
-trend as predicted by Michener (1997). To test this we asked if there are
-differences in data reporting based on any of three project characteristics: 1)
-data field, 2) grantee's agency sector, and 3) age of data. Of the data we are
-unable to recover, we wanted to know why were data not shared. Since each
-funded project had an unknown number of “datasets”, we base success on the
-publication of at least one dataset for any given project, regardless of size
-or complexity. Throughout our extensive data recovery effort, we took careful
-notes of our outreach efforts, communications and progress in publicly
-archiving acquired data for use in statistical analyses.<br></div><div>&nbsp;<br></div><div><b>Data recovery and archiving</b><br></div><div>From 2012 to 2014, a team of one
-full-time and three part-time staff members was assigned to collect and archive
-data funded by the Exxon Valdez Oil Spill Trustee Council (EVOSTC) targeting
-specifically those projects funded between 1989 and 2010. Project information
-was obtained from the projects page on the&nbsp;<a href="http://www.evostc.state.ak.us/index.cfm?FA=projects.search">EVOSTC website</a>,&nbsp;which includes varying levels of
-detail for each project, ranging from project title only to full bibliographic
-information and attached reports. We tracked the progress of the data request
-and acquisition process for each project based on six stages: “emailed”,
-“replied”, “sent data”, “published”, “unrecoverable”. <br></div><div>&nbsp;<br></div><div>Contact information was obtained
-through agency sites and Google searches based on the information we were able
-to gather from the EVOSTC site. If we were able to find contact information for
-the listed principal investigator, an initial outreach email or phone call was
-made explaining the data recovery project, citing the data requirements, and
-requesting data for the project in question. Projects for which outreach could
-be made were labeled “emailed” and were followed up numerous times if no reply
-was received. A reply to the outreach and would confirm that the contact
-information was correct, the project label would be promoted to “replied”,
-regardless of level of cooperation expressed in the response. If the responder determined
-the data was unrecoverable, they were labeled as such and the reasons were
-recorded in our tracking system.<br></div><div>Once we received data from for a
-project, the label was changed to “data sent”. If the data were clean and well
-documented enough and/or the contact was responsive enough to guide us through
-any necessary data edits and metadata creation the data were published to
-the&nbsp;<a href="https://goa.nceas.ucsb.edu/">Gulf of Alaska Historic Data Portal</a>&nbsp;and the project was labeled,
-“published”.&nbsp;<br></div><div>&nbsp;<br></div><div><b>Statistical Analysis</b><br></div><div>At the close of the data collation
-effort, we quantified the number of projects that fell into each of the above
-status labels and plotted them in a simple bar chart in order to assess the
-final status of our archiving undertaking. <br></div><div>&nbsp;<br></div><div>Results of the outreach efforts
-are further characterized based on three project descriptors: <i>research field
-of the project</i> (field), <i>agency sector of the home institution of the
-principal investigato</i>r (sector), <i>age of data when data when recovery
-efforts were initiated</i> (age). Within each of these categories a binary
-response (obtained or not) was used in which status classifications were
-grouped as such: successful = “published”, “data sent”; unsuccessful =
-“unrecoverable”, “emailed”, “replied”. Age of data is calculated as the number
-of years since the last year a project received EVOSTC funding since some
+<h1 class="ltx_title_section">Methods<br></h1><div><b>Data recovery and archiving</b><br></div><div>From 2012
+to 2014, a team of one full-time and three part-time staff members was assigned
+to collect and archive data funded by the EVOSTC targeting specifically those
+projects funded between 1989 and 2010. Project information was obtained from
+the projects page on the&nbsp;<a href="http://www.evostc.state.ak.us/index.cfm?FA=projects.search">EVOSTC website</a>,&nbsp;which includes varying levels of detail
+for each project, ranging from only the project title to full bibliographic
+information and attached reports. Throughout our extensive data recovery
+effort, we took careful notes of our outreach efforts, communications and
+progress in publicly archiving acquired data.&nbsp;
+We tracked the progress of the data request and acquisition process for
+each project based on six stages of increasing progress: “outreach attempted”,
+“contact established”, “data received”, “published”, “unrecoverable”. <br></div><div>&nbsp;<br></div><div>Grantee
+contact information was obtained through agency websites and Google searches
+based on the information we were able to gather from the EVOSTC website. If we
+were able to find contact information for the listed grantee, an initial outreach
+email or phone call was made and efforts and communications were tracked on an
+internal ticketing system. The data support team conducted data outreach and
+provided data support in the form of data formatting and metadata creation in
+order to minimize barriers to data sharing. Recovered data were published to
+the&nbsp;<a href="https://goa.nceas.ucsb.edu/">Gulf of
+Alaska Historic Data Portal</a>. At the close of the data recovery effort (fall
+2014), we quantified the number of projects that fell into each of the six
+status labels to assess the final status of the data recovery effort. <br></div><div>&nbsp;<br></div><div><b>Trends in data recovery</b><br></div><div>Projects were
+further characterized based on three project descriptors: <i>research field of
+the project</i> (field), <i>agency sector of the home institution of the
+grantee</i> (sector), <i>age of data when data when recovery efforts were
+initiated</i> (age). Within each of these categories a binary response (recovered
+or not recovered) was used, and status classifications were grouped as follows:
+recovered = “published”, “data received”; not recovered = “unrecoverable”,
+“outreach attempted”, “contact established”. Age of data was calculated as the
+number of years since the last year a project received EVOSTC funding since many
 projects spanned multiple years. This effort was initiated in 2012 so the most
-recent data were two years old.<br></div><div>&nbsp;<br></div><div>The impacts of these
-characteristics on the likelihood of providing data are assessed using discrete
-statistical tests: Chi-squared and random forest analyses. Chi-squared tests
-were run on each group of characteristics individually to test for differences
-in success based on these classifications. We then asked which of these
+recent data pursued were two years old.<br></div><div>&nbsp;<br></div><div>The impacts of these
+characteristics on the likelihood of providing data were assessed using
+discrete statistical tests: Chi-squared and random forest analyses. Chi-squared
+tests were run on each group of characteristics individually to test for
+differences in success based on these classifications. We then asked which of these
 characteristics were the most important in determining if the data from a
-project will successfully be recovered. To assess the relative importance of
-the three characteristics we ran a random forest analysis using the “party”
-package in R. We also produced a classification tree to visualize how these
-characteristics affect our outcome. <br></div><div>&nbsp;<br></div><div><b>Hurdles to recovery</b><br></div><div>Also of interest were the reasons
-data were not recovered. To quantify these responses we categorized the
-projects for which we were unable to gather any data based on notes from our
-correspondences.&nbsp; The projects included
-in this analysis are those labeled from the unsuccessful grouping: “emailed”,
-“replied” and “unrecoverable”. Since projects in the category “replied” where
-instances where we received at least an initial reply confirming that we had
-accurate contact information but lost communication before the data was sent, these
-projects were re-categorized as <i>communication
-lost</i>. Of the “unrecoverable” projects, notes were used to divide these
-into: <i>no contact information</i>, <i>data lost</i>, <i>non-digital data</i>, <i>unwilling
-to share</i>, and <i>requested additional
-funding</i>. The projects from the “emailed” status have been added to the <i>no contact information</i> group since we
+project was successfully be recovered. To assess the relative importance of the
+three characteristics we conducted a random forest analysis in R version 3.3.3
+using the “party” package and produced a classification tree to visualize how
+these characteristics affect our outcome (Hothorn et al, 2006a, Hothorn et al. 2006b, Strobl et al. 2007, Strobl et al. 2008).&nbsp; <br></div><div>&nbsp;<br></div><div><b>Hurdles to recovery</b><br></div><div>Also of
+interest were the reasons data were not recovered. To quantify these responses
+we categorized the projects for which we were unable to gather any data based
+on notes from our correspondence.&nbsp; The
+projects included in this analysis were those labeled from the not recovered
+grouping. &nbsp;Reasons were only recorded
+when we had direct confirmation through communications, otherwise projects that
+were not recovered were characterized based on their status (eg. The projects
+from the “outreach attempted” status have been added to the <i>no contact information</i> group since we
 were never able to confirm the outreach efforts actually reached the target
-recipient. Data are only labeled <i>data
-lost</i> if our contact confirmed that they were so. Similarly, the <i>non-digital data</i>, <i>unwilling to share</i> and <i>requested
-additional funding</i> cases are only labeled as such for projects were data
-requests were rejected for these confirmed reasons. Non-digital data is deemed
-“unrecoverable” here since our project lacked the resources to convert or store
-such data. Where possible, we have since digitized these data and published in
-the archive.<br></div><div><br></div><div><br></div>
+recipient.) Non-digital data is deemed “unrecoverable” here since our project
+lacked the resources to convert or store such data. Where possible, we have
+since digitized these data and published in the archive.<br></div><div><br></div>
