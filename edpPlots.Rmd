@@ -1,14 +1,14 @@
 ---
 title: "EVOS data project - Plots"
 author: "Jessica Couture"
-date: "4/26/2017"
+date: "8/27/2017"
 output:
-  pdf_document:
-    toc: yes
-    toc_depth: '3'
   html_document:
     toc: yes
     toc_depth: 3
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
 ---
 
 #Background
@@ -54,14 +54,12 @@ rslt2=rslt2 %>%
 rslt2$dataType<-gsub("biological-",'',rslt2$dataType)
 ```
 
-# MS Plots:
+# MS Plots: 
 
 ## 1. Project Status Reporting
 > Twenty-five years after the EVOS, for how many projects funded by EVOSTC can we collect data?</h4>
 
-__Figure 1:__ Final status of all projects requested. Black are bars are projects for which data were successfully acquired, grey bars represent projects for which no data were acquired.
-
-_NOTES: This first plot displays the number of datasets within each staus classification at the end to the 2 year data collection effort._
+__Figure 1:__ : Final status of all projects from which data were requested. Black bars are projects for which data were successfully acquired, grey bars represent projects for which no data were acquired.
 
 ```{r status plot, fig.width=10,echo=FALSE}
 
@@ -118,9 +116,7 @@ statPlot
 ## 2. Research field
 > Are there certain **research fields** that are more likely to make data available than others?
  
-__Figure 2:__ Percent success of projects by research field. The top plot is total number of projects funded for each field, the bottom plot shows the percent success for the given field.
-
-_NOTES: We use the stacked nProjects & percent recovered graphs to display variation in nProjects between groups as well as variation in relative responses for each group._
+__Figure 2:__ Percent success of data recovery, with projects grouped by research field. The top plot is total number of projects funded for each field, the bottom plot shows the percent success for the given field.
 
 ```{r research field success plots,fig.height=9, echo=FALSE}
 
@@ -177,7 +173,10 @@ plot_grid(fieldNDs,fieldPerc, ncol = 1, rel_heights=c(1,1.5),align="v")
 ## 3. Classification tree
 > How do the important characteristics influence the output (success)? 
 
-__Figure 3:__ Classification tree of which data variables and characterizations predict successful and non-successful data acquisition. Data field was the only variable that could be used to predict data availability. 
+__Figure 3:__ Classification tree of which data variables and characterizations predicting successful and non-successful data recovery. Data field was the only variable that could be used to predict data availability. 
+
+
+_NOTES: This will be redrawn in another program_
 
 
 ```{r class tree bio, message=F, warning=FALSE}
@@ -377,79 +376,4 @@ yrsPerc=ggplot(yrsPropEnd[yrsPropEnd$succ==0,],aes(x=since,y=as.numeric(prop*100
         axis.line.y = element_line(color="black"))
 
 plot_grid(yrsNds, yrsPerc, ncol = 1, rel_heights=c(1,1.5),align="v")
-```
-
-***
-
-## S3 Figure. Temporal trends in reasons?
-> Are there temporal trends in the reasons given for not sharing data?
-
-__SuppFigure 3:__ Counts of reasons for not sharing data based on the age of the data. 
-
-_To test if there were temporal trends in reasons given for not sharing data, we plotted the frequency of each reason for not sharing based on the age of the data._
-
-```{r reasons - temp, echo=F, message=F, warning=F}
-reas2a=rslt2 %>%
-  filter(Status %in% c('Unrecoverable',"Emailed","Replied")) %>%
-  select(Status,reason,end,agSubGrp,dataType)
-reas2a[reas2a$Status=="Emailed","reason"]<-"no contact info"
-reas2a[reas2a$Status=="Replied","reason"]<-"lost communication"
-
-reas2<-filter(reas2a,!reason %in% c("no data generated","data uvailable"))
-
-reasYr=as.data.frame(with(reas2,table(reason,end)))
-
-DL = ggplot(data=reasYr[reasYr$reason=="data lost",],aes(as.numeric(as.character((end))),Freq)) +
-  geom_line() +
-  ylim(0,15) +
-  xlim(1989,2010) +
-  xlab("") +
-  ylab("")+
-  ggtitle("data lost")
-
-NCI = ggplot(data=reasYr[reasYr$reason=="no contact info",],aes(as.numeric(as.character((end))),Freq)) +
-  geom_line() +
-  ylim(0,15) +
-  xlim(1989,2010) +
-  xlab("") +
-  ylab("")+
-  ggtitle("no contact info")
-
-ND = ggplot(data=reasYr[reasYr$reason=="non digital",],aes(as.numeric(as.character((end))),Freq)) +
-  geom_line() +
-  ylim(0,15) +
-  xlim(1989,2010) +
-  xlab("") +
-  ylab("")+
-  ggtitle("non digital")
-
-RF = ggplot(data=reasYr[reasYr$reason=="requested funding",],aes(as.numeric(as.character((end))),Freq)) +
-  geom_line() +
-  ylim(0,15) +
-  xlim(1989,2010) +
-  xlab("") +
-  ylab("") +
-  ggtitle("requested funding")
-
-US = ggplot(data=reasYr[reasYr$reason=="unwilling to share",],aes(as.numeric(as.character((end))),Freq)) +
-  geom_line() +
-  ylim(0,15) +
-  xlim(1989,2010) +
-  ylab("")+
-  xlab("") +
-  ggtitle("unwilling to share")
-
-LC = ggplot(data=reasYr[reasYr$reason=="lost communication",],aes(as.numeric(as.character((end))),Freq)) +
-  geom_line() +
-  ylim(0,15) +
-  xlab("") +
-  ylab("")+
-  ggtitle("lost communication")
-
-yAxLab <- ggdraw() + draw_label("Frequency", fontface='bold',angle = 90,hjust=0)
-xAxLab <- ggdraw() + draw_label("Year", fontface='bold',vjust=0)
-
-pYr<-plot_grid(DL,NCI,ND,RF,US,LC,labels="AUTO", ncol = 2,align="v")
-xPlot<-plot_grid(pYr,xAxLab,ncol=1,rel_heights = c(1,0.05))
-plot_grid(yAxLab,xPlot,ncol=2,rel_widths = c(0.05,1))
 ```
