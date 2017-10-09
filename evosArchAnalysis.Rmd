@@ -1,7 +1,7 @@
 ---
 title: "EVOSTC data collection paper - Analysis"
 author: "Jessica Couture"
-date: "9/6/2016"
+date: "10/6/2016"
 output:
   pdf_document:
     toc: yes
@@ -13,19 +13,18 @@ output:
 
 ## Background
 
-We are writing up a publication to report results of a two year data archiving effort by a small group of researchers and students at the National Center for Ecological Analysis and Synthesis at UC Santa Barbara. The [Exxon Valdez Oil Spill Trustee Council](http://www.evostc.state.ak.us) (EVOSTC) was formed following the Exxon Valdez oil spill in Alaska in 1989. Since then, the EVOSTC has funded hundreds of projects and in 2012 we initiated an effort to recover and archive the data collected in these EVOSTC funded projects which lasted for two years.
+This analysis accompanies publication the publication "_______", assessing results of a two year data archiving effort by a group of researchers and students at the National Center for Ecological Analysis and Synthesis at UC Santa Barbara. The [Exxon Valdez Oil Spill Trustee Council](http://www.evostc.state.ak.us) (EVOSTC) was formed following the Exxon Valdez oil spill in Alaska in 1989. Since then, the EVOSTC has funded hundreds of projects and in 2012 we initiated an effort to recover and archive the data collected through these EVOSTC funded projects. The recovery effort spanned two years.
 
-For this paper we ask 4 main questions about the data collected from the Exxon Valdez Oil Spill Trustee Council funded projects:
+For this paper we ask 3 main questions about the data collected from the Exxon Valdez Oil Spill Trustee Council funded projects:
 
 1. Twenty-five years after the EVOS, for how many projects funded by EVOSTC can we collect data?
-2. Are there differences in data reporting based on data characteristics?
+2. Are there differences in data reporting based on characteristics of the data?
 
   * Research field
   * Sector of researching body
   * Year data projects ended
 
-3. Which characteristics are most *important* in determining if a dataset will be successfully recovered?
-4. How do the important characteristics influence the output (success)?
+3. Which of these characteristics are most *important* in determining if a dataset will be successfully recovered and how do the important characteristics influence the output (success)?
 
 
 ```{r data prep,echo=FALSE,message=FALSE,warning=F}
@@ -121,19 +120,11 @@ sum(overall[c("Published","SentData")])/sum(overall)
 ## 2. Are there differences in data reporting based on data characteristics?
 #### Chi-square tests for each variable (characteristic)
 
-Limitations of the Chi-Square Test: 
-
-* The chi-square test does not give us information about the strength of the relationship or its substantive significance in the population.
-* The chi-square test is sensitive to sample size. The size of the calculated chi-square is directly proportional to the size of the sample, independent of the strength of the relationship between the variables.
-* The chi-square test is also sensitive to small expected frequencies in one or more of the cells in the table. 
-
-These limitations are helpful with these data since the sample sizes _are_ so variable it is helpful that the test takes that into account. Therefore, when we find a significant difference we can be confident in the results. Here we test whether there are differences between groups within a characterization: research field, agency sector, age of data. 
-
 ### Research field
 
 #### Are there certain **research fields** that are more likely to make data available than others?
 
-Chi-squared test for equal proportions between research fields - _bio broken out_
+Chi-squared test for equal proportions between research fields
 
 ```{r chi squared - field of study BIO,echo=FALSE,warning=FALSE}
 
@@ -142,7 +133,7 @@ bioChi=chisq.test(bioProps)
 
 bioChi
 ```
-__SIGNIFICANT: There are differences between successes in different research fields__
+__SIGNIFICANT: Reject the H0 that there are no differences in recovery in different research fields__
 
 ***
 
@@ -157,7 +148,7 @@ subSectChi=chisq.test(subSecProps)
 
 subSectChi
 ```
-__NOT SIGNIFICANT: sectors are not significant__
+__NOT SIGNIFICANT: there are no differences in recovery in different sectors__
 
 ***
 
@@ -175,12 +166,12 @@ tempChi=chisq.test(tempProps)
 tempChi
 
 ```
-__NOT SIGNIFICANT: no detectable temporal trends in reporting data__
+__NOT SIGNIFICANT: there are no differences in recovery based on when data were collected__
 
 ***
 ## 3. Which characteristics are most important in determining if a dataset will be successfully recovered?
 
-We use the "party" package in R to run a random forests analysis to determine which variables are most important (cforest() function). I use the same model as the glm, then create a classification tree below to show how the important variables influence the outcome. This package is be better than randomForest when independent variables are different types (Strobl et al. 2009)
+We use the "party" package in R to run a random forests analysis to determine which variables are most important. I use the same model as the glm, then create a classification tree below to show how the important variables influence the outcome. This package is be better than randomForest when independent variables are different types (Strobl et al. 2009)
 
 ### Random forests
 ```{r randForestBio, message=F}
@@ -189,11 +180,11 @@ partyForBio<-cforest(statSucc~agSubGrp+end+dataType,data=rslt2,controls = cfores
 varimp(partyForBio)
 ```
 
-__Since the importance value for research field is so much higher than the others, the most important variable in determining the outcome is research field__
+__Based on these results the most important variable in determining the outcome is research field__
 
 ***
 
-## 4. How do the important characteristics influence the output (success)? 
+## How do the important characteristics influence the output (success)? 
 ### Classification tree
 
 Here we run one iteration of the forest analysis above to display which variables whithin each classification determine positive or negative results.
@@ -206,3 +197,5 @@ partreeBio
 plot(partreeBio)
 ```
 
+_Birds, fish, habitat, mammal_ and _modeling data_ result in negative results.
+_Benthic invertebrates, plankton, oil,_ and _physical data_ result in positive results.

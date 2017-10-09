@@ -1,0 +1,201 @@
+---
+title: "EVOSTC data collection paper - Analysis"
+author: "Jessica Couture"
+date: "10/6/2016"
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+  html_document:
+    toc: yes
+    toc_depth: 3
+---
+
+## Background
+
+This analysis accompanies publication the publication "_______", assessing results of a two year data archiving effort by a group of researchers and students at the National Center for Ecological Analysis and Synthesis at UC Santa Barbara. The [Exxon Valdez Oil Spill Trustee Council](http://www.evostc.state.ak.us) (EVOSTC) was formed following the Exxon Valdez oil spill in Alaska in 1989. Since then, the EVOSTC has funded hundreds of projects and in 2012 we initiated an effort to recover and archive the data collected through these EVOSTC funded projects. The recovery effort spanned two years.
+
+For this paper we ask 3 main questions about the data collected from the Exxon Valdez Oil Spill Trustee Council funded projects:
+
+1. Twenty-five years after the EVOS, for how many projects funded by EVOSTC can we collect data?
+2. Are there differences in data reporting based on characteristics of the data?
+
+  * Research field
+  * Sector of researching body
+  * Year data projects ended
+
+3. Which of these characteristics are most *important* in determining if a dataset will be successfully recovered and how do the important characteristics influence the output (success)?
+
+
+```{r data prep,echo=FALSE,message=FALSE,warning=F}
+
+library(knitr)
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(reshape2)
+library(grid)
+library(gridExtra)
+library(party)
+
+rslt=read.csv('data/evosArchResults.csv',header=T,stringsAsFactors=T)
+rslt[rslt$Status=='published','Status']<-'Published'
+
+rslt$succ=ifelse(rslt$Status %in% c('Published','SentData','Revised'),0,1) # 0=success??? ### RM?
+rslt$statSucc=ifelse(rslt$Status %in% c('Published','SentData','Revised'),1,0) # 1 = success, 2 = not successful
+
+
+agDes=read.csv('data/ecoInfoAgencyDesig.csv',header=T,stringsAsFactors=T,col.names=c('agency','agGrp','agSubGrp'))
+agDes$agGrp=gsub('nonProf','private',agDes$agGrp)
+
+
+rslt2=merge(rslt,agDes,all.x=T)
+rslt2=rslt2 %>%
+  filter(!end>2010) %>%
+  select(Status,start,end,ecosystem,dataType,statSucc,agGrp,agSubGrp,reason)
+
+splBio=strsplit(as.character(rslt2$dataType),'-')
+
+rslt2$dataType<-gsub("biological-",'',rslt2$dataType)
+
+```
+
+## 1. Project Status Reporting
+<h4>Twenty-five years after the EVOS, for how many projects funded by EVOSTC can we collect data?</h4>
+ 
+```{r status plot, fig.width=10,echo=FALSE}
+
+overall=table(rslt2$Status)
+overallLong=melt(overall)
+colnames(overallLong)=c('Status','nDatasets')
+overall2=overallLong %>%
+  mutate(prop=nDatasets/sum(nDatasets))
+
+possible=overallLong %>%
+  filter(!Status=='Unrecoverable') %>%
+  mutate(prop=nDatasets/sum(nDatasets))
+
+statusOrd=c('Unrecoverable','Emailed','Replied','SentData','Revised','Published')
+#rslt2$Status=as.factor(rslt2$Status,levels=statusOrd,ordered=T)
+statGrey=c('Unrecoverable'='gray67',
+             'Emailed'='gray67',
+             'Replied'='gray67',
+             'SentData'='black',
+             'Revised'='black',
+             'Published'='black')
+
+statPlot=ggplot()+
+  geom_bar(data=rslt2,
+                 aes(x=factor(Status,levels=statusOrd,ordered=T),fill=Status))+
+  scale_fill_manual(labels=statusOrd,breaks=statusOrd,values=statGrey)+
+  theme(legend.title=element_blank())+
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())+
+  #theme(axis.text.x = element_text(angle=90))+
+  xlab(expression(RecoveryStage %->% .))+ # %->%, symbol(/256)
+  ylab('Number of projects\n')+
+  ggtitle('Projects status')+
+  theme(axis.text=element_text(size=14),
+        title=element_text(size=16,face="bold"),
+        legend.text = element_text(size = 14, face = "bold"))+
+  theme(axis.line.x = element_line(color="black"),
+        axis.line.y = element_line(color="black"))
+
+statPlot
+
+```
+
+```{r Effort results}
+# Number of projects requested
+sum(overall)
+
+# percent successful
+sum(overall[c("Published","SentData")])/sum(overall)
+```
+
+***
+
+## 2. Are there differences in data reporting based on data characteristics?
+#### Chi-square tests for each variable (characteristic)
+
+### Research field
+
+#### Are there certain **research fields** that are more likely to make data available than others?
+
+Chi-squared test for equal proportions between research fields
+
+```{r chi squared - field of study BIO,echo=FALSE,warning=FALSE}
+
+bioProps=table(rslt2$statSucc,rslt2$dataType)
+bioChi=chisq.test(bioProps)
+
+bioChi
+```
+__SIGNIFICANT: Reject the H0 that there are no differences in recovery in different research fields__
+
+***
+
+### Research sector
+
+#### Test for equal propportions between PI's home institution type/sector:
+
+government and private split: govFed, govState, nonProf, forProf
+```{r chi squared - subSector,echo=FALSE,warning=FALSE}
+subSecProps=table(rslt2$statSucc,rslt2$agSubGrp)
+subSectChi=chisq.test(subSecProps)
+
+subSectChi
+```
+__NOT SIGNIFICANT: there are no differences in recovery in different sectors__
+
+***
+
+### Year project ended
+
+#### Test for equal proportions between years:
+
+Chi-squared test for equal proportions between age of data
+
+```{r chi squared - end years,echo=FALSE,warning=FALSE}
+
+tempProps=table(rslt2$statSucc,as.character(rslt2$end))
+tempChi=chisq.test(tempProps)
+
+tempChi
+
+```
+__NOT SIGNIFICANT: there are no differences in recovery based on when data were collected__
+
+***
+## 3. Which characteristics are most important in determining if a dataset will be successfully recovered?
+
+We use the "party" package in R to run a random forests analysis to determine which variables are most important. I use the same model as the glm, then create a classification tree below to show how the important variables influence the outcome. This package is be better than randomForest when independent variables are different types (Strobl et al. 2009)
+
+### Random forests
+```{r randForestBio, message=F}
+rslt2$dataType<-as.factor(rslt2$dataType)
+partyForBio<-cforest(statSucc~agSubGrp+end+dataType,data=rslt2,controls = cforest_unbiased(mtry = 2, ntree = 1000))
+varimp(partyForBio)
+```
+
+__Based on these results the most important variable in determining the outcome is research field__
+
+***
+
+## How do the important characteristics influence the output (success)? 
+### Classification tree
+
+Here we run one iteration of the forest analysis above to display which variables whithin each classification determine positive or negative results.
+
+```{r class tree bio, message=F, warning=FALSE}
+partreeBio<-ctree(statSucc~agSubGrp+end+dataType,data=rslt2)
+
+partreeBio
+
+plot(partreeBio)
+```
+
+_Birds, fish, habitat, mammal_ and _modeling data_ result in negative results.
+_Benthic invertebrates, plankton, oil,_ and _physical data_ result in positive results.
