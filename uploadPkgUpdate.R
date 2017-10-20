@@ -22,7 +22,7 @@ uploadPkg <- function() {
   dp <- new("DataPackage")
   dataDir <- "filesToArchive"
   saveDir <- getwd()
-  #setwd(dataDir)
+  setwd(dataDir)
   emlFile <- "evosMsEML.xml"
   EMLdoc <- read_eml(emlFile)
   
