@@ -1,7 +1,7 @@
 ---
-title: "EVOSTC data collection paper - Analysis"
+title: "EVOS data project - Analysis"
 author: "Jessica Couture"
-date: "10/6/2016"
+date: "10/22/2017"
 output:
   pdf_document:
     toc: yes
@@ -13,7 +13,7 @@ output:
 
 ## Background
 
-This analysis accompanies publication the publication "_______", assessing results of a two year data archiving effort by a group of researchers and students at the National Center for Ecological Analysis and Synthesis at UC Santa Barbara. The [Exxon Valdez Oil Spill Trustee Council](http://www.evostc.state.ak.us) (EVOSTC) was formed following the Exxon Valdez oil spill in Alaska in 1989. Since then, the EVOSTC has funded hundreds of projects and in 2012 we initiated an effort to recover and archive the data collected through these EVOSTC funded projects. The recovery effort spanned two years.
+This analysis accompanies publication the manuscript "How effective are funder imposed data sharing requirements?", assessing results of a two year data archiving effort by a group of researchers and students at the National Center for Ecological Analysis and Synthesis at UC Santa Barbara. The [Exxon Valdez Oil Spill Trustee Council](http://www.evostc.state.ak.us) (EVOSTC) was formed following the Exxon Valdez oil spill in Alaska in 1989. Since then, the EVOSTC has funded hundreds of projects and in 2012 we initiated an effort to recover and archive the data collected through these EVOSTC funded projects. The recovery effort spanned two years.
 
 For this paper we ask 3 main questions about the data collected from the Exxon Valdez Oil Spill Trustee Council funded projects:
 
@@ -76,27 +76,23 @@ possible=overallLong %>%
   mutate(prop=nDatasets/sum(nDatasets))
 
 statusOrd=c('Unrecoverable','Emailed','Replied','SentData','Revised','Published')
-#rslt2$Status=as.factor(rslt2$Status,levels=statusOrd,ordered=T)
-statGrey=c('Unrecoverable'='gray67',
-             'Emailed'='gray67',
-             'Replied'='gray67',
-             'SentData'='black',
-             'Revised'='black',
-             'Published'='black')
+stSuccCols=c("0"='gray67',"1"="black")
 
 statPlot=ggplot()+
   geom_bar(data=rslt2,
-                 aes(x=factor(Status,levels=statusOrd,ordered=T),fill=Status))+
-  scale_fill_manual(labels=statusOrd,breaks=statusOrd,values=statGrey)+
+                 aes(x=factor(Status,levels=statusOrd,ordered=T),fill=factor(statSucc)))+
+  scale_x_discrete(labels=c("unrecoverable","outreach\nattempted","contact\nestablished","data\nreceived","published"))+
+  scale_fill_manual(name="Data obtained?",
+                    breaks=c("1","0"),
+                    values=stSuccCols,
+                    labels=c("Data recovered", "No data recovered"))+
   theme(legend.title=element_blank())+
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.border = element_blank(),
         panel.background = element_blank())+
-  #theme(axis.text.x = element_text(angle=90))+
-  xlab(expression(RecoveryStage %->% .))+ # %->%, symbol(/256)
+  xlab("Recovery stage")+ 
   ylab('Number of projects\n')+
-  ggtitle('Projects status')+
   theme(axis.text=element_text(size=14),
         title=element_text(size=16,face="bold"),
         legend.text = element_text(size = 14, face = "bold"))+
@@ -113,6 +109,7 @@ sum(overall)
 
 # percent successful
 sum(overall[c("Published","SentData")])/sum(overall)
+
 ```
 
 ***

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<eml:eml xmlns:eml="eml://ecoinformatics.org/eml-2.1.1" xmlns:stmml="http://www.xml-cml.org/schema/stmml-1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" packageId="df35b.311.1" system="knb" xsi:schemaLocation="eml://ecoinformatics.org/eml-2.1.1 eml.xsd">
+<eml:eml xmlns:eml="eml://ecoinformatics.org/eml-2.1.1" xmlns:stmml="http://www.xml-cml.org/schema/stmml-1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" packageId="df35b.311.4" system="knb" xsi:schemaLocation="eml://ecoinformatics.org/eml-2.1.1 eml.xsd">
   <access order="allowFirst" authSystem="knb">
     <allow>
       <principal>cn=evos,o=NCEAS,dc=ecoinformatics,dc=org</principal>
@@ -14,7 +14,6 @@
         <surName>Couture</surName>
       </individualName>
       <organizationName>University of California, Santa Barbara</organizationName>
-      <positionName>PhD Student</positionName>
       <address>
         <deliveryPoint>Bren Hall</deliveryPoint>
         <city>Santa Barbara</city>
@@ -24,6 +23,23 @@
       </address>
       <electronicMailAddress>couture@nceas.ucsb.edu</electronicMailAddress>
     </creator>
+    <associatedParty id="1508707672158">
+      <individualName>
+        <salutation>Dr.</salutation>
+        <givenName>Colette</givenName>
+        <surName>Ward</surName>
+      </individualName>
+      <organizationName>National Center for Ecological Analysis and Synthesis, UCSB</organizationName>
+      <role>Author</role>
+    </associatedParty>
+    <associatedParty id="1508707715109">
+      <individualName>
+        <givenName>Gavin</givenName>
+        <surName>McDonald</surName>
+      </individualName>
+      <organizationName>University of California, Santa Barbara</organizationName>
+      <role>Content Provider</role>
+    </associatedParty>
     <associatedParty>
       <references>1486521714777</references>
       <role>Originator</role>
@@ -35,6 +51,15 @@
       </individualName>
       <organizationName>National Center for Ecological Analysis and Synthesis, UCSB</organizationName>
       <role>Principal Investigator</role>
+    </associatedParty>
+    <associatedParty id="1508707626039">
+      <individualName>
+        <salutation>Dr.</salutation>
+        <givenName>Rachael</givenName>
+        <surName>Blake</surName>
+      </individualName>
+      <organizationName>National Center for Ecological Analysis and Synthesis, UCSB</organizationName>
+      <role>Author</role>
     </associatedParty>
     <abstract>
       <para>These data quantify  the results of a two year data archiving effort by a small group of researchers and students at the National Center for Ecological Analysis and Synthesis at UC Santa Barbara in collaboration with the Gulf Watch Alaska synthesis group and funded by the Exxon Valdez Oil Spill Trustee Council (EVOSTC). The EVOSTC was formed following the Exxon Valdez oil spill in Alaska in 1989. Since then, the EVOSTC has funded hundreds of projects and in 2012 we began a project to recover and archive the data collected during these EVOSTC funded projects. These data and analyses summarize the archiving project results and inform a manuscript in which we ask 5 main questions about the data collected from the Exxon Valdez Oil Spill Trustee Council funded projects:
@@ -91,7 +116,7 @@ This data is licensed under CC0. The person who associated a work with this deed
         <description>
           <section>
             <title>Data recovery and archiving</title>
-            <para>From 2012 to 2014, a team of one full-time and three part-time staff members was assigned to collect and archive data funded by the Exxon Valdez Oil Spill Trustee Council (EVOSTC) targeting specifically those projects funded between 1989 and 2010. Project information was obtained from the projects page on the EVOSTC website, which includes varying levels of detail for each project, ranging from project title only to full bibliographic information and attached reports. We tracked the progress of the data request and acquisition process for each project based on six stages: “contact attempted”, “contact established”, “data received”, “published”, “unrecoverable”. Contact information was obtained through agency sites and Google searches based on the information we were able to gather from the EVOSTC site. If we were able to find contact information for the listed principal investigator (either email address or phone number), an outreach email or phone call was made explaining the data recovery project and requesting data for the project in question. Projects for which outreach could be made were labeled “contact attempted”. If we then received a reply to the outreach and could therefore confirm that the contact information was correct, the project label was promoted to “contact established”, regardless of level of cooperation expressed in the response. Once we received data from for a project, the label was changed to “data received”. Since it was often difficult to determine how much data were created under each project, if any data were received the project was considered successful. If the data were clean and well documented enough and/or the contact was responsive enough to guide us through any necessary data edits and metadata creation the data were then published to the Gulf of Alaska Historic Data Portal and the project was labeled, “published”. Data were deemed “unrecoverable” only if the contact confirmed that the data were not recoverable.</para>
+            <para>From 2012 to 2014, a team of one full-time and three part-time staff members was assigned to collect and archive data funded by the Exxon Valdez Oil Spill Trustee Council (EVOSTC) targeting specifically those projects funded between 1989 and 2010. Project information was obtained from the projects page on the EVOSTC website, which includes varying levels of detail for each project, ranging from project title only to full bibliographic information and attached reports. We tracked the progress of the data request and acquisition process for each project based on six stages: “emailed”, “replied”, “sent data”, “data revised”, “published”, “unrecoverable”. Contact information was obtained through agency sites and Google searches based on the information we were able to gather from the EVOSTC site. If we were able to find contact information for the listed principal investigator (either email address or phone number), an outreach email or phone call was made explaining the data recovery project and requesting data for the project in question. Projects for which outreach could be made were labeled “emailed”. If we then received a reply to the outreach and could therefore confirm that the contact information was correct, the project label was promoted to “replied”, regardless of level of cooperation expressed in the response. Once we received data from for a project, the label was changed to “data sent”. Since it was often difficult to determine how much data were created under each project, if any data were received the project was considered successful. If the data were clean and well documented enough and/or the contact was responsive enough to guide us through any necessary data edits and metadata creation the data were labeled “data formatted”. Once the contact approved our edits and compiled metadata, the products were then published to the Gulf of Alaska Historic Data Portal and the project was labeled, “published”.</para>
             <para>Since each funded project had an unknown number of “datasets”, we base success on the publication of at least on dataset for any given project, regardless of size or complexity. Throughout our extensive data recovery effort, we took careful notes of our out reach efforts, communications and progress in publicly archiving acquired data for use in statistical analyses.</para>
           </section>
         </description>
@@ -136,7 +161,7 @@ This data is licensed under CC0. The person who associated a work with this deed
         </dataFormat>
         <distribution>
           <online>
-            <url>https://cn-dev-2.test.dataone.org/cn/v2/resolve/urn:uuid:84d38dd9-004f-402d-b047-0c1577ccf0b5</url>
+            <url>https://cn-dev-2.test.dataone.org/cn/v2/resolve/urn:uuid:2a2a0728-bb61-4170-b391-651f16481085</url>
           </online>
         </distribution>
       </physical>
@@ -149,20 +174,20 @@ This data is licensed under CC0. The person who associated a work with this deed
               <nonNumericDomain>
                 <enumeratedDomain>
                   <codeDefinition>
-                    <code>contact</code>
-                    <definition>Contact established. contact information confirmed and data request was received</definition>
+                    <code>Replied</code>
+                    <definition>contact information confirmed and data request was received</definition>
                   </codeDefinition>
                   <codeDefinition>
-                    <code>outAttempt</code>
-                    <definition>Outreach attempted. Initial outreach was sent</definition>
+                    <code>Emailed</code>
+                    <definition>initial outreach was sent</definition>
                   </codeDefinition>
                   <codeDefinition>
                     <code>Unrecoverable</code>
                     <definition>data is not recoverable</definition>
                   </codeDefinition>
                   <codeDefinition>
-                    <code>dataRcvd</code>
-                    <definition>Data received. Data were obtained for the given project but were not published</definition>
+                    <code>SentData</code>
+                    <definition>data were obtained for the given project but were not published</definition>
                   </codeDefinition>
                   <codeDefinition>
                     <code>published</code>
@@ -306,7 +331,7 @@ This data is licensed under CC0. The person who associated a work with this deed
       <entityName>MS figures R markdown script</entityName>
       <entityDescription>R markdown script that plots the data (evosArchResults.csv) representing total results and data field, agency and temporal breakdowns.</entityDescription>
       <physical>
-        <objectName>edpPlots.Rmd</objectName>
+        <objectName>ecoinfoPlots.Rmd</objectName>
         <size unit="byte">18464</size>
         <dataFormat>
           <externallyDefinedFormat>
@@ -315,7 +340,7 @@ This data is licensed under CC0. The person who associated a work with this deed
         </dataFormat>
         <distribution id="1486524739435">
           <online>
-            <url function="download">https://cn-dev-2.test.dataone.org/cn/v2/resolve/urn:uuid:3203e029-75a9-49e0-b7f3-dda765d91bc3</url>
+            <url function="download">https://cn-dev-2.test.dataone.org/cn/v2/resolve/urn:uuid:95161630-af52-4db7-bebd-af8b4995724d</url>
           </online>
         </distribution>
       </physical>
@@ -325,7 +350,7 @@ This data is licensed under CC0. The person who associated a work with this deed
       <entityName>MS figures PDF</entityName>
       <entityDescription>Output PDF from MS figures R markdown script</entityDescription>
       <physical>
-        <objectName>edpPlots.pdf</objectName>
+        <objectName>ecoinfoPlots.pdf</objectName>
         <size unit="byte">234827</size>
         <dataFormat>
           <externallyDefinedFormat>
@@ -334,7 +359,7 @@ This data is licensed under CC0. The person who associated a work with this deed
         </dataFormat>
         <distribution id="1486524795335">
           <online>
-            <url function="download">https://cn-dev-2.test.dataone.org/cn/v2/resolve/urn:uuid:1f21c1ac-ba16-4faf-80d7-4ec758371df9</url>
+            <url function="download">https://cn-dev-2.test.dataone.org/cn/v2/resolve/urn:uuid:f921876a-f16b-4bf7-bc43-accd4918a2d7</url>
           </online>
         </distribution>
       </physical>
@@ -353,7 +378,7 @@ This data is licensed under CC0. The person who associated a work with this deed
         </dataFormat>
         <distribution id="1486525122750">
           <online>
-            <url function="download">https://cn-dev-2.test.dataone.org/cn/v2/resolve/urn:uuid:1c00daae-b430-41b5-9b94-0f3563f6229c</url>
+            <url function="download">https://cn-dev-2.test.dataone.org/cn/v2/resolve/urn:uuid:ac4e8c8a-8408-45fe-ab0f-07c560886d4d</url>
           </online>
         </distribution>
       </physical>
@@ -372,7 +397,7 @@ This data is licensed under CC0. The person who associated a work with this deed
         </dataFormat>
         <distribution id="1486525180151">
           <online>
-            <url function="download">https://cn-dev-2.test.dataone.org/cn/v2/resolve/urn:uuid:a52ad289-8d45-4728-bdf8-3da221f5d908</url>
+            <url function="download">https://cn-dev-2.test.dataone.org/cn/v2/resolve/urn:uuid:77300063-2ab8-413f-9fe9-1b615d972bbf</url>
           </online>
         </distribution>
       </physical>

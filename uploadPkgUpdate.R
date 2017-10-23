@@ -14,21 +14,22 @@ library(EML)
 uploadPkg <- function() {
   
  # INPUTS/OUTPUTS:
- #   evosArchResults.csv --> dataAnalysis.Rmd --> dataAnalysis.pdf
+ #  evosArchResults.csv --> evosArchAnalysis.Rmd --> evosArchAnalysis.pdf
  # 
- # evosArchResults.csv --> ecoinfoPlots.Rmd --> ecoinfoPlots.pdf
+ #  evosArchResults.csv --> evosArchPlots.Rmd --> evosArchPlots.pdf
  # 
   
   dp <- new("DataPackage")
   dataDir <- "filesToArchive"
   saveDir <- getwd()
-  setwd(dataDir)
-  emlFile <- "evosMsEML.xml"
+  #setwd(dataDir)
+  emlFile <- "dataArchEML.xml"
   EMLdoc <- read_eml(emlFile)
   
   # The 'resolveURI' CN MN in 'D1Client' must agree
   resolveURI <- "https://cn-dev-2.test.dataone.org/cn/v2/resolve"
-  d1c <- D1Client("DEV2", "urn:node:mnDevUCSB1")
+  d1c <- D1Client("STAGING2", "urn:node:mnTestKNB")
+  #d1c <- D1Client("DEV2", "urn:node:mnDevUCSB1")
   
   # resolveURI <- "https://cn.dataone.org/cn/v2/resolve"
   # d1c <- D1Client("STAGING2", "urn:node:mnTestKNB")
