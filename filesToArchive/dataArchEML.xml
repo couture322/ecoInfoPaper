@@ -127,8 +127,8 @@ This data is licensed under CC0. The person who associated a work with this deed
             <title>Statistical analysis</title>
             <para>At the close of the data collation effort, we quantified the number of projects that fell into each of the above status labels and plotted them in a simple bar chart in order to assess the final status of our archiving undertaking.</para>
             <para>Results of the outreach efforts are further characterized based on three project descriptors: research field of the project (field), agency sector of the home institution of the principal investigator (sector), age of data when data when recovery efforts were initiated (age). Age of data is calculated as the number of years since the last year a project received EVOSTC funding since some projects spanned multiple years.</para>
-            <para>The impacts of these characteristics on the likelihood of providing data are assessed using discrete statistical tests: Chi-squared and random forest analyses. Chi-squared tests were run on each group of characteristics individually to test for differences in success based on these classifications. We then asked which of these characteristics were the most important in determining if the data from a project will successfully be recovered. Do assess the relative importance of the three characteristics we ran a random forest analysis using the “party” package in the R programming language. We also produced one classification tree to visualize how these characteristics affect our outcome.</para>
-            <para>Also of interest were the reasons data were not recovered. To quantify these responses we categorized the projects for which we were unable to gather any data based on notes from our correspondences.  The projects included in this analysis include those labeled “emailed”, “replied” and “unrecoverable” in the status categorization. Projects in the category “replied” where instances where we received at least an initial reply confirming that we had accurate contact information but lost communication before the data was sent. These projects have been re-categorized here as communication lost. Of the “unrecoverable” projects, notes were used to divide these into: no contact information, data lost, non-digital data, unwilling to share, and requested additional funding. The projects from the “emailed” status have been added to the no contact information group since we were never able to confirm the outreach efforts actually reached the target recipient. Data are only labeled data lost if our contact confirmed that they were so. Similarly, the non-digital data, unwilling to share and requested additional funding cases are only labeled as such for projects were data requests were rejected for these confirmed reasons. Non-digital data is deemed “unrecoverable” here since our project lacked the resources to convert or store such data. We have since converted these data, when possible, and refer to these data in the discussion.</para>
+            <para>The impacts of these characteristics on the likelihood of providing data are assessed using discrete statistical tests: Chi-squared and random forest analyses. Chi-squared tests were run on each group of characteristics individually to test for differences in success based on these classifications. We then asked which of these characteristics were the most important in determining if the data from a project will successfully be recovered. To assess the relative importance of the three characteristics we ran a random forest analysis using the “party” package in the R programming language. We also produced one classification tree to visualize how these characteristics affect our outcome.</para>
+            <para>Also of interest were the reasons data were not recovered. To quantify these responses we categorized the projects for which we were unable to gather any data based on notes from our correspondences.  The projects included in this analysis include those labeled “emailed”, “replied” and “unrecoverable” in the status categorization. Projects in the category “replied” were instances where we received at least an initial reply confirming that we had accurate contact information but lost communication before the data was sent. These projects have been re-categorized here as communication lost. Of the “unrecoverable” projects, notes were used to divide these into: no contact information, data lost, non-digital data, unwilling to share, and requested additional funding. The projects from the “emailed” status have been added to the no contact information group since we were never able to confirm the outreach efforts actually reached the target recipient. Data are only labeled data lost if our contact confirmed that they were so. Similarly, the non-digital data, unwilling to share and requested additional funding cases are only labeled as such for projects were data requests were rejected for these confirmed reasons. Non-digital data is deemed “unrecoverable” here since our project lacked the resources to convert or store such data. We have since converted these data, when possible, and refer to these data in the discussion.</para>
           </section>
         </description>
       </methodStep>
@@ -161,7 +161,7 @@ This data is licensed under CC0. The person who associated a work with this deed
         </dataFormat>
         <distribution>
           <online>
-            <url>https://cn-dev-2.test.dataone.org/cn/v2/resolve/urn:uuid:2a2a0728-bb61-4170-b391-651f16481085</url>
+            <url>https://cn-dev-2.test.dataone.org/cn/v2/resolve/urn:uuid:dcd0a3a9-9197-43c9-9e79-1f36577a3cba</url>
           </online>
         </distribution>
       </physical>
@@ -204,7 +204,7 @@ This data is licensed under CC0. The person who associated a work with this deed
         </attribute>
         <attribute id="1486524600431">
           <attributeName>category</attributeName>
-          <attributeDefinition>research field oe subject of the given project</attributeDefinition>
+          <attributeDefinition>research field subject of the given project</attributeDefinition>
           <measurementScale>
             <nominal>
               <nonNumericDomain>
@@ -340,7 +340,7 @@ This data is licensed under CC0. The person who associated a work with this deed
         </dataFormat>
         <distribution id="1486524739435">
           <online>
-            <url function="download">https://cn-dev-2.test.dataone.org/cn/v2/resolve/urn:uuid:95161630-af52-4db7-bebd-af8b4995724d</url>
+            <url function="download">https://cn-dev-2.test.dataone.org/cn/v2/resolve/urn:uuid:cd75c7dd-0aae-4759-97ed-206c5fc4fc6b</url>
           </online>
         </distribution>
       </physical>
@@ -359,7 +359,7 @@ This data is licensed under CC0. The person who associated a work with this deed
         </dataFormat>
         <distribution id="1486524795335">
           <online>
-            <url function="download">https://cn-dev-2.test.dataone.org/cn/v2/resolve/urn:uuid:f921876a-f16b-4bf7-bc43-accd4918a2d7</url>
+            <url function="download">https://cn-dev-2.test.dataone.org/cn/v2/resolve/urn:uuid:fc7e8e59-68d2-4612-985d-6f8e0c51efa3</url>
           </online>
         </distribution>
       </physical>
@@ -378,7 +378,7 @@ This data is licensed under CC0. The person who associated a work with this deed
         </dataFormat>
         <distribution id="1486525122750">
           <online>
-            <url function="download">https://cn-dev-2.test.dataone.org/cn/v2/resolve/urn:uuid:ac4e8c8a-8408-45fe-ab0f-07c560886d4d</url>
+            <url function="download">https://cn-dev-2.test.dataone.org/cn/v2/resolve/urn:uuid:f5ce6de6-158b-43f3-be33-be302c807e4c</url>
           </online>
         </distribution>
       </physical>
@@ -397,7 +397,7 @@ This data is licensed under CC0. The person who associated a work with this deed
         </dataFormat>
         <distribution id="1486525180151">
           <online>
-            <url function="download">https://cn-dev-2.test.dataone.org/cn/v2/resolve/urn:uuid:77300063-2ab8-413f-9fe9-1b615d972bbf</url>
+            <url function="download">https://cn-dev-2.test.dataone.org/cn/v2/resolve/urn:uuid:a123da9a-7b4d-4a1c-9664-48bdc935afb5</url>
           </online>
         </distribution>
       </physical>
