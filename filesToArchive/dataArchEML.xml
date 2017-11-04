@@ -62,7 +62,7 @@
       <role>Author</role>
     </associatedParty>
     <abstract>
-      <para>These data quantify  the results of a two year data archiving effort by a small group of researchers and students at the National Center for Ecological Analysis and Synthesis at UC Santa Barbara in collaboration with the Gulf Watch Alaska synthesis group and funded by the Exxon Valdez Oil Spill Trustee Council (EVOSTC). The EVOSTC was formed following the Exxon Valdez oil spill in Alaska in 1989. Since then, the EVOSTC has funded hundreds of projects and in 2012 we began a project to recover and archive the data collected during these EVOSTC funded projects. These data and analyses summarize the archiving project results and inform a manuscript in which we ask 5 main questions about the data collected from the Exxon Valdez Oil Spill Trustee Council funded projects:
+      <para>These data quantify  the results of a two year data archiving effort by a small group of researchers and students at the National Center for Ecological Analysis and Synthesis at UC Santa Barbara in collaboration with the Gulf Watch Alaska synthesis group and funded by the Exxon Valdez Oil Spill Trustee Council (EVOSTC). The EVOSTC was formed following the Exxon Valdez oil spill in Alaska in 1989. Since then, the EVOSTC has funded hundreds of projects and in 2012 we began a project to recover and archive the data collected during these EVOSTC funded projects. These data and analyses summarize the archiving project results and inform a manuscript (Funder imposed data publication requirements seldom inspire data sharing) in which we ask 5 main questions about the data collected from the Exxon Valdez Oil Spill Trustee Council funded projects:
 1. Twenty-five years after the EVOS, for how many projects funded by EVOSTC can we collect data? 
 2. Are there certain research fields that are more likely to make data available than others?
 3. Are there certain sectors that are more likely to make data available than others?
@@ -81,9 +81,9 @@ The data here are a quantification of the responses to data outreach efforts, a 
       <keyword>open science</keyword>
     </keywordSet>
     <intellectualRights>
-      <para>This material is based upon work funded by the Exxon Valdez Oil Spill Trustee Council.  Any opinions, findings, conclusions, or recommendations expressed herein are those of the author(s) and do not necessarily reflect the views or positions of the Trustee Council.
+      <para>This material is based upon work funded by the National Center for Ecological Analysis and Synthesis (NCEAS)and the Exxon Valdez Oil Spill Trustee Council (EVOSTC).  Any opinions, findings, conclusions, or recommendations expressed herein are those of the author(s) and do not necessarily reflect the views or positions of the Trustee Council.
 
-Standard scientific norms for attribution and credit to the Exxon Valdez Oil Spill Trustee Council and the National Center for Ecological Analysis and Synthesis any additional funding agencies should be followed when using this data. Please let the Owner know when this data is used.
+Standard scientific norms for attribution and credit to EVOS and NCEAS any additional funding agencies should be followed when using this data. Please let the Owner know when this data is used.
 
 This data is licensed under CC0. The person who associated a work with this deed has dedicated the work to the public domain by waiving all of his or her rights to the work worldwide under copyright law, including all related and neighboring rights, to the extent allowed by law. You can copy, modify, distribute and perform the work, even for commercial purposes, all without asking permission.</para>
     </intellectualRights>
@@ -161,7 +161,7 @@ This data is licensed under CC0. The person who associated a work with this deed
         </dataFormat>
         <distribution>
           <online>
-            <url>https://cn-dev-2.test.dataone.org/cn/v2/resolve/urn:uuid:dcd0a3a9-9197-43c9-9e79-1f36577a3cba</url>
+            <url>https://cn.dataone.org/cn/v2/resolve/urn:uuid:007f82b9-bc30-43d3-9cf3-8cce9f00101a</url>
           </online>
         </distribution>
       </physical>
@@ -209,23 +209,10 @@ This data is licensed under CC0. The person who associated a work with this deed
             <nominal>
               <nonNumericDomain>
                 <textDomain>
-                  <definition>data field</definition>
+                  <definition>research field</definition>
                 </textDomain>
               </nonNumericDomain>
             </nominal>
-          </measurementScale>
-        </attribute>
-        <attribute id="1486524600432">
-          <attributeName>parentTask</attributeName>
-          <attributeDefinition>Internal tracking number for the project</attributeDefinition>
-          <measurementScale>
-            <ordinal>
-              <nonNumericDomain>
-                <textDomain>
-                  <definition>tracking number</definition>
-                </textDomain>
-              </nonNumericDomain>
-            </ordinal>
           </measurementScale>
         </attribute>
         <attribute id="1486524600433">
@@ -340,7 +327,7 @@ This data is licensed under CC0. The person who associated a work with this deed
         </dataFormat>
         <distribution id="1486524739435">
           <online>
-            <url function="download">https://cn-dev-2.test.dataone.org/cn/v2/resolve/urn:uuid:cd75c7dd-0aae-4759-97ed-206c5fc4fc6b</url>
+            <url function="download">https://cn.dataone.org/cn/v2/resolve/urn:uuid:74e94655-db70-43ca-badb-5d934ab67fbb</url>
           </online>
         </distribution>
       </physical>
@@ -359,7 +346,7 @@ This data is licensed under CC0. The person who associated a work with this deed
         </dataFormat>
         <distribution id="1486524795335">
           <online>
-            <url function="download">https://cn-dev-2.test.dataone.org/cn/v2/resolve/urn:uuid:fc7e8e59-68d2-4612-985d-6f8e0c51efa3</url>
+            <url function="download">https://cn.dataone.org/cn/v2/resolve/urn:uuid:179a36cf-1eae-427c-b2bb-0c711c8e8fbc</url>
           </online>
         </distribution>
       </physical>
@@ -378,7 +365,7 @@ This data is licensed under CC0. The person who associated a work with this deed
         </dataFormat>
         <distribution id="1486525122750">
           <online>
-            <url function="download">https://cn-dev-2.test.dataone.org/cn/v2/resolve/urn:uuid:f5ce6de6-158b-43f3-be33-be302c807e4c</url>
+            <url function="download">https://cn.dataone.org/cn/v2/resolve/urn:uuid:95f49c46-4c0e-4dce-ae89-ee6e06b95d32</url>
           </online>
         </distribution>
       </physical>
@@ -397,7 +384,7 @@ This data is licensed under CC0. The person who associated a work with this deed
         </dataFormat>
         <distribution id="1486525180151">
           <online>
-            <url function="download">https://cn-dev-2.test.dataone.org/cn/v2/resolve/urn:uuid:a123da9a-7b4d-4a1c-9664-48bdc935afb5</url>
+            <url function="download">https://cn.dataone.org/cn/v2/resolve/urn:uuid:ac458cc0-0fc2-4f9b-ac72-81f3e0656b6a</url>
           </online>
         </distribution>
       </physical>

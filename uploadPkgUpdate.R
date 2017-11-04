@@ -27,12 +27,16 @@ uploadPkg <- function() {
   EMLdoc <- read_eml(emlFile)
   
   # The 'resolveURI' CN MN in 'D1Client' must agree
-  resolveURI <- "https://cn-dev-2.test.dataone.org/cn/v2/resolve"
-  d1c <- D1Client("STAGING2", "urn:node:mnTestKNB")
+  # resolveURI <- "https://cn-dev-2.test.dataone.org/cn/v2/resolve"
+  # d1c <- D1Client("STAGING2", "urn:node:mnTestKNB")
   #d1c <- D1Client("DEV2", "urn:node:mnDevUCSB1")
   
   # resolveURI <- "https://cn.dataone.org/cn/v2/resolve"
   # d1c <- D1Client("STAGING2", "urn:node:mnTestKNB")
+  
+  resolveURI <- "https://cn.dataone.org/cn/v2/resolve"
+  d1c <- D1Client("PROD", "urn:node:KNB") #real KNB
+  
   
   #
   #----- Execution #1

@@ -1,7 +1,7 @@
 ---
 title: "EVOSTC data collection paper - Data Visualizations"
 author: "Jessica Couture"
-date: "1/30/2017"
+date: "10/31/2017"
 output:
   pdf_document:
     toc: yes
@@ -13,7 +13,7 @@ output:
 
 #Background
 
-We are writing up a publication to report results of a two year data archiving effort by a small group of researchers and students at the National Center for Ecological Analysis and Synthesis at UC Santa Barbara. The [Exxon Valdez Oil Spill Trustee Council](http://www.evostc.state.ak.us) (EVOSTC) was formed following the Exon Valdez oil spill in Alaska in 1989. Since then, the EVOSTC has funded hundreds of projects and in 2012 we began a project to recover and archive the data collected in these EVOSTC funded projects.
+The data and plots produced here contribute to a publication ("Funder imposed data publication requirements seldom inspire data sharing") to report results of a two year data archiving effort by a small group of researchers and students at the National Center for Ecological Analysis and Synthesis at UC Santa Barbara. The [Exxon Valdez Oil Spill Trustee Council](http://www.evostc.state.ak.us) (EVOSTC) was formed following the Exon Valdez oil spill in Alaska in 1989. Since then, the EVOSTC has funded hundreds of projects and in 2012 we began a project to recover and archive the data collected in these EVOSTC funded projects.
 
 For this paper we ask 5 main questions about the data collected from the Exxon Valdez Oil Spill Trustee Council funded projects:
 
@@ -158,7 +158,7 @@ fieldPerc=ggplot(fldYN[fldYN$succ==0,],aes(x=category,y=(prop*100)))+
         panel.border = element_blank(),
         panel.background = element_blank(),
         axis.text.x = element_text(angle=45,size = 14,vjust = 1,hjust = 1))+
-  xlab('Field')+
+  xlab('Research field')+
   ylab('% recovered\n')+
   ylim(0,63)+
   theme(title=element_text(size=18,face="bold"),

@@ -164,7 +164,7 @@ fieldPerc=ggplot(fldYN[fldYN$succ==0,],aes(x=category,y=(prop*100)))+
         panel.border = element_blank(),
         panel.background = element_blank(),
         axis.text.x = element_text(angle=45,size = 14,vjust = 1,hjust = 1))+
-  xlab('Field')+
+  xlab('Research field')+
   ylab('% recovered\n')+
   ylim(0,63)+
   theme(title=element_text(size=18,face="bold"),
