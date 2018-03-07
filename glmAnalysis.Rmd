@@ -1,0 +1,74 @@
+---
+title: "Regression analysis"
+author: "Jessica Couture"
+date: "March 7, 2018"
+output: html_document
+---
+## Background
+
+This analysis accompanies the manuscript "Funder imposed data publication requirements seldom inspire data sharing", assessing results of a two year data archiving effort by a group of researchers and students at the National Center for Ecological Analysis and Synthesis at UC Santa Barbara. The [Exxon Valdez Oil Spill Trustee Council](http://www.evostc.state.ak.us) (EVOSTC) was formed following the Exxon Valdez oil spill in Alaska in 1989. Since then, the EVOSTC has funded hundreds of projects and in 2012 we initiated an effort to recover and archive the data collected through these EVOSTC funded projects. The recovery effort spanned two years.
+
+For this paper we ask 3 main questions about the data collected from the Exxon Valdez Oil Spill Trustee Council funded projects:
+
+1. Twenty-five years after the EVOS, for how many projects funded by EVOSTC can we collect data?
+2. Are there differences in data reporting based on characteristics of the data?
+
+  * Research field
+  * Sector of researching body
+  * Year data projects ended
+
+3. Which of these characteristics are most *important* in determining if a dataset will be successfully recovered and how do the important characteristics influence the output (success)?
+
+```{r data prep,echo=FALSE,message=FALSE,warning=F}
+
+library(knitr)
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(reshape2)
+library(grid)
+library(gridExtra)
+library(party)
+
+rslt=read.csv('data/evosArchResults.csv',header=T,stringsAsFactors=T)
+rslt[rslt$Status=='published','Status']<-'Published'
+
+rslt$succ=ifelse(rslt$Status %in% c('Published','SentData','Revised'),0,1) # 0=success??? ### RM?
+rslt$statSucc=ifelse(rslt$Status %in% c('Published','SentData','Revised'),1,0) # 1 = success, 2 = not successful
+
+
+agDes=read.csv('data/ecoInfoAgencyDesig.csv',header=T,stringsAsFactors=T,col.names=c('agency','agGrp','agSubGrp'))
+agDes$agGrp=gsub('nonProf','private',agDes$agGrp)
+
+
+rslt2=merge(rslt,agDes,all.x=T)
+rslt2=rslt2 %>%
+  filter(!end>2010) %>%
+  select(Status,start,end,ecosystem,dataType,statSucc,agGrp,agSubGrp,reason)
+
+splBio=strsplit(as.character(rslt2$dataType),'-')
+
+rslt2$dataType<-gsub("biological-",'',rslt2$dataType)
+
+```
+
+## Binomial regression
+
+In order to assess how the percent recovery is influenced by time, we are running an binomial logistic regression. 
+
+```{r binomRegr}
+blrDat<-rslt2 %>%
+  select(start,dataType,statSucc,agSubGrp)
+
+mod<-glm(statSucc~.,family = binomial(link="logit"),data=blrDat)
+
+summary(mod)
+
+ageMod<-glm(statSucc~start-1,family = binomial(link="logit"),data=blrDat)
+summary(ageMod)
+```
+
+## to dos:
+mimic Vines' status analyese (see paper, last paragraph)
+include other categories individually
+
