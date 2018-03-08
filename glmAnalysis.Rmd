@@ -6,7 +6,7 @@ output: html_document
 ---
 ## Background
 
-This analysis accompanies the manuscript "Funder imposed data publication requirements seldom inspire data sharing", assessing results of a two year data archiving effort by a group of researchers and students at the National Center for Ecological Analysis and Synthesis at UC Santa Barbara. The [Exxon Valdez Oil Spill Trustee Council](http://www.evostc.state.ak.us) (EVOSTC) was formed following the Exxon Valdez oil spill in Alaska in 1989. Since then, the EVOSTC has funded hundreds of projects and in 2012 we initiated an effort to recover and archive the data collected through these EVOSTC funded projects. The recovery effort spanned two years.
+This analysis accompanies the manuscript "Funder imposed data publication requirements seldom inspire data sharing", assessing results of a two year data archiving effort by a group of researchers and students at the National Center for Ecological Analysis and Synthesis at UC Santa Barbara. The [Exxon Valdez Oil Spill Trustee Council](http://www.evostc.state.ak.us) (EVOSTC) was formed following the Exxon Valdez oil spill in Alaska in 1989. Since then, the EVOSTC has funded hundreds of projects and in 2012 an effort was initiated to recover and archive the data collected through these EVOSTC funded projects. The recovery effort spanned two years.
 
 For this paper we ask 3 main questions about the data collected from the Exxon Valdez Oil Spill Trustee Council funded projects:
 
@@ -54,21 +54,93 @@ rslt2$dataType<-gsub("biological-",'',rslt2$dataType)
 
 ## Binomial regression
 
-In order to assess how the percent recovery is influenced by time, we are running an binomial logistic regression. 
+In order to assess how the percent recovery is influenced by time, data type and agency we are running an logistic regression on all 3 factors. 
 
 ```{r binomRegr}
 blrDat<-rslt2 %>%
-  select(start,dataType,statSucc,agSubGrp)
+  select(end,dataType,statSucc,agSubGrp)
 
 mod<-glm(statSucc~.,family = binomial(link="logit"),data=blrDat)
 
 summary(mod)
 
-ageMod<-glm(statSucc~start-1,family = binomial(link="logit"),data=blrDat)
-summary(ageMod)
+ageMod<-glm(statSucc~end-1,family = binomial(link="logit"),data=blrDat)
+#summary(ageMod)
+```
+
+# Chi-sq tests from Regression:
+
+```{r chiSq}
+library(aod)
+
+timeChi<-wald.test(b = coef(mod), Sigma = vcov(mod), Terms = 2)
+
+typeChi<-wald.test(b = coef(mod), Sigma = vcov(mod), Terms = 3:11)
+
+agChi<-wald.test(b = coef(mod), Sigma = vcov(mod), Terms = 12:16)
+
+```
+
+Chi-sq for age of data = `r timeChi$result$chi2[[3]]`
+
+Chi-sq for data type = `r typeChi$result$chi2[[3]]`
+
+Chi-sq for agency = `r agChi$result$chi2[[3]]`
+
+These chi-sq results match what we found before: only data-type is significant
+___
+
+## Binomial regression: "START"
+
+Playing with the data I saw that then stats are run using "start" instead of "end" for age of data, we get a lot more significance. I know we decided on "end" for a reason but might be worth discussing in our group and maybe adding to the discussion. 
+
+```{r binomRegr-Start}
+strtDat<-rslt2 %>%
+  select(start,dataType,statSucc,agSubGrp)
+
+modSt<-glm(statSucc~.,family = binomial(link="logit"),data=strtDat)
+
+summary(modSt)
+
+ageMod<-glm(statSucc~start-1,family = binomial(link="logit"),data=strtDat)
+#summary(ageMod)
+```
+
+# Chi-sq tests from Regression:
+
+```{r chiSq-start}
+library(aod)
+
+timeChiSt<-wald.test(b = coef(modSt), Sigma = vcov(modSt), Terms = 2)
+
+typeChiSt<-wald.test(b = coef(modSt), Sigma = vcov(modSt), Terms = 3:11)
+
+agChiSt<-wald.test(b = coef(modSt), Sigma = vcov(modSt), Terms = 12:16)
+
+```
+
+Chi-sq for age of data = `r timeChiSt$result$chi2[[3]]`
+
+Chi-sq for data type = `r typeChiSt$result$chi2[[3]]`
+
+Chi-sq for agency = `r agChiSt$result$chi2[[3]]`
+
+_Using "start" the age of data is in fact SIGNIFICANT along with data type_
+
+```{r chi squared - end years,echo=FALSE,warning=FALSE}
+
+startProps=table(rslt2$statSucc,as.character(rslt2$start))
+startProps
+
+strtChi=chisq.test(startProps)
+
+strtChi
+
 ```
 
 ## to dos:
-mimic Vines' status analyese (see paper, last paragraph)
-include other categories individually
+
+mimic Vines' status analyese (see paper, last paragraph) --> don't think this is relevant for our analysis
+
+include other categories individually--> ditto
 

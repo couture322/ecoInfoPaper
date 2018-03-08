@@ -1,21 +1,21 @@
 ---
 title: "EVOS data project - Analysis"
 author: "Jessica Couture"
-date: "10/31/2017"
+date: "3/8/2017"
 output:
-  pdf_document:
-    toc: yes
-    toc_depth: '3'
   html_document:
     toc: yes
     toc_depth: 3
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
 ---
 
 ## Background
 
-This analysis accompanies the manuscript "Funder imposed data publication requirements seldom inspire data sharing", assessing results of a two year data archiving effort by a group of researchers and students at the National Center for Ecological Analysis and Synthesis at UC Santa Barbara. The [Exxon Valdez Oil Spill Trustee Council](http://www.evostc.state.ak.us) (EVOSTC) was formed following the Exxon Valdez oil spill in Alaska in 1989. Since then, the EVOSTC has funded hundreds of projects and in 2012 we initiated an effort to recover and archive the data collected through these EVOSTC funded projects. The recovery effort spanned two years.
+This analysis accompanies the manuscript "Funder imposed data publication requirements seldom inspire data sharing", assessing results of a two year data archiving effort by a group of researchers and students at the National Center for Ecological Analysis and Synthesis at UC Santa Barbara. The [Exxon Valdez Oil Spill Trustee Council](http://www.evostc.state.ak.us) (EVOSTC) was formed following the Exxon Valdez oil spill in Alaska in 1989. Since then, the EVOSTC has funded hundreds of projects and in 2012 an effort was initiated to recover and archive the data collected through these EVOSTC funded projects. The recovery effort spanned two years.
 
-For this paper we ask 3 main questions about the data collected from the Exxon Valdez Oil Spill Trustee Council funded projects:
+For this paper we use the results of that effort to ask 3 main questions about the data collected from the Exxon Valdez Oil Spill Trustee Council funded projects:
 
 1. Twenty-five years after the EVOS, for how many projects funded by EVOSTC can we collect data?
 2. Are there differences in data reporting based on characteristics of the data?
@@ -41,7 +41,7 @@ library(party)
 rslt=read.csv('data/evosArchResults.csv',header=T,stringsAsFactors=T)
 rslt[rslt$Status=='published','Status']<-'Published'
 
-rslt$succ=ifelse(rslt$Status %in% c('Published','SentData','Revised'),0,1) # 0=success??? ### RM?
+#rslt$succ=ifelse(rslt$Status %in% c('Published','SentData','Revised'),0,1) # 0=success??? ### RM?
 rslt$statSucc=ifelse(rslt$Status %in% c('Published','SentData','Revised'),1,0) # 1 = success, 2 = not successful
 
 
@@ -126,6 +126,8 @@ Chi-squared test for equal proportions between research fields
 ```{r chi squared - field of study BIO,echo=FALSE,warning=FALSE}
 
 bioProps=table(rslt2$statSucc,rslt2$dataType)
+bioProps
+
 bioChi=chisq.test(bioProps)
 
 bioChi
@@ -138,9 +140,12 @@ __SIGNIFICANT: Reject the H0 that there are no differences in recovery in differ
 
 #### Test for equal propportions between PI's home institution type/sector:
 
-government and private split: govFed, govState, nonProf, forProf
+Government and private split in to local, federal, and non-profit, for-profit sectors: govFed, govState, nonProf, forProf
+
 ```{r chi squared - subSector,echo=FALSE,warning=FALSE}
 subSecProps=table(rslt2$statSucc,rslt2$agSubGrp)
+subSecProps
+
 subSectChi=chisq.test(subSecProps)
 
 subSectChi
@@ -153,19 +158,57 @@ __NOT SIGNIFICANT: there are no differences in recovery in different sectors__
 
 #### Test for equal proportions between years:
 
-Chi-squared test for equal proportions between age of data
+Chi-squared test for equal proportions between age of data. Since many projects span multiple years we base "age of data" on the last year that the project received funding as a conservative, assuming they had 1 year to publish/make available.
 
 ```{r chi squared - end years,echo=FALSE,warning=FALSE}
 
 tempProps=table(rslt2$statSucc,as.character(rslt2$end))
+tempProps
+
 tempChi=chisq.test(tempProps)
 
 tempChi
 
 ```
+
+
 __NOT SIGNIFICANT: there are no differences in recovery based on when data were collected__
 
 ***
+## Binomial regression
+
+In order to assess how the percent recovery is influenced by time, data type and agency we are running an logistic regression on all 3 factors. 
+
+```{r binomRegr}
+blrDat<-rslt2 %>%
+  select(end,dataType,statSucc,agSubGrp)
+
+mod<-glm(statSucc~.,family = binomial(link="logit"),data=blrDat)
+
+summary(mod)
+
+ageMod<-glm(statSucc~end-1,family = binomial(link="logit"),data=blrDat)
+#summary(ageMod)
+```
+
+## Chi-sq tests from Regression:
+
+```{r chiSq}
+library(aod)
+
+timeChi<-wald.test(b = coef(mod), Sigma = vcov(mod), Terms = 2)
+
+typeChi<-wald.test(b = coef(mod), Sigma = vcov(mod), Terms = 3:11)
+
+agChi<-wald.test(b = coef(mod), Sigma = vcov(mod), Terms = 12:16)
+
+```
+Chi-sq for age of data = `r timeChi$result$chi2[[3]][1]`
+Chi-sq for data type = `r typeChi$result$chi2[[3]][1]`
+Chi-sq for agency = `r agChi$result$chi2[[3]][1]`
+
+_INTERESING NOTE: When these tests are run on the "start" dates rather than the "end" we get significance in AGE and  TYPE_
+
 ## 3. Which characteristics are most important in determining if a dataset will be successfully recovered?
 
 We use the "party" package in R to run a random forests analysis to determine which variables are most important. I use the same model as the glm, then create a classification tree below to show how the important variables influence the outcome. This package is be better than randomForest when independent variables are different types (Strobl et al. 2009)
