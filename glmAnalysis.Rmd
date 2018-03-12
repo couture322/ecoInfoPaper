@@ -1,7 +1,7 @@
 ---
 title: "Regression analysis"
 author: "Jessica Couture"
-date: "March 7, 2018"
+date: "March 9, 2018"
 output: html_document
 ---
 ## Background

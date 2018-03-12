@@ -1,7 +1,7 @@
 ---
 title: "EVOS data project - Analysis"
 author: "Jessica Couture"
-date: "3/8/2017"
+date: "3/12/2017"
 output:
   html_document:
     toc: yes
@@ -187,8 +187,10 @@ mod<-glm(statSucc~.,family = binomial(link="logit"),data=blrDat)
 
 summary(mod)
 
-ageMod<-glm(statSucc~end-1,family = binomial(link="logit"),data=blrDat)
-#summary(ageMod)
+#rm factors that are not significant
+
+dtMod<-glm(statSucc~dataType,family = binomial(link="logit"),data=blrDat)
+summary(dtMod)
 ```
 
 ## Chi-sq tests from Regression:
@@ -207,11 +209,13 @@ Chi-sq for age of data = `r timeChi$result$chi2[[3]][1]`
 Chi-sq for data type = `r typeChi$result$chi2[[3]][1]`
 Chi-sq for agency = `r agChi$result$chi2[[3]][1]`
 
-_INTERESING NOTE: When these tests are run on the "start" dates rather than the "end" we get significance in AGE and  TYPE_
+_INTERESING NOTE: When these tests are run on the "start" dates rather than the "end" we get significance in AGE and  DATATYPE_
 
 ## 3. Which characteristics are most important in determining if a dataset will be successfully recovered?
 
-We use the "party" package in R to run a random forests analysis to determine which variables are most important. I use the same model as the glm, then create a classification tree below to show how the important variables influence the outcome. This package is be better than randomForest when independent variables are different types (Strobl et al. 2009)
+We use the "party" package in R to run a random forests analysis to determine which variables are most important. I use the same model as the glm, then create a classification tree below to show _how_ the important variables influence the outcome. This package is be better than the "randomForest" package when independent variables are different types (Strobl et al. 2009).
+
+For the random forests the independent variable with the highest absolute value has the highest impact on the dependent variable.
 
 ### Random forests
 ```{r randForestBio, message=F}
@@ -230,7 +234,7 @@ __Based on these results the most important variable in determining the outcome 
 Here we run one iteration of the forest analysis above to display which variables whithin each classification determine positive or negative results.
 
 ```{r class tree bio, message=F, warning=FALSE}
-partreeBio<-ctree(statSucc~agSubGrp+end+dataType,data=rslt2)
+partreeBio<-ctree(statSucc~agSubGrp+end+factor(dataType),data=rslt2)
 
 partreeBio
 
