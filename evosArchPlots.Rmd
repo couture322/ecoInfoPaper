@@ -1,14 +1,14 @@
 ---
 title: "EVOS data project - Plots"
 author: "Jessica Couture"
-date: "10/22/2017"
+date: "03/16/2017"
 output:
-  html_document:
-    toc: yes
-    toc_depth: 3
   pdf_document:
     toc: yes
     toc_depth: '3'
+  html_document:
+    toc: yes
+    toc_depth: 3
 ---
 
 #Background
@@ -37,16 +37,14 @@ library(dplyr)
 library(readr)
 library(ggplot2)
 library(reshape2)
-library(grid)
-library(gridExtra)
-library(gtable)
 library(cowplot)
 library(party)
+library(kableExtra)
 
 rslt=read.csv('data/evosArchResults.csv',header=T,stringsAsFactors=F)
 rslt[rslt$Status=='published','Status']<-'Published'
 
-rslt$succ=ifelse(rslt$Status %in% c('Published','SentData','Revised'),0,1) # success=0, not successful=1....why?
+rslt$succ=ifelse(rslt$Status %in% c('Published','SentData','Revised'),1,0) # success=0, not successful=1....why?
 rslt$statSucc=ifelse(rslt$Status %in% c('Published','SentData','Revised'),1,2) # 1 = success, 2 = not successful
 
 agDes=read.csv('data/ecoInfoAgencyDesig.csv',header=T,stringsAsFactors=T,col.names=c('agency','agGrp','agSubGrp'))
@@ -58,6 +56,24 @@ rslt2=rslt2 %>%
 
 rslt2$dataType<-gsub("biological-",'',rslt2$dataType)
 ```
+
+# Status definitions
+
+```{r statusTab}
+statusDF<-data.frame("Data status"=c("outreach attempted", "contact established", "data received", "published", "unrecoverable"),
+                   "Definition"=c("Contact information found and outreach attemtped via email and/or phone",
+                                "At least one reply was received by the archiving team from the target researcher. Confrims contact information was correct",
+                                "Data was received from the researcher, regardless of data quality or level of documentation",
+                                "Data were received and docemented well enough to be archived by the data team or the researcher cooperated in data clean up and documentation",
+                                "Data were unrecoverable either due to inability to find contact information or for reasons confirmed by the researcher/data owner"))
+
+statKab<-knitr::kable(statusDF,format="latex",booktabs=T) %>%
+  #kable_styling(latex_options = "bordered") %>%
+  column_spec(2,width = "10cm")
+kable_as_image(statKab,filename = "statusDefs")
+
+```
+
 
 # MS Plots: 
 
@@ -126,7 +142,7 @@ statPlot
  
 Percent success of data recovery, with projects grouped by research field. The top plot is total number of projects funded for each field, the bottom plot shows the percent success for the given field.
 
-```{r research field success plots,fig.height=9, echo=FALSE}
+```{r research field success plots,fig.width=9, echo=FALSE}
 
 catYN=as.data.frame(table(rslt2$dataType,rslt2$succ))
 colnames(catYN)=c('category','succ','nDatasets')
@@ -136,43 +152,23 @@ fldYN=catYN %>%
   mutate(grpTots=sum(nDatasets)) %>%
   mutate(prop=nDatasets/grpTots)
 
-fldYN$category=factor(fldYN$category,levels=c("oil","physical","habitat",'plankton','benthicInverts','fish','birds','mammals',"social","modeling"))
+fldYN$category=factor(fldYN$category,levels=c("oil","physical","habitat",'plankton','benthicInverts','fish','birds','mammals',"social","modeling"),ordered=T)
 
 ##### all fields
 
-fieldNDs=ggplot(fldYN[fldYN$succ==0,],aes(x=category,y=grpTots))+
-  geom_bar(stat = "identity",fill="grey")+
-  theme(axis.line=element_line('black'),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        panel.background = element_blank())+
-  theme(axis.text.x = element_blank(),
-        axis.title.x = element_blank())+
-  ylim(0,100)+
-  ylab('Number of projects\n')+
+stkDatTyp<-ggplot(fldYN,aes(x=category,y=nDatasets,fill=succ))+
+  geom_bar(stat="identity")+
+  scale_fill_manual(values=c("gray83","black"),labels=c("Not received","Data received"),name="")+
+  xlab("Research field")+
+  ylab("Number of Projects")+
   theme(axis.text=element_text(size=14),
-        title=element_text(size=16,face="bold"))+
+        title=element_text(size=16,face="bold"),
+        legend.text = element_text(size = 14, face = "bold"))+
   theme(axis.line.x = element_line(color="black"),
-        axis.line.y = element_line(color="black"))
-  
-fieldPerc=ggplot(fldYN[fldYN$succ==0,],aes(x=category,y=(prop*100)))+
-  geom_bar(stat = "identity",fill="black")+
-  scale_x_discrete(labels=c("oil","physical","habitat",'plankton','benthicInverts','fish','birds','mammals',"social","modeling"))+
-  theme(axis.line=element_line('black'),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        panel.background = element_blank(),
-        axis.text.x = element_text(angle=45,size = 14,vjust = 1,hjust = 1))+
-  xlab('Research field')+
-  ylab('% recovered\n')+
-  ylim(0,63)+
-  theme(title=element_text(size=18,face="bold"),
-        axis.line.x = element_line(color="black"),
-        axis.line.y = element_line(color="black"))
+        axis.line.y = element_line(color="black"),
+        axis.text.x = element_text(angle = 45, hjust = 1))
 
-plot_grid(fieldNDs,fieldPerc, ncol = 1, rel_heights=c(1,1.5),align="v")
+stkDatTyp
 
 ```
 
@@ -181,7 +177,7 @@ plot_grid(fieldNDs,fieldPerc, ncol = 1, rel_heights=c(1,1.5),align="v")
 Percent success of projects by agency sector based on the agency affiliation of the principal investigator on the project. The top plot is total number of projects funded for each sector, the bottom plot shows the percent success for the given sector.
 
 
-```{r, subSector stacked, fig.height=10,echo=FALSE}
+```{r, subSector stacked, fig.width=10,echo=FALSE}
 secSubYN=as.data.frame(table(rslt2$agSubGrp,rslt2$succ))
 colnames(secSubYN)=c('subSector','succ','nDatasets')
 
@@ -189,44 +185,20 @@ secSubYN2=secSubYN %>%
   group_by(subSector) %>%
   mutate(grpTots=sum(nDatasets)) %>%
   mutate(prop=nDatasets/grpTots)
-secSubYN2$subSector=factor(secSubYN2$subSector,levels=c("gov_fed","gov_state","academia","nonProf","private","tribe"),ordered = T)
+secSubYN2$subSector=factor(secSubYN2$subSector,levels=c("gov_fed","gov_state","academia","nonProf","private","akNative"),ordered = T)
 
-subSecNds=ggplot(secSubYN2,aes(x=subSector,y=nDatasets))+
-  geom_bar(stat = "identity",fill="grey")+
-  theme(axis.line=element_line('black'),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        panel.background = element_blank())+
-  theme(axis.text.x = element_blank(),
-        axis.title.x = element_blank())+
-  ylab('Number of projects\n')+
+stkSec<-ggplot(secSubYN2,aes(x=subSector,y=nDatasets,fill=succ))+
+  geom_bar(stat="identity")+
+  scale_fill_manual(values=c("gray83","black"),labels=c("Not received","Data received"),name="")+
+  xlab("Agency sector")+
+  ylab("Number of Projects")+
   theme(axis.text=element_text(size=14),
-        title=element_text(size=16,face="bold"))+
+        title=element_text(size=16,face="bold"),
+        legend.text = element_text(size = 14, face = "bold"))+
   theme(axis.line.x = element_line(color="black"),
         axis.line.y = element_line(color="black"))
 
-subSecPerc=ggplot(secSubYN2[secSubYN2$succ==0,],aes(x=subSector,y=as.numeric(prop*100)))+
-  geom_bar(stat = "identity",fill="black")+
-  scale_x_discrete(breaks=levels(secSubYN2$subSector),
-                   labels=c("Gov - fed","Gov - State","academia","non-profit","for-profit","AK native"))+
-  theme(axis.line=element_line('black'),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        panel.background = element_blank(),
-        axis.text.x = element_text(angle=45,size = 14,vjust = 1,hjust = 1))+
-  xlab('\nSector')+
-  ylab('% recovered\n')+
-  ylim(0,63)+
-  #ggtitle('Percent success by research sector type')+
-  theme(axis.text=element_text(size=14),
-        title=element_text(size=16,face="bold"))+
-  theme(axis.line.x = element_line(color="black"),
-        axis.line.y = element_line(color="black"))
-
-plot_grid(subSecNds, subSecPerc, ncol = 1, rel_heights=c(1,1.5),align="v")
-
+stkSec
 ```
 
 ***
@@ -238,9 +210,9 @@ Percent success of projects by age of data. Age is calculated based on number of
 
 _The x-axis might not be initially intuitive but we are representing years since a project ended in opposite-chronological order to show any effect of increasing age of a dataset. We chose this design to be able to compare to [Michener et al. 1997](http://onlinelibrary.wiley.com/doi/10.1890/1051-0761(1997)007[0330:NMFTES]2.0.CO;2/abstract;jsessionid=57D1E6F52B947ABD71ABEA56185DA7D3.f01t04) - fig 1._
 
-```{r temporal - stacked plots,fig.height=10, echo=F, message=F, warning=F}
+```{r temporal - stacked plots,fig.width=10, echo=F, message=F, warning=F}
 
-rslt2$succ<-ifelse(rslt2$Status %in% c('Unrecoverable','Emailed','Replied'),1,0)
+rslt2$succ<-ifelse(rslt2$Status %in% c('Unrecoverable','Emailed','Replied'),0,1)
 
 endYr=rslt2 %>%
   filter(!end<1989) %>%
@@ -256,41 +228,19 @@ yrsPropEnd<-endYrs %>%
   mutate(yrSum=sum(freq)) %>%
   mutate(prop=freq/yrSum)
 
-yrsNds=ggplot(yrsPropEnd[yrsPropEnd$succ==0,],aes(x=since,y=yrSum)) +
-  geom_bar( stat="identity",fill="grey")+
-  theme(axis.line=element_line('black'),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        panel.background = element_blank(),
-        axis.title.y=element_text(color="black"),
-        axis.title.x=element_blank())+
-  xlim(min(endYrs$since),max(endYrs$since))+
-  ylab('Number\nof projects')+
-  theme(legend.position="none",
-        axis.text=element_text(size=14),
-        title=element_text(size=16,face="bold"),
-        axis.line.x = element_line(color="black"),
-        axis.line.y = element_line(color="black"))
-
-
-yrsPerc=ggplot(yrsPropEnd[yrsPropEnd$succ==0,],aes(x=since,y=as.numeric(prop*100)))+
-  geom_bar(stat = "identity",fill="black")+
-  xlim(min(endYrs$since),max(endYrs$since))+
-  theme(axis.line=element_line('black'),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        panel.background = element_blank())+
-  xlab('Age of data (years)')+
-  ylab('% recovered\n')+
-  ylim(0,63)+
+stkAge<-ggplot(yrsPropEnd,aes(x=since,y=freq,fill=succ))+
+  geom_bar(stat="identity")+
+  #scale_x_reverse()+
+  scale_fill_manual(values=c("gray83","black"),labels=c("Not received","Data received"),name="")+
+  xlab("Age of data")+
+  ylab("Number of Projects")+
   theme(axis.text=element_text(size=14),
-        title=element_text(size=16,face="bold"))+
+        title=element_text(size=16,face="bold"),
+        legend.text = element_text(size = 14, face = "bold"))+
   theme(axis.line.x = element_line(color="black"),
         axis.line.y = element_line(color="black"))
 
-plot_grid(yrsNds, yrsPerc, ncol = 1, rel_heights=c(1,1.5),align="v")
+stkAge
 ```
 
 ***

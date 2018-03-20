@@ -1,14 +1,14 @@
 ---
 title: "EVOS data project - Analysis"
 author: "Jessica Couture"
-date: "3/12/2017"
+date: "3/15/2017"
 output:
-  html_document:
-    toc: yes
-    toc_depth: 3
   pdf_document:
     toc: yes
     toc_depth: '3'
+  html_document:
+    toc: yes
+    toc_depth: 3
 ---
 
 ## Background
@@ -32,8 +32,8 @@ For this paper we use the results of that effort to ask 3 main questions about t
 library(knitr)
 library(dplyr)
 library(readr)
-library(ggplot2)
 library(reshape2)
+library(ggplot2)
 library(grid)
 library(gridExtra)
 library(party)
@@ -105,97 +105,31 @@ statPlot
 
 ```{r Effort results}
 # Number of projects requested
-sum(overall)
+nProj<-sum(overall)
 
 # percent successful
-sum(overall[c("Published","SentData")])/sum(overall)
+percRcv<-sum(overall[c("Published","SentData")])/sum(overall)
 
 ```
+Total number of projects sought = `r nProj`  
+Percent success = `r round(percRcv*100)`%
 
 ***
 
 ## 2. Are there differences in data reporting based on data characteristics?
-#### Chi-square tests for each variable (characteristic)
+## Chi-sq tests from Regression
 
-### Research field
-
-#### Are there certain **research fields** that are more likely to make data available than others?
-
-Chi-squared test for equal proportions between research fields
-
-```{r chi squared - field of study BIO,echo=FALSE,warning=FALSE}
-
-bioProps=table(rslt2$statSucc,rslt2$dataType)
-bioProps
-
-bioChi=chisq.test(bioProps)
-
-bioChi
-```
-__SIGNIFICANT: Reject the H0 that there are no differences in recovery in different research fields__
-
-***
-
-### Research sector
-
-#### Test for equal propportions between PI's home institution type/sector:
-
-Government and private split in to local, federal, and non-profit, for-profit sectors: govFed, govState, nonProf, forProf
-
-```{r chi squared - subSector,echo=FALSE,warning=FALSE}
-subSecProps=table(rslt2$statSucc,rslt2$agSubGrp)
-subSecProps
-
-subSectChi=chisq.test(subSecProps)
-
-subSectChi
-```
-__NOT SIGNIFICANT: there are no differences in recovery in different sectors__
-
-***
-
-### Year project ended
-
-#### Test for equal proportions between years:
-
-Chi-squared test for equal proportions between age of data. Since many projects span multiple years we base "age of data" on the last year that the project received funding as a conservative, assuming they had 1 year to publish/make available.
-
-```{r chi squared - end years,echo=FALSE,warning=FALSE}
-
-tempProps=table(rslt2$statSucc,as.character(rslt2$end))
-tempProps
-
-tempChi=chisq.test(tempProps)
-
-tempChi
-
-```
-
-
-__NOT SIGNIFICANT: there are no differences in recovery based on when data were collected__
-
-***
-## Binomial regression
-
-In order to assess how the percent recovery is influenced by time, data type and agency we are running an logistic regression on all 3 factors. 
-
-```{r binomRegr}
+```{r blmChiSq}
 blrDat<-rslt2 %>%
   select(end,dataType,statSucc,agSubGrp)
 
 mod<-glm(statSucc~.,family = binomial(link="logit"),data=blrDat)
 
-summary(mod)
-
 #rm factors that are not significant
 
 dtMod<-glm(statSucc~dataType,family = binomial(link="logit"),data=blrDat)
-summary(dtMod)
-```
+#summary(dtMod)
 
-## Chi-sq tests from Regression:
-
-```{r chiSq}
 library(aod)
 
 timeChi<-wald.test(b = coef(mod), Sigma = vcov(mod), Terms = 2)
@@ -205,13 +139,89 @@ typeChi<-wald.test(b = coef(mod), Sigma = vcov(mod), Terms = 3:11)
 agChi<-wald.test(b = coef(mod), Sigma = vcov(mod), Terms = 12:16)
 
 ```
-Chi-sq for age of data = `r timeChi$result$chi2[[3]][1]`
-Chi-sq for data type = `r typeChi$result$chi2[[3]][1]`
+Chi-sq for age of data = `r timeChi$result$chi2[[3]][1]`  
+Chi-sq for data type = `r typeChi$result$chi2[[3]][1]`  
 Chi-sq for agency = `r agChi$result$chi2[[3]][1]`
+
+## Binomial regression
+
+In order to assess how the percent recovery is influenced by time, data type and agency we are running an logistic regression on all 3 factors. 
+
+```{r bionomRegr}
+
+summary(mod)
+
+```
+
 
 _INTERESING NOTE: When these tests are run on the "start" dates rather than the "end" we get significance in AGE and  DATATYPE_
 
-## 3. Which characteristics are most important in determining if a dataset will be successfully recovered?
+***
+# Vines et al. 2014 style nesting
+
+### Nest 1: Confirmed contact info ("emailed"+)
+```{r nestedBLR}
+nest<-rslt2 %>%
+  mutate(pContInf=ifelse(is.na(reason),1,ifelse(reason=="no contact info",0,1))) %>% #use all date
+  mutate(pRepl=ifelse(Status=="Emailed",0,1)) %>% # remove "no contact info" values when analyzing --> of those that we had contact info for, how many replied?
+  mutate(pSent=ifelse(Status=="SentData",1,ifelse(Status=="Published",1,0))) %>% # rm "no contact info" & emailed data when analyzing --> of those that 'replied' which sent data?
+  mutate(pPub=ifelse(Status=="Published",1,0))
+
+nest1blm<-glm(pContInf~end+dataType+agSubGrp,family = binomial(link="logit"),data=nest)
+
+summary(nest1blm)
+
+summary(nest1b<-glm(pContInf~end,family = binomial(link = "logit"),data=nest))
+```
+Looking at just how many contact information could be found, there is a significant positive effect of age (p=`r coef(summary(nest1blm))["end",4]`), increasing `r nest1blm$coefficients["end"][[1]]` annually.
+
+### Nest 2: replied given we found contact info ("Replied"+)
+
+```{r nest2}
+
+nest2<-nest %>%
+  filter(is.na(reason) | reason !="no contact info")
+
+nest2blm<-glm(pRepl~end+dataType+agSubGrp,family = binomial(link="logit"),data=nest2)
+
+summary(nest2blm)
+
+```
+
+### Nest 3: Sent data given we received a response ("SentData"+)
+
+```{r nest3}
+
+nest3<-nest2 %>%
+  filter(!Status=="Emailed")
+
+nest3blm<-glm(pSent~end+dataType+agSubGrp,family = binomial(link="logit"),data=nest3)
+
+summary(nest3blm)
+
+```
+Our variables were not significant indicators as to whether data were sent given that we received a response.
+
+### Nest 4: Data were published given we received data ("Published")
+
+```{r nest4}
+
+nest4<-nest3 %>%
+  filter(Status %in% c("SentData","Published"))
+
+nest4blm<-glm(pPub~end+dataType+agSubGrp,family = binomial(link="logit"),data=nest4)
+
+summary(nest4blm)
+
+```
+
+Our variables were not significance indicators as to whether data were complete enough to publish given data were sent.
+
+Consistent with Vines, we find that availability of contact information decreases with age of the project. Response, data recovery and ability to publish data are **not** dependent on data or project age. 
+
+***
+
+# 3. Which characteristics are most important in determining if a dataset will be successfully recovered?
 
 We use the "party" package in R to run a random forests analysis to determine which variables are most important. I use the same model as the glm, then create a classification tree below to show _how_ the important variables influence the outcome. This package is be better than the "randomForest" package when independent variables are different types (Strobl et al. 2009).
 
