@@ -59,7 +59,7 @@ rslt2$dataType<-gsub("biological-",'',rslt2$dataType)
 
 # Status definitions
 
-```{r statusTab}
+```{r statusTab, echo=FALSE}
 statusDF<-data.frame("Data status"=c("outreach attempted", "contact established", "data received", "published", "unrecoverable"),
                    "Definition"=c("Contact information found and outreach attemtped via email and/or phone",
                                 "At least one reply was received by the archiving team from the target researcher. Confrims contact information was correct",
@@ -75,10 +75,10 @@ kable_as_image(statKab,filename = "statusDefs")
 ```
 
 
-# MS Plots: 
-
-## 1. Project Status Reporting
+# 1. Project Status Reporting
 > Twenty-five years after the EVOS, for how many projects funded by EVOSTC can we collect data?</h4>
+
+## Fig 1: Recovery process
 
 Final status of all projects from which data were requested. Black bars are projects for which data were successfully acquired, grey bars represent projects for which no data were acquired.
 
@@ -135,12 +135,12 @@ statPlot
 
 ***
 
-## 2. Data Characteristics
+# 2. Data Characteristics
 > Are there differences in data reporting based on characteristics of the data?
  
-#### Research Field
+## Fig 2: Research Field
  
-Percent success of data recovery, with projects grouped by research field. The top plot is total number of projects funded for each field, the bottom plot shows the percent success for the given field.
+Total recovered and non-recovered projects by research field.
 
 ```{r research field success plots,fig.width=9, echo=FALSE}
 
@@ -172,9 +172,9 @@ stkDatTyp
 
 ```
 
-#### Awardee agency sector
+## S1 Fig: Grantee agency sector
 
-Percent success of projects by agency sector based on the agency affiliation of the principal investigator on the project. The top plot is total number of projects funded for each sector, the bottom plot shows the percent success for the given sector.
+Total recovered and non-recovered projects by agency or institution sector.
 
 
 ```{r, subSector stacked, fig.width=10,echo=FALSE}
@@ -203,10 +203,10 @@ stkSec
 
 ***
 
-## S2 Figure. Temporal trends?
+## S2 Fig: Age of data
 > Is the availability of data correlated to how old the data are?
 
-Percent success of projects by age of data. Age is calculated based on number of years between the last year of EVOSTC funding and start of the archiving project (2012). The top plot is total number of projects that ended each year, the bottom plot shows the percent success for the given year.
+Total recovered and non-recovered projects by project age. Age is calculated based on number of years between the last year of EVOSTC funding and start of the archiving project (2012). 
 
 _The x-axis might not be initially intuitive but we are representing years since a project ended in opposite-chronological order to show any effect of increasing age of a dataset. We chose this design to be able to compare to [Michener et al. 1997](http://onlinelibrary.wiley.com/doi/10.1890/1051-0761(1997)007[0330:NMFTES]2.0.CO;2/abstract;jsessionid=57D1E6F52B947ABD71ABEA56185DA7D3.f01t04) - fig 1._
 
@@ -245,7 +245,7 @@ stkAge
 
 ***
 
-## 3. Which characteristics are most important?
+# 3. Which characteristics are most important?
 
 > How do the important characteristics influence the output (success)? 
 
@@ -263,20 +263,22 @@ plot(partreeBio)
 
 ***
 
-## 4. Reasons for not sharing
+# 4. Reasons for not sharing
 
 > Why don't people share data?
 
 Reasons given for not providing data. Communication loss and lack of contact information were the main reasons data were not obtained.
 
 Data details:
-Here I used all of the data that were not collected and sorted them into categories based on the redmine notes we took:
+Here I used all of the data that were not collected and sorted them into categories based on recovery notes:
 
 * All datasets labeled "emailed" were grouped with a other datasets that were labeled "unrecoverable" because no contact information could be found.
 * All datasets labeled "replied" we put into their own category called "communication lost".
 * The "data lost" category includes all datasets in which someone confirmed that the data no longer existed either due to damage, non-persistent formats (not including printed/non-digital), etc.
 * The other are self-explanatory, but represent confirmed responses as to one of these reasons.
 * I tried to separate out the datasets that were not recovered but "should be on the CD" to sort these into their own category, but we acked sufficient notes to confidently add this grouping.
+
+## Fig 3: Why not share?
 
 ```{r Unrecoverable reasons, echo=F}
 reas=rslt2 %>%

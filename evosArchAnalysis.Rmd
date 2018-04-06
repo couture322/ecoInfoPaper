@@ -60,7 +60,7 @@ rslt2$dataType<-gsub("biological-",'',rslt2$dataType)
 
 ```
 
-## 1. Project Status Reporting
+# 1. Project Status Reporting
 <h4>Twenty-five years after the EVOS, for how many projects funded by EVOSTC can we collect data?</h4>
  
 ```{r status plot, fig.width=10,echo=FALSE}
@@ -116,8 +116,7 @@ Percent success = `r round(percRcv*100)`%
 
 ***
 
-## 2. Are there differences in data reporting based on data characteristics?
-## Chi-sq tests from Regression
+# 2. Are there differences in data reporting based on data characteristics?
 
 ```{r blmChiSq}
 blrDat<-rslt2 %>%
@@ -130,20 +129,10 @@ mod<-glm(statSucc~.,family = binomial(link="logit"),data=blrDat)
 dtMod<-glm(statSucc~dataType,family = binomial(link="logit"),data=blrDat)
 #summary(dtMod)
 
-library(aod)
-
-timeChi<-wald.test(b = coef(mod), Sigma = vcov(mod), Terms = 2)
-
-typeChi<-wald.test(b = coef(mod), Sigma = vcov(mod), Terms = 3:11)
-
-agChi<-wald.test(b = coef(mod), Sigma = vcov(mod), Terms = 12:16)
-
 ```
-Chi-sq for age of data = `r timeChi$result$chi2[[3]][1]`  
-Chi-sq for data type = `r typeChi$result$chi2[[3]][1]`  
-Chi-sq for agency = `r agChi$result$chi2[[3]][1]`
 
-## Binomial regression
+
+## Logistic regression
 
 In order to assess how the percent recovery is influenced by time, data type and agency we are running an logistic regression on all 3 factors. 
 
@@ -154,10 +143,11 @@ summary(mod)
 ```
 
 
-_INTERESING NOTE: When these tests are run on the "start" dates rather than the "end" we get significance in AGE and  DATATYPE_
 
 ***
-# Vines et al. 2014 style nesting
+
+## Nested logistic regression
+How do our three characteristics influence each step in the recovery process?
 
 ### Nest 1: Confirmed contact info ("emailed"+)
 ```{r nestedBLR}
@@ -217,7 +207,6 @@ summary(nest4blm)
 
 Our variables were not significance indicators as to whether data were complete enough to publish given data were sent.
 
-Consistent with Vines, we find that availability of contact information decreases with age of the project. Response, data recovery and ability to publish data are **not** dependent on data or project age. 
 
 ***
 
