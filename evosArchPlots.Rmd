@@ -1,7 +1,5 @@
 ---
 title: "EVOS data project - Plots"
-author: "Jessica Couture"
-date: "03/16/2017"
 output:
   pdf_document:
     toc: yes
@@ -254,7 +252,7 @@ stkAge
 Classification tree of which data variables and characterizations predicting successful and non-successful data recovery. Data field was the only variable that could be used to predict data availability. 
 
 
-```{r class tree bio, message=F, warning=FALSE}
+```{r class tree bio, echo=F,message=F, warning=FALSE}
 rslt2$dataType<-factor(rslt2$dataType)
 partreeBio<-ctree(succ~agSubGrp+end+dataType,data=rslt2)
 
