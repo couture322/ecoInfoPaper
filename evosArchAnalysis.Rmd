@@ -240,3 +240,22 @@ plot(partreeBio)
 
 _Birds, fish, habitat, mammal_ and _modeling data_ result in negative results.
 _Benthic invertebrates, plankton, oil,_ and _physical data_ result in positive results.
+
+***
+
+# Data policy model
+
+```{r post94}
+blrDat$DP<-ifelse(blrDat$end<1995,0,1)
+
+modDP<-glm(statSucc~.,family = binomial(link="logit"),data=blrDat)
+summary(modDP)
+
+blr2<-blrDat %>%
+  filter(end>1994)%>%
+  select(-DP)
+
+mod95<-glm(statSucc~.,family = binomial(link="logit"),data=blr2)
+summary(mod95)
+
+```
