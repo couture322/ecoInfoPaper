@@ -146,25 +146,21 @@ This data is licensed under CC0. The person who associated a work with this deed
     <dataTable id="1486524600429">
       <entityName>evosArchResults.csv</entityName>
       <entityDescription>Tracked results of data archiving effort</entityDescription>
-      <physical id="1486523927327">
-        <objectName>evosArchResults.csv</objectName>
-        <size unit="byte">28350</size>
-        <dataFormat>
-          <textFormat>
-            <numHeaderLines>1</numHeaderLines>
-            <recordDelimiter>#x0A</recordDelimiter>
-            <attributeOrientation>column</attributeOrientation>
-            <simpleDelimited>
-              <fieldDelimiter>,</fieldDelimiter>
-            </simpleDelimited>
-          </textFormat>
-        </dataFormat>
-        <distribution>
-          <online>
-            <url>https://cn.dataone.org/cn/v2/resolve/urn:uuid:007f82b9-bc30-43d3-9cf3-8cce9f00101a</url>
-          </online>
-        </distribution>
-      </physical>
+      <physical system="uuid" scope="document">
+  <objectName>evosArchResults.csv</objectName>
+  <size unit="bytes">26555</size>
+  <authentication method="SHA1">c0c18642fa1ac0ef4bb358743ac56136f2b244c2</authentication>
+  <dataFormat>
+    <externallyDefinedFormat>
+      <formatName>text/csv</formatName>
+    </externallyDefinedFormat>
+  </dataFormat>
+  <distribution scope="document">
+    <online>
+      <url function="download">https://cn.dataone.org/cn/v2/resolve/urn:uuid:b7e1486b-f94b-4892-993a-9692d88f5f58</url>
+    </online>
+  </distribution>
+</physical>
       <attributeList>
         <attribute id="1486524600430">
           <attributeName>Status</attributeName>
@@ -317,77 +313,81 @@ This data is licensed under CC0. The person who associated a work with this deed
     <otherEntity>
       <entityName>MS figures R markdown script</entityName>
       <entityDescription>R markdown script that plots the data (evosArchResults.csv) representing total results and data field, agency and temporal breakdowns.</entityDescription>
-      <physical>
-        <objectName>ecoinfoPlots.Rmd</objectName>
-        <size unit="byte">18464</size>
-        <dataFormat>
-          <externallyDefinedFormat>
-            <formatName>application/octet-stream</formatName>
-          </externallyDefinedFormat>
-        </dataFormat>
-        <distribution id="1486524739435">
-          <online>
-            <url function="download">https://cn.dataone.org/cn/v2/resolve/urn:uuid:74e94655-db70-43ca-badb-5d934ab67fbb</url>
-          </online>
-        </distribution>
-      </physical>
+      <physical system="uuid" scope="document">
+  <objectName>evosArchPlots.Rmd</objectName>
+  <size unit="bytes">12912</size>
+  <authentication method="SHA1">4ff3b8384c051d449d2fd027f458eb8deead6557</authentication>
+  <dataFormat>
+    <externallyDefinedFormat>
+      <formatName>text/plain</formatName>
+    </externallyDefinedFormat>
+  </dataFormat>
+  <distribution scope="document">
+    <online>
+      <url function="download">https://cn.dataone.org/cn/v2/resolve/urn:uuid:5910fc3e-ef06-4388-9067-1c4019b61770</url>
+    </online>
+  </distribution>
+</physical>
       <entityType>Other</entityType>
     </otherEntity>
     <otherEntity>
       <entityName>MS figures PDF</entityName>
       <entityDescription>Output PDF from MS figures R markdown script</entityDescription>
-      <physical>
-        <objectName>ecoinfoPlots.pdf</objectName>
-        <size unit="byte">234827</size>
-        <dataFormat>
-          <externallyDefinedFormat>
-            <formatName>application/pdf</formatName>
-          </externallyDefinedFormat>
-        </dataFormat>
-        <distribution id="1486524795335">
-          <online>
-            <url function="download">https://cn.dataone.org/cn/v2/resolve/urn:uuid:179a36cf-1eae-427c-b2bb-0c711c8e8fbc</url>
-          </online>
-        </distribution>
-      </physical>
+      <physical system="uuid" scope="document">
+  <objectName>evosArchPlots.pdf</objectName>
+  <size unit="bytes">253070</size>
+  <authentication method="SHA1">cc481f0aa151dbcd25d2bd3c9bff0aa02b816ae0</authentication>
+  <dataFormat>
+    <externallyDefinedFormat>
+      <formatName>application/pdf</formatName>
+    </externallyDefinedFormat>
+  </dataFormat>
+  <distribution scope="document">
+    <online>
+      <url function="download">https://cn.dataone.org/cn/v2/resolve/urn:uuid:6b2a49d3-131d-4299-b987-10d9d2869cb7</url>
+    </online>
+  </distribution>
+</physical>
       <entityType>Other</entityType>
     </otherEntity>
     <otherEntity>
       <entityName>Data analysis R markdown script</entityName>
       <entityDescription>R markdown script for statistical analysis of evosArchResults.csv data</entityDescription>
-      <physical>
-        <objectName>dataAnalysis.Rmd</objectName>
-        <size unit="byte">7511</size>
-        <dataFormat>
-          <externallyDefinedFormat>
-            <formatName>application/octet-stream</formatName>
-          </externallyDefinedFormat>
-        </dataFormat>
-        <distribution id="1486525122750">
-          <online>
-            <url function="download">https://cn.dataone.org/cn/v2/resolve/urn:uuid:95f49c46-4c0e-4dce-ae89-ee6e06b95d32</url>
-          </online>
-        </distribution>
-      </physical>
+      <physical system="uuid" scope="document">
+  <objectName>evosArchAnalysis.Rmd</objectName>
+  <size unit="bytes">8363</size>
+  <authentication method="SHA1">693839a623061e5e17237d273467ada776a4b3e4</authentication>
+  <dataFormat>
+    <externallyDefinedFormat>
+      <formatName>text/plain</formatName>
+    </externallyDefinedFormat>
+  </dataFormat>
+  <distribution scope="document">
+    <online>
+      <url function="download">https://cn.dataone.org/cn/v2/resolve/urn:uuid:07dfb48c-3ddf-4684-9fa8-d3715efb255d</url>
+    </online>
+  </distribution>
+</physical>
       <entityType>Other</entityType>
     </otherEntity>
     <otherEntity>
       <entityName>Data analysis PDF</entityName>
       <entityDescription>PDF output from Data analysis R markdown script with statistical results</entityDescription>
-      <physical>
-        <objectName>dataAnalysis.pdf</objectName>
-        <size unit="byte">232120</size>
-        <dataFormat>
-          <externallyDefinedFormat>
-            <formatName>application/pdf</formatName>
-          </externallyDefinedFormat>
-        </dataFormat>
-        <distribution id="1486525180151">
-          <online>
-            <url function="download">https://cn.dataone.org/cn/v2/resolve/urn:uuid:ac458cc0-0fc2-4f9b-ac72-81f3e0656b6a</url>
-          </online>
-        </distribution>
-      </physical>
+      <physical system="uuid" scope="document">
+  <objectName>evosArchAnalysis.pdf</objectName>
+  <size unit="bytes">236908</size>
+  <authentication method="SHA1">4308c25187f7d33486d5268ce2e6df513747d693</authentication>
+  <dataFormat>
+    <externallyDefinedFormat>
+      <formatName>application/pdf</formatName>
+    </externallyDefinedFormat>
+  </dataFormat>
+  <distribution scope="document">
+    <online>
+      <url function="download">https://cn.dataone.org/cn/v2/resolve/urn:uuid:76257f25-ece1-4729-a26a-c8a87e89169c</url>
+    </online>
+  </distribution>
+</physical>
       <entityType>Other</entityType>
     </otherEntity>
   </dataset>
