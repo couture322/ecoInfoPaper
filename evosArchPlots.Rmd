@@ -28,7 +28,7 @@ We were also interested in why data were not recovered and plotted reasons why r
 
 ***
 
-```{r data prep,echo=FALSE,message=FALSE}
+```{r data prep,echo=FALSE,message=FALSE,warning=FALSE}
 
 library(knitr)
 library(dplyr)
@@ -72,6 +72,23 @@ kable_as_image(statKab,filename = "statusDefs")
 
 ```
 
+# Hurdles definitions
+
+```{r hurdlesTab, echo=FALSE}
+hurdlesDF<-data.frame("Hurdle"=c("no contact info", "communication lost", "data lost", "non digital", "unwilling to share","requested funding"),
+                   "Definition"=c("No contact information found or contact information was never confirmed because outreach attempts received no response",
+                                "At least one reply was received by the archiving team from the target researcher but communication was lost before any data were sent",
+                                "PI or other data manager confirmed that the data no longer exist",
+                                "Data exist in a non-digital format (excludes digital PDFs, includes hand-written or type-written data)",
+                                "PI or other data manager refused to share data",
+                                "PI or other data manager agreed to share data only if additional funding was provided"))
+
+hurdKab<-knitr::kable(hurdlesDF,format="latex",booktabs=T) %>%
+  #kable_styling(latex_options = "bordered") %>%
+  column_spec(2,width = "10cm")
+kable_as_image(hurdKab,filename = "hurdlesDefs")
+
+```
 
 # 1. Project Status Reporting
 > Twenty-five years after the EVOS, for how many projects funded by EVOSTC can we collect data?</h4>

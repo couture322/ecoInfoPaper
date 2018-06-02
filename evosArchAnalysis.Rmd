@@ -120,21 +120,16 @@ Percent success = `r round(percRcv*100)`%
 
 blrDat<-rslt2 %>%
   select(end,dataType,statSucc,agSubGrp)
-blrDat$DP<-ifelse(blrDat$end<1995,0,1)
+blrDat$DP<-ifelse(blrDat$end<1995,0,1) # add data policy binary, formal language for data sharing was introduced in 1994 so data in 1995 and later would be included in these requirements
 
 mod<-glm(statSucc~.,family = binomial(link="logit"),data=blrDat)
-
-#rm factors that are not significant
-
-dtMod<-glm(statSucc~dataType,family = binomial(link="logit"),data=blrDat)
-#summary(dtMod)
 
 ```
 
 
 ## Logistic regression
 
-In order to assess how the percent recovery is influenced by time, data type and agency we are running an logistic regression on all 3 factors. 
+In order to assess how the percent recovery is influenced by time, data type, agency, and presence of a data policy we are running an logistic regression on all 3 factors. 
 
 ```{r bionomRegr}
 
@@ -147,27 +142,23 @@ summary(mod)
 ***
 
 ## Nested logistic regression
-How do our three characteristics influence each step in the recovery process?
+How do our three characteristics and data policy influence each step in the recovery process?
 
 ### Nest 1: Confirmed contact info ("emailed"+)
 ```{r nestedBLR}
 nest<-rslt2 %>%
-  mutate(pContInf=ifelse(is.na(reason),1,ifelse(reason=="no contact info",0,1))) %>% #use all date
-  mutate(pRepl=ifelse(Status=="Emailed",0,1)) %>% # remove "no contact info" values when analyzing --> of those that we had contact info for, how many replied?
-  mutate(pSent=ifelse(Status=="SentData",1,ifelse(Status=="Published",1,0))) %>% # rm "no contact info" & emailed data when analyzing --> of those that 'replied' which sent data?
-  mutate(pPub=ifelse(Status=="Published",1,0)) %>%
+  mutate(pContInf=ifelse(is.na(reason),1,ifelse(reason=="no contact info",0,1))) %>% # for NEST1: use all data
+  mutate(pRepl=ifelse(Status=="Emailed",0,1)) %>% # for NEST2: remove "no contact info" values when analyzing --> of those that we had contact info for, how many replied?
+  mutate(pSent=ifelse(Status=="SentData",1,ifelse(Status=="Published",1,0))) %>% # for NEST3: rm "no contact info" & emailed data when analyzing --> of those that 'replied' which sent data?
+  mutate(pPub=ifelse(Status=="Published",1,0)) %>% #for NEST 4: use remaining data
   mutate(DP=ifelse(blrDat$end<1995,0,1))
-
-nest1blm<-glm(pContInf~end+dataType+agSubGrp,family = binomial(link="logit"),data=nest)
 
 nest1blmB<-glm(pContInf~end+dataType+agSubGrp+DP,family = binomial(link="logit"),data=nest)
 
-summary(nest1blm)
 summary(nest1blmB)
 
-summary(nest1b<-glm(pContInf~end,family = binomial(link = "logit"),data=nest))
 ```
-Looking at just how many contact information could be found, there is a significant positive effect of age (p=`r coef(summary(nest1blm))["end",4]`), increasing `r nest1blm$coefficients["end"][[1]]` annually.
+Looking at just for how many contact information could be found, there is a significant positive effect of age (p=`r coef(summary(nest1blmB))["end",4]`), increasing `r nest1blmB$coefficients["end"][[1]]` annually.
 
 ### Nest 2: replied given we found contact info ("Replied"+)
 
@@ -176,11 +167,8 @@ Looking at just how many contact information could be found, there is a signific
 nest2<-nest %>%
   filter(is.na(reason) | reason !="no contact info")
 
-nest2blm<-glm(pRepl~end+dataType+agSubGrp,family = binomial(link="logit"),data=nest2)
-
 nest2blmB<-glm(pRepl~end+dataType+agSubGrp+DP,family = binomial(link="logit"),data=nest2)
 
-summary(nest2blm)
 summary(nest2blmB)
 
 ```
@@ -191,10 +179,6 @@ summary(nest2blmB)
 
 nest3<-nest2 %>%
   filter(!Status=="Emailed")
-
-nest3blm<-glm(pSent~end+dataType+agSubGrp,family = binomial(link="logit"),data=nest3)
-
-summary(nest3blm)
 
 nest3blmB<-glm(pSent~end+dataType+agSubGrp+DP,family = binomial(link="logit"),data=nest3)
 
@@ -211,10 +195,6 @@ Our variables were not significant indicators as to whether data were sent given
 nest4<-nest3 %>%
   filter(Status %in% c("SentData","Published"))
 
-nest4blm<-glm(pPub~end+dataType+agSubGrp,family = binomial(link="logit"),data=nest4)
-
-summary(nest4blm)
-
 nest4blmB<-glm(pPub~end+dataType+agSubGrp+DP,family = binomial(link="logit"),data=nest4)
 
 summary(nest4blmB)
@@ -222,7 +202,6 @@ summary(nest4blmB)
 ```
 
 Our variables were not significance indicators as to whether data were complete enough to publish given data were sent.
-
 
 ***
 
@@ -235,7 +214,7 @@ For the random forests the independent variable with the highest absolute value 
 ### Random forests
 ```{r randForestBio, message=F}
 rslt2$dataType<-as.factor(rslt2$dataType)
-partyForBio<-cforest(statSucc~agSubGrp+end+dataType,data=rslt2,controls = cforest_unbiased(mtry = 2, ntree = 1000))
+partyForBio<-cforest(statSucc~agSubGrp+end+factor(dataType)+DP,data=nest,controls = cforest_unbiased(mtry = 2, ntree = 1000))
 varimp(partyForBio)
 ```
 
@@ -249,7 +228,7 @@ __Based on these results the most important variable in determining the outcome 
 Here we run one iteration of the forest analysis above to display which variables whithin each classification determine positive or negative results.
 
 ```{r class tree bio, message=F, warning=FALSE}
-partreeBio<-ctree(statSucc~agSubGrp+end+factor(dataType),data=rslt2)
+partreeBio<-ctree(statSucc~agSubGrp+end+factor(dataType)+DP,data=nest)
 
 partreeBio
 
@@ -258,3 +237,19 @@ plot(partreeBio)
 
 _Birds, fish, habitat, mammal_ and _modeling data_ result in negative results.
 _Benthic invertebrates, plankton, oil,_ and _physical data_ result in positive results.
+
+***
+
+# Post-data policy model
+We isolate the data to project ending post 1994 to assess trends based on just data under the formal data policy. This model was not used in the submitted manuscript.
+
+```{r postDP}
+post<-blrDat %>%
+  filter(DP==1) %>%
+  select(-DP)
+
+modP<-glm(statSucc~.,family = binomial(link="logit"),data=post)
+summary(modP)
+
+```
+

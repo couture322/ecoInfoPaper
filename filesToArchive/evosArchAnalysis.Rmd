@@ -1,7 +1,5 @@
 ---
-title: "EVOSTC data collection paper - Analysis"
-author: "Jessica Couture"
-date: "10/6/2016"
+title: "EVOS data project - Analysis"
 output:
   pdf_document:
     toc: yes
@@ -13,12 +11,12 @@ output:
 
 ## Background
 
-This analysis accompanies publication the publication "_______", assessing results of a two year data archiving effort by a group of researchers and students at the National Center for Ecological Analysis and Synthesis at UC Santa Barbara. The [Exxon Valdez Oil Spill Trustee Council](http://www.evostc.state.ak.us) (EVOSTC) was formed following the Exxon Valdez oil spill in Alaska in 1989. Since then, the EVOSTC has funded hundreds of projects and in 2012 we initiated an effort to recover and archive the data collected through these EVOSTC funded projects. The recovery effort spanned two years.
+This analysis accompanies the manuscript "A funder imposed data publication requirement seldom inspired data sharing", assessing results of a two year data archiving effort by a group of researchers and students at the National Center for Ecological Analysis and Synthesis at UC Santa Barbara. The [Exxon Valdez Oil Spill Trustee Council](http://www.evostc.state.ak.us) (EVOSTC) was formed following the Exxon Valdez oil spill in Alaska in 1989. Since then, the EVOSTC has funded hundreds of projects and in 2012 an effort was initiated to recover and archive the data collected through these EVOSTC funded projects. The recovery effort spanned two years.
 
-For this paper we ask 3 main questions about the data collected from the Exxon Valdez Oil Spill Trustee Council funded projects:
+For this paper we use the results of that effort to ask 3 main questions about the data collected from the Exxon Valdez Oil Spill Trustee Council funded projects:
 
 1. Twenty-five years after the EVOS, for how many projects funded by EVOSTC can we collect data?
-2. Are there differences in data reporting based on characteristics of the data?
+2. Are there differences in data reporting based on characteristics of the data project?
 
   * Research field
   * Sector of researching body
@@ -32,8 +30,8 @@ For this paper we ask 3 main questions about the data collected from the Exxon V
 library(knitr)
 library(dplyr)
 library(readr)
-library(ggplot2)
 library(reshape2)
+library(ggplot2)
 library(grid)
 library(gridExtra)
 library(party)
@@ -41,7 +39,7 @@ library(party)
 rslt=read.csv('data/evosArchResults.csv',header=T,stringsAsFactors=T)
 rslt[rslt$Status=='published','Status']<-'Published'
 
-rslt$succ=ifelse(rslt$Status %in% c('Published','SentData','Revised'),0,1) # 0=success??? ### RM?
+#rslt$succ=ifelse(rslt$Status %in% c('Published','SentData','Revised'),0,1) # 0=success??? ### RM?
 rslt$statSucc=ifelse(rslt$Status %in% c('Published','SentData','Revised'),1,0) # 1 = success, 2 = not successful
 
 
@@ -60,7 +58,7 @@ rslt2$dataType<-gsub("biological-",'',rslt2$dataType)
 
 ```
 
-## 1. Project Status Reporting
+# 1. Project Status Reporting
 <h4>Twenty-five years after the EVOS, for how many projects funded by EVOSTC can we collect data?</h4>
  
 ```{r status plot, fig.width=10,echo=FALSE}
@@ -76,27 +74,23 @@ possible=overallLong %>%
   mutate(prop=nDatasets/sum(nDatasets))
 
 statusOrd=c('Unrecoverable','Emailed','Replied','SentData','Revised','Published')
-#rslt2$Status=as.factor(rslt2$Status,levels=statusOrd,ordered=T)
-statGrey=c('Unrecoverable'='gray67',
-             'Emailed'='gray67',
-             'Replied'='gray67',
-             'SentData'='black',
-             'Revised'='black',
-             'Published'='black')
+stSuccCols=c("0"='gray67',"1"="black")
 
 statPlot=ggplot()+
   geom_bar(data=rslt2,
-                 aes(x=factor(Status,levels=statusOrd,ordered=T),fill=Status))+
-  scale_fill_manual(labels=statusOrd,breaks=statusOrd,values=statGrey)+
+                 aes(x=factor(Status,levels=statusOrd,ordered=T),fill=factor(statSucc)))+
+  scale_x_discrete(labels=c("unrecoverable","outreach\nattempted","contact\nestablished","data\nreceived","published"))+
+  scale_fill_manual(name="Data obtained?",
+                    breaks=c("1","0"),
+                    values=stSuccCols,
+                    labels=c("Data recovered", "No data recovered"))+
   theme(legend.title=element_blank())+
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.border = element_blank(),
         panel.background = element_blank())+
-  #theme(axis.text.x = element_text(angle=90))+
-  xlab(expression(RecoveryStage %->% .))+ # %->%, symbol(/256)
+  xlab("Recovery stage")+ 
   ylab('Number of projects\n')+
-  ggtitle('Projects status')+
   theme(axis.text=element_text(size=14),
         title=element_text(size=16,face="bold"),
         legend.text = element_text(size = 14, face = "bold"))+
@@ -109,74 +103,118 @@ statPlot
 
 ```{r Effort results}
 # Number of projects requested
-sum(overall)
+nProj<-sum(overall)
 
 # percent successful
-sum(overall[c("Published","SentData")])/sum(overall)
+percRcv<-sum(overall[c("Published","SentData")])/sum(overall)
+
 ```
+Total number of projects sought = `r nProj`  
+Percent success = `r round(percRcv*100)`%
 
 ***
 
-## 2. Are there differences in data reporting based on data characteristics?
-#### Chi-square tests for each variable (characteristic)
+# 2. Are there differences in data reporting based on data characteristics?
 
-### Research field
+```{r blmChiSq}
 
-#### Are there certain **research fields** that are more likely to make data available than others?
+blrDat<-rslt2 %>%
+  select(end,dataType,statSucc,agSubGrp)
+blrDat$DP<-ifelse(blrDat$end<1995,0,1) # add data policy binary, formal language for data sharing was introduced in 1994 so data in 1995 and later would be included in these requirements
 
-Chi-squared test for equal proportions between research fields
+mod<-glm(statSucc~.,family = binomial(link="logit"),data=blrDat)
 
-```{r chi squared - field of study BIO,echo=FALSE,warning=FALSE}
-
-bioProps=table(rslt2$statSucc,rslt2$dataType)
-bioChi=chisq.test(bioProps)
-
-bioChi
 ```
-__SIGNIFICANT: Reject the H0 that there are no differences in recovery in different research fields__
+
+
+## Logistic regression
+
+In order to assess how the percent recovery is influenced by time, data type, agency, and presence of a data policy we are running an logistic regression on all 3 factors. 
+
+```{r bionomRegr}
+
+summary(mod)
+
+```
+
+
 
 ***
 
-### Research sector
+## Nested logistic regression
+How do our three characteristics and data policy influence each step in the recovery process?
 
-#### Test for equal propportions between PI's home institution type/sector:
+### Nest 1: Confirmed contact info ("emailed"+)
+```{r nestedBLR}
+nest<-rslt2 %>%
+  mutate(pContInf=ifelse(is.na(reason),1,ifelse(reason=="no contact info",0,1))) %>% # for NEST1: use all data
+  mutate(pRepl=ifelse(Status=="Emailed",0,1)) %>% # for NEST2: remove "no contact info" values when analyzing --> of those that we had contact info for, how many replied?
+  mutate(pSent=ifelse(Status=="SentData",1,ifelse(Status=="Published",1,0))) %>% # for NEST3: rm "no contact info" & emailed data when analyzing --> of those that 'replied' which sent data?
+  mutate(pPub=ifelse(Status=="Published",1,0)) %>% #for NEST 4: use remaining data
+  mutate(DP=ifelse(blrDat$end<1995,0,1))
 
-government and private split: govFed, govState, nonProf, forProf
-```{r chi squared - subSector,echo=FALSE,warning=FALSE}
-subSecProps=table(rslt2$statSucc,rslt2$agSubGrp)
-subSectChi=chisq.test(subSecProps)
+nest1blmB<-glm(pContInf~end+dataType+agSubGrp+DP,family = binomial(link="logit"),data=nest)
 
-subSectChi
+summary(nest1blmB)
+
 ```
-__NOT SIGNIFICANT: there are no differences in recovery in different sectors__
+Looking at just for how many contact information could be found, there is a significant positive effect of age (p=`r coef(summary(nest1blmB))["end",4]`), increasing `r nest1blmB$coefficients["end"][[1]]` annually.
+
+### Nest 2: replied given we found contact info ("Replied"+)
+
+```{r nest2}
+
+nest2<-nest %>%
+  filter(is.na(reason) | reason !="no contact info")
+
+nest2blmB<-glm(pRepl~end+dataType+agSubGrp+DP,family = binomial(link="logit"),data=nest2)
+
+summary(nest2blmB)
+
+```
+
+### Nest 3: Sent data given we received a response ("SentData"+)
+
+```{r nest3}
+
+nest3<-nest2 %>%
+  filter(!Status=="Emailed")
+
+nest3blmB<-glm(pSent~end+dataType+agSubGrp+DP,family = binomial(link="logit"),data=nest3)
+
+summary(nest3blmB)
+
+
+```
+Our variables were not significant indicators as to whether data were sent given that we received a response.
+
+### Nest 4: Data were published given we received data ("Published")
+
+```{r nest4}
+
+nest4<-nest3 %>%
+  filter(Status %in% c("SentData","Published"))
+
+nest4blmB<-glm(pPub~end+dataType+agSubGrp+DP,family = binomial(link="logit"),data=nest4)
+
+summary(nest4blmB)
+
+```
+
+Our variables were not significance indicators as to whether data were complete enough to publish given data were sent.
 
 ***
 
-### Year project ended
+# 3. Which characteristics are most important in determining if a dataset will be successfully recovered?
 
-#### Test for equal proportions between years:
+We use the "party" package in R to run a random forests analysis to determine which variables are most important. I use the same model as the glm, then create a classification tree below to show _how_ the important variables influence the outcome. This package is be better than the "randomForest" package when independent variables are different types (Strobl et al. 2009).
 
-Chi-squared test for equal proportions between age of data
-
-```{r chi squared - end years,echo=FALSE,warning=FALSE}
-
-tempProps=table(rslt2$statSucc,as.character(rslt2$end))
-tempChi=chisq.test(tempProps)
-
-tempChi
-
-```
-__NOT SIGNIFICANT: there are no differences in recovery based on when data were collected__
-
-***
-## 3. Which characteristics are most important in determining if a dataset will be successfully recovered?
-
-We use the "party" package in R to run a random forests analysis to determine which variables are most important. I use the same model as the glm, then create a classification tree below to show how the important variables influence the outcome. This package is be better than randomForest when independent variables are different types (Strobl et al. 2009)
+For the random forests the independent variable with the highest absolute value has the highest impact on the dependent variable.
 
 ### Random forests
 ```{r randForestBio, message=F}
 rslt2$dataType<-as.factor(rslt2$dataType)
-partyForBio<-cforest(statSucc~agSubGrp+end+dataType,data=rslt2,controls = cforest_unbiased(mtry = 2, ntree = 1000))
+partyForBio<-cforest(statSucc~agSubGrp+end+factor(dataType)+DP,data=nest,controls = cforest_unbiased(mtry = 2, ntree = 1000))
 varimp(partyForBio)
 ```
 
@@ -190,7 +228,7 @@ __Based on these results the most important variable in determining the outcome 
 Here we run one iteration of the forest analysis above to display which variables whithin each classification determine positive or negative results.
 
 ```{r class tree bio, message=F, warning=FALSE}
-partreeBio<-ctree(statSucc~agSubGrp+end+dataType,data=rslt2)
+partreeBio<-ctree(statSucc~agSubGrp+end+factor(dataType)+DP,data=nest)
 
 partreeBio
 
@@ -199,3 +237,19 @@ plot(partreeBio)
 
 _Birds, fish, habitat, mammal_ and _modeling data_ result in negative results.
 _Benthic invertebrates, plankton, oil,_ and _physical data_ result in positive results.
+
+***
+
+# Post-data policy model
+We isolate the data to project ending post 1994 to assess trends based on just data under the formal data policy. This model was not used in the submitted manuscript.
+
+```{r postDP}
+post<-blrDat %>%
+  filter(DP==1) %>%
+  select(-DP)
+
+modP<-glm(statSucc~.,family = binomial(link="logit"),data=post)
+summary(modP)
+
+```
+
